@@ -1,0 +1,20 @@
+<tr>
+	<td>
+		<span>{{num}}</span>
+		<a class="play"><i class="icon-{{#if search}}plus{{else}}play{{/if}}"></i></a>
+	</td>
+	<td class="title">
+		{{title}}
+		{{#if hd}}
+			 <b>HD</b>
+		{{/if}}
+	</td>
+	<td class="time">
+		{{#if search}}
+			{{timeFormatted}}
+		{{else}}
+			<span>{{timeFormatted}}</span>
+			<a class="remove"><i class="icon-trash"></i></a>
+		{{/if}}
+	</td>
+</tr>

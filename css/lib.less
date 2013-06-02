@@ -1,0 +1,33 @@
+.boxShadow(@val) {
+	-webkit-box-shadow: @val;
+	-moz-box-shadow: @val;
+	box-shadow: @val;
+}
+
+.borderRadius(@val: 4px) {
+	-moz-border-radius: @val;
+	-webkit-border-radius: @val;
+	border-radius: @val;
+}
+
+.ellipsis() {
+	text-overflow: ellipsis;
+	-o-text-overflow: ellipsis;
+	-ms-text-overflow: ellipsis;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+.transition(@val) {
+	-webkit-transition: @val;
+	-moz-transition: @val;
+	-o-transition: @val;
+	transition: @val;
+}
+
+.transition(@val1, @val2) {
+	-webkit-transition: @val1, @val2;
+	-moz-transition: @val1, @val2;
+	-o-transition: @val1, @val2;
+	transition: @val1, @val2;
+}

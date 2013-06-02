@@ -1,0 +1,19 @@
+<menu>
+	<li class="createAlbum">{{a 'createAlbum' '/album' null 'plus icon-white'}}</li>
+	<li class="createPlaylist">{{a 'createPlaylist' '/' null 'plus icon-white'}}</li>
+	<li class="loved">{{a 'loved' '/loved' null 'heart icon-white'}}</li>
+	{{#empty albums}}
+	{{else}}
+		<li class="header">Albums</li>
+		{{#each albums}}
+			<li key="{{dataKey}}">{{a fullTitle link null 'music icon-white'}}</li>
+		{{/each}}
+	{{/empty}}
+	{{#empty playlists}}
+	{{else}}
+		<li class="header">Playlists</li>
+		{{#each playlists}}
+			<li key="{{dataKey}}">{{a title link null 'music icon-white'}}</li>
+		{{/each}}
+	{{/empty}}
+</menu>

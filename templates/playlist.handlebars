@@ -1,0 +1,30 @@
+<div class="header">
+	{{inline title dataKey 'title' 'h1'}}
+	<hr>
+</div>
+<div class="half">
+	<div class="padding">
+		<table></table>
+	</div>
+</div>
+<div class="half">
+	<div class="padding border">
+		<form>
+			<label>{{L 'addSongs'}}</label>
+			<div class="controls">
+				<input type="text" placeholder="{{L 'searchPrompt'}}..." name="query" /> 
+				<button class="btn" type="submit">{{L 'search'}}</button>
+				<input type="hidden" name="provider" />
+			</div>
+		</form>
+		<menu style="display:none">
+			<li class="selected">
+				<a>Youtube</a>
+			</li>
+			<li>
+				<a>Soundcloud</a>
+			</li>
+		</menu>
+		<table></table>
+	</div>
+</div>

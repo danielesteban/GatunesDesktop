@@ -1,0 +1,18 @@
+<!doctype html>
+<html>
+	<head>
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<script>
+			var img = document.createElement('img');
+			img.src = document.location.hash.substr(1);
+			document.body.appendChild(img);
+		</script>	
+	</body>
+</html>
