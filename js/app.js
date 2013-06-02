@@ -385,6 +385,7 @@ TEMPLATE = {
 										songs : []
 									};
 									(data.tracks.track.length ? data.tracks.track : [data.tracks.track]).forEach(function(t) {
+										if(album.songs.length >= 20) return; //TEMP BUGFIX FOR QUOTA_BYTES_PER_ITEM ERROR
 										delete t.artist.url;
 										album.songs.push({
 											artist : t.artist,
@@ -395,8 +396,8 @@ TEMPLATE = {
 									DATA.getItem('albums', function(albums) {
 										albums = albums || [];
 										albums.unshift(a.mbid);
-										DATA.setItem('albums', albums, function() {
-											DATA.setItem('album:' + a.mbid, album, function() {
+										DATA.setItem('album:' + a.mbid, album, function() {
+											DATA.setItem('albums', albums, function() {
 												ROUTER.update('/album/' + a.mbid);
 											});
 										});
@@ -520,9 +521,9 @@ $(window).load(function() {
 				PLAYER.init();
 
 				/* Disable console access */
-				/*$(window).contextmenu(function(e) {
-					LIB.cancelHandler(e);
-				});*/
+				//$(window).contextmenu(function(e) {
+				//	LIB.cancelHandler(e);
+				//});
 
 				/* Start the app */
 				if(!window.chrome.storage) ROUTER.init();
