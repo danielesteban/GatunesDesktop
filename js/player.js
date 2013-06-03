@@ -54,8 +54,14 @@ PLAYER = {
 		}
 	},
 	load : function(queueId) {
-		var song = PLAYER.queue[queueId];
-		if(song.provider === DATA.providers.lastfm) return PLAYER.next();
+		var song = PLAYER.queue[queueId],
+			id = song.provider + ':' + song.provider_id;
+
+		if(song.provider === DATA.providers.lastfm) {
+			 if(!song.bestMatch) return PLAYER.next();
+			 song.bestMatch.albumSong = song;
+			 song = song.bestMatch;
+		}
 		PLAYER.queueId = queueId;
 		PLAYER.onStateChange(-1);
 		PLAYER.current && PLAYER.current.destruct && PLAYER.current.destruct();
@@ -72,6 +78,9 @@ PLAYER = {
 		PLAYER.setSlider({
 			progress : 0,
 			loading : 0
+		});
+		DATA.loved.check(id, function(loved) {
+			$('menu li.love button i').attr('class', 'icon-' + (loved ? 'remove' : 'heart'));
 		});
 	},
 	startInterval : function() {
@@ -204,7 +213,19 @@ PLAYER = {
 		}
 	},
 	love : function() {
-		//TODO
+		if(!PLAYER.current) return;
+		var s = PLAYER.current.song.albumSong || PLAYER.current.song,
+			id = s.provider + ':' + s.provider_id,
+			cb = function(loved) {
+				return function() {
+					$('menu li.love button i').attr('class', 'icon-' + (loved ? 'remove' : 'heart'));
+				}
+			};
+
+		DATA.loved.check(id, function(loved) {
+			if(loved) return DATA.loved.remove(id, cb(false));
+			else DATA.loved.add([s], cb(true));
+		});
 	},
 	fullscreen : function() {
 		//TODO

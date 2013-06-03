@@ -33,11 +33,25 @@
 </div>
 <div class="half">
 	<div class="padding">
-		{{#if dataKey}}
+		{{#unless dataKey}}
+			<form>
+				<div class="control-group">
+					<label>{{L 'albumTag'}}</label>
+					<div class="controls">
+						<input type="text" placeholder="{{L 'albumTagPrompt'}}..." name="tag" />
+					</div>
+				</div>
+				<div class="control-group">
+					<div class="controls">
+						<button class="btn" type="submit">{{L 'search'}}</button>
+					</div>
+				</div>
+			</form>
+		{{else}}
 			<div class="cover"></div>
 			<menu>
 				<li class="remove"><button class="btn btn-mini">{{L 'removeAlbum'}}</button></li>
 			</menu>
-		{{/if}}
+		{{/unless}}
 	</div>
 </div>

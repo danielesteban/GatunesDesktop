@@ -243,6 +243,83 @@ DATA = {
 				});
 			});
 		}
+	},
+	loved : {
+		getAll : function(callback) {
+			DATA.getItem('loved', function(loved) {
+				var cb = function() {
+						count--;
+						if(count > 0) return;
+						callback(loved);
+					};
+
+				loved = loved || [];
+				if(!loved.length) return callback(loved);
+				var count = loved.length;
+				loved.forEach(function(id, index) {
+					DATA.getItem('song:' + id, function(s) {
+						s.provider = parseInt(id.split(':')[0], 10);
+						s.provider_id = id.split(':')[1];
+						loved[index] = s;
+						cb();
+					});
+				});
+			});
+		},
+		add : function(songs, callback) {
+			DATA.getItem('loved', function(loved) {
+				loved = loved || [];
+
+				var index = loved.length, //TODO: This will be used for adding into a defined position (dragging)
+					count = songs.length;
+				
+				songs.forEach(function(s) {
+					var id = parseInt(s.provider, 10) + ':' + LIB.escapeHTML(s.provider_id),
+						add = function() {
+							loved.splice(index, 0, id);
+							index++;
+							count--;
+							if(count > 0) return;
+							DATA.setItem('loved', loved, callback);
+						};
+
+					if(loved.indexOf(id) !== -1) {
+						count--;
+						return;
+					}
+
+					DATA.getItem('song:' + id, function(song) {
+						if(song) return add();
+						song = {
+							title : LIB.escapeHTML(s.title),
+							time : parseInt(s.time, 10)
+						};
+						s.artist && (song.artist = {
+							mbid : LIB.escapeHTML(s.artist.mbid),
+							name : LIB.escapeHTML(s.artist.name)
+						});
+						DATA.setItem('song:' + id, song, add);
+					});
+				});
+			});
+		},
+		remove : function(id, callback) {
+			DATA.getItem('loved', function(loved) {
+				loved = loved || [];
+				var index = loved.indexOf(id);
+				if(index === -1) return callback && callback();
+				loved.splice(index, 1);
+				DATA.setItem('loved', loved, callback);
+			});
+		},
+		check : function(id, callback) {
+			DATA.getItem('loved', function(loved) {
+				loved = loved || [];
+				var index = loved.indexOf(id);
+				if(index === -1) return callback(false);
+				callback(true);
+			});
+		}
 	}
 };
 
@@ -507,46 +584,72 @@ TEMPLATE = {
 			});
 		},
 		render : function(data) {
-			$('section form').first().submit(function(e) {
-				var values = LIB.getForm(e, ['artist']),
-					dest = $('section table');
-
-				if(values === null) return;
-				dest.empty();
-				LASTFM.getTopAlbums(values.artist, function(albums) {
-					DATA.getItem('albums', function(userAlbums) {
-						userAlbums = userAlbums || [];
-						albums.forEach(function(a) {
-							if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
-							dest.append('<tr><td class="img"><iframe src="/image.html#' + a.image[1]['#text'] + '"></iframe><b></b></td><td class="title">' + a.artist.name + ' - ' + a.name + '</td>');
-							$('td', dest.children().children().last()).click(function() {
-								LASTFM.getAlbum(a.mbid, function(data) {
-									var songs = [];
-									(data.tracks.track.length ? data.tracks.track : [data.tracks.track]).forEach(function(t) {
-										if(!t.mbid) return;
-										songs.push({
-											mbid : t.mbid,
-											artist : t.artist,
-											title : t.name,
-											time : t.duration
+			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createAlbum')).addClass('selected');		
+			if(!data.dataKey) {
+				var dest = $('section table'),
+					values,
+					renderAlbums = function(albums, fromArtistSearch) {
+						DATA.getItem('albums', function(userAlbums) {
+							userAlbums = userAlbums || [];
+							albums.forEach(function(a, i) {
+								if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
+								var tr = $('<tr><td class="img"><iframe></iframe><b></b></td><td class="title">' + a.artist.name + ' - ' + a.name + '</td>');
+								$('td', tr).click(function() {
+									LASTFM.getAlbum(a.mbid, function(data) {
+										var songs = [];
+										(data.tracks.track.length ? data.tracks.track : [data.tracks.track]).forEach(function(t) {
+											if(!t.mbid) return;
+											songs.push({
+												mbid : t.mbid,
+												artist : t.artist,
+												title : t.name,
+												time : t.duration
+											});
+										});
+										DATA.albums.add(a.mbid, a.artist, a.name, a.image[a.image.length - 1]['#text'], songs, function(mbid) {
+											ROUTER.update('/album/' + mbid);
 										});
 									});
-									DATA.albums.add(a.mbid, a.artist, a.name, a.image[a.image.length - 1]['#text'], songs, function(mbid) {
-										ROUTER.update('/album/' + mbid);
+								});
+								dest.append(tr);
+								setTimeout(function() {
+									$('td.img iframe', tr).attr('src', '/image.html#' + a.image[1]['#text'])
+								}, i * 150);
+							});
+							if(!fromArtistSearch && !$('tr', dest).length && values.artist) LASTFM.searchArtists(values.artist, function(artists) {
+								var hit = false;
+								artists && artists.forEach(function(a) {
+									if(hit || !a.mbid) return;
+									hit = true;
+									LASTFM.getTopAlbums(a.name, function(albums) {
+										renderAlbums(albums, true);
 									});
 								});
 							});
 						});
-					});
+					};
+
+				$('section form').first().submit(function(e) {
+					values = LIB.getForm(e, ['artist']);
+					if(values === null) return;
+					dest.empty();
+					$('section form').last()[0].reset();
+					LASTFM.getTopAlbums(values.artist, renderAlbums);
 				});
-			});
-			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createAlbum')).addClass('selected');
-			data.image && $('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
-			if(!data.dataKey) return $('section input').first().focus();
+				$('section form').last().submit(function(e) {
+					values = LIB.getForm(e, ['tag']);
+					if(values === null) return;
+					dest.empty();
+					$('section form').first()[0].reset()
+					LASTFM.getTagAlbums(values.tag, renderAlbums);
+				});
+				return $('section input').first().focus();
+			}
+			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
 					cf = function(play) {
-						if(bestMatch) return play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
+						if(s.bestMatch) return play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
 						YT.search('videos', title + ' -cover -live', 0, function(r) {
 							if(r.entry) {
 								r.entry.forEach(function(e) {
@@ -568,24 +671,17 @@ TEMPLATE = {
 									if(wCount >= (words.length / 2) && minTimeDiff > timeDiff && maxWCount <= wCount) {
 										minTimeDiff = timeDiff;
 										maxWCount = wCount;
-										bestMatch = ss;
+										s.bestMatch = ss;
 									}
 								});
-								!bestMatch && !play && tr.addClass('error');
-								if(bestMatch) {
-									s.provider = bestMatch.provider;
-									s.provider_id = bestMatch.provider_id;
-									s.title = bestMatch.title;
-									s.time = bestMatch.time;
-									play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
-								}
+								!s.bestMatch && !play && tr.addClass('error');
+								s.bestMatch && play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
 							}
 						});
 					},
 					title = s.artist.name + ' ' + s.title,
 					words = title.split(' '),
-					maxWCount = 0, minTimeDiff = s.time,
-					bestMatch;
+					maxWCount = 0, minTimeDiff = s.time;
 
 				tr.dblclick(cf);
 				$('a.play', tr).click(cf);
@@ -595,6 +691,19 @@ TEMPLATE = {
 			$('section menu li.remove button').click(function() {
 				DATA.albums.remove(data.dataKey.split(':')[1], function() {
 					ROUTER.update('/album');
+				});
+			});
+		}
+	},
+	loved : {
+		data : function(params, callback) {
+			DATA.loved.getAll(function(songs) {
+				songs.forEach(function(s, i) {
+					s.num = LIB.addZero(i + 1);
+					s.album = true;
+				});
+				callback({
+					songs : songs
 				});
 			});
 		}

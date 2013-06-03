@@ -1,1 +1,16 @@
-loved
+<div class="header">
+	<h1>{{L 'loved'}}</h1>
+	<hr>
+</div>
+<div class="half">
+	<div class="padding">
+		<table>
+			{{#each songs}}
+				{{> song}}
+			{{/each}}
+			{{#empty songs}}
+				<tr><td class="empty">No loved songs</td>
+			{{/empty}}
+		</table>
+	</div>
+</div>
