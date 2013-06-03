@@ -53,7 +53,10 @@ PLAYER = {
 			$('body').append('<div id="YTPlayer" />');
 		}
 	},
-	load : function(song) {
+	load : function(queueId) {
+		var song = PLAYER.queue[queueId];
+		if(song.provider === DATA.providers.lastfm) return PLAYER.next();
+		PLAYER.queueId = queueId;
 		PLAYER.onStateChange(-1);
 		PLAYER.current && PLAYER.current.destruct && PLAYER.current.destruct();
 		switch(song.provider) {
@@ -138,14 +141,19 @@ PLAYER = {
 		}
 	},
 	prev : function() {
-		//if(PLAYER.current && PLAYER.current.getCurrentTime() > 3) return PLAYER.current.seekTo(0);
-		var q = PLAYER.queue;
-		if(!q) return;
+		var cb = function(currentTime) {
+				if(currentTime > 3) return PLAYER.current.seekTo(0);
+				var q = PLAYER.queue;
+				if(!q) return;
 
-		PLAYER.queueId--;
-		PLAYER.queueId < 0 && (PLAYER.queueId = q.length - 1);
-		
-		PLAYER.load(q[PLAYER.queueId]);
+				PLAYER.queueId--;
+				PLAYER.queueId < 0 && (PLAYER.queueId = q.length - 1);
+				
+				PLAYER.load(PLAYER.queueId);
+			};
+
+		if(PLAYER.current) return PLAYER.current.getCurrentTime(cb);
+		cb();
 	},
 	next : function() {
 		var q = PLAYER.queue;
@@ -154,37 +162,7 @@ PLAYER = {
 		PLAYER.queueId++;
 		PLAYER.queueId >= q.length && (PLAYER.queueId = 0);
 		
-		PLAYER.load(q[PLAYER.queueId]);
-	},
-	addToQueue : function(songs, startFrom, reset) {
-		(reset || !PLAYER.queue) && (PLAYER.queue = []);
-		songs.forEach(function(s) {
-			var song = {
-					id : s.id,
-	    			provider : s.provider,
-	    			provider_id : s.provider_id,
-	    			time : s.time,
-	    			title : s.title
-	    		};
-
-			//s.provider === DATA.providers.remotestorage && s.provider_storage && (song.provider_storage = s.provider_storage);
-			s.from && (song.from = s.from);
-			if(QUEUE.allowDups) return PLAYER.queue.push(song);
-			var already;
-			PLAYER.queue.forEach(function(qs) {
-				s.provider === qs.provider && s.provider_id === qs.provider_id && s.provider_storage === qs.provider_storage && (already = true);
-			});
-			!already && PLAYER.queue.push(song);
-		});
-		if(PLAYER.queue.length && (reset || !PLAYER.current)) {
-			var startFromId;
-			startFrom && PLAYER.queue.forEach(function(s, i) {
-				s.provider === startFrom.provider && s.provider_id === startFrom.provider_id && s.provider_storage === startFrom.provider_storage && (startFromId = i);
-			});
-			PLAYER.queueId = startFromId || 0;
-			PLAYER.load(PLAYER.queue[PLAYER.queueId]);
-		}
-		QUEUE.updateBadge();
+		PLAYER.load(PLAYER.queueId);
 	},
 	setPlay : function(paused) {
 		var controls = $('footer');
@@ -194,8 +172,8 @@ PLAYER = {
 	},
 	setTitle : function(song) {
 		$('li.title a', 'footer')
-			.text(song ? song.title : '')
-			.attr('href', /*song && song.from ? LIB.playlistLink(song.from) : */'/queue');
+			.text(song ? song.title : '');
+			//.attr('href', /*song && song.from ? LIB.playlistLink(song.from) : */'/queue');
 		
 		//LIB.setTitle(song ? '(0:00) ' + song.title : null);
 	},

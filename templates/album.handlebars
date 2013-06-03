@@ -20,15 +20,24 @@
 			</form>
 		{{/unless}}
 		<table>
-			{{#each songs}}
-				{{> song}}
-			{{/each}}
-			{{#empty songs}}
-				<tr><td class="empty">Sorry, this album does not contain any songs</td>
-			{{/empty}}
+			{{#if dataKey}}
+				{{#each songs}}
+					{{> song}}
+				{{/each}}
+				{{#empty songs}}
+					<tr><td class="empty">Sorry, this album does not contain any songs</td>
+				{{/empty}}
+			{{/if}}
 		</table>
 	</div>
 </div>
-<div class="half cover">
-
+<div class="half">
+	<div class="padding">
+		{{#if dataKey}}
+			<div class="cover"></div>
+			<menu>
+				<li class="remove"><button class="btn btn-mini">{{L 'removeAlbum'}}</button></li>
+			</menu>
+		{{/if}}
+	</div>
 </div>

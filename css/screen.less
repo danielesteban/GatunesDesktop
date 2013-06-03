@@ -193,7 +193,7 @@ section#playlist, section#album {
 			}
 		}
 	}
-	menu {
+	menu.tabs {
 		margin: 0 0 10px;
 		border-bottom: 1px solid #ddd;
 		&:before, &:after {
@@ -264,12 +264,22 @@ section#playlist, section#album {
 			background: #f8f8f8;
 			border-top-color: #f8f8f8;
 		}
+		tr.playing td {
+			background: #fff9e3;
+			&.title {
+				font-weight: bold;
+			}
+		}
 		tr.selected td {
-			background: #d9edf7;
-			border-top-color: #d9edf7;
+			background: #e2eff6;
+			border-top-color: #e2eff6;
 		}
 		tr.dropping td {
 			border-top-color: #0088cc;
+		}
+		tr.error td {
+			text-decoration: line-through;
+			color: #c0c0c0;
 		}
 		tr.ltr td {
 			background: #fff;
@@ -282,6 +292,16 @@ section#playlist, section#album {
 				}
 				a {
 					display: inline;
+				}
+			}
+			&.error {
+				td:first-child, td.time {
+					span {
+						display: inline;
+					}
+					a {
+						display: none;
+					}
 				}
 			}
 		}
@@ -298,6 +318,14 @@ section#album {
 		b {
 			position: relative;
 			margin: -64px 0 0;
+		}
+	}
+	menu {
+		width: 300px;
+		margin: 20px 0 0;
+		text-align: center;
+		li {
+			display: inline-block;
 		}
 	}
 	div.cover iframe {

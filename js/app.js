@@ -48,7 +48,7 @@ DATA = {
 						callback(data);
 					};
 
-				if(!playlists) return callback(data);
+				if(!playlists || !playlists.length) return callback(data);
 				var count = playlists.length;
 				playlists.forEach(function(id, index) {
 					DATA.getItem('playlist:' + id, function(p) {
@@ -149,7 +149,7 @@ DATA = {
 						callback(data);
 					};
 
-				if(!albums) return callback(data);
+				if(!albums || !albums.length) return callback(data);
 				var count = albums.length;
 				albums.forEach(function(id, index) {
 					DATA.getItem('album:' + id, function(a) {
@@ -232,6 +232,16 @@ DATA = {
 					});
 				});
 			});
+		},
+		remove : function(id, callback) {
+			DATA.getItem('albums', function(albums) {
+				var index = albums.indexOf(id);
+				if(index === -1) return callback && callback();
+				albums.splice(index, 1);
+				DATA.removeItem('album:' + id, function() {
+					DATA.setItem('albums', albums, callback);
+				});
+			});
 		}
 	}
 };
@@ -282,6 +292,7 @@ TEMPLATE = {
 				s.num = LIB.addZero(i + 1);
 				TEMPLATE.song(s, dest);
 			});
+			TEMPLATE.playlist.setPlayingSong();
 		},
 		search : function(e) {
 			LIB.cancelHandler(e);
@@ -382,6 +393,14 @@ TEMPLATE = {
 	            	//delete TEMPLATE.playlist.selectedSongs;
 	            }
 	        }
+	    },
+	    setPlayingSong : function() {
+	    	if(!PLAYER.current) return;
+	    	var t = $('section#playlist table').first();
+	    	!t.length && (t = $('section#album table').first());
+	    	if(!t.length || PLAYER.queueDataKey !== $('section .header h1').attr("key")) return;
+	    	$('tr', t).removeClass('playing');
+	    	$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
 	    }
 	},
 	song : function(song, dest) {
@@ -389,7 +408,7 @@ TEMPLATE = {
 		var tr = dest.children().children().last(),
 			h1 = $('section .header h1'),
 			cf = function() {
-				if(!song.search) return PLAYER.load(song);
+				if(!song.search) return; //PLAYER.load(song);
 				var dataKey = h1.attr("key"),
 					add = function() {
 						var id = dataKey.split(':')[1];
@@ -523,48 +542,61 @@ TEMPLATE = {
 			});
 			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createAlbum')).addClass('selected');
 			data.image && $('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
-			if(data.dataKey) {
-				data.songs.forEach(function(s, i) {
-					var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
-						cf = function() {
-							if(bestMatch) return PLAYER.load(bestMatch);
-							YT.search('videos', title + ' -cover -live', 0, function(r) {
-								if(r.entry) {
-									r.entry.forEach(function(e) {
-										var ss = {
-												provider : DATA.providers.youtube,
-												provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
-												title : e.title.$t,
-												time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
-											},
-											timeDiff = Math.abs(ss.time - s.time),
-											sWords = ss.title.split(' '),
-											wCount = 0;
+			if(!data.dataKey) return $('section input').first().focus();
+			data.songs.forEach(function(s, i) {
+				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
+					cf = function(play) {
+						if(bestMatch) return play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
+						YT.search('videos', title + ' -cover -live', 0, function(r) {
+							if(r.entry) {
+								r.entry.forEach(function(e) {
+									var ss = {
+											provider : DATA.providers.youtube,
+											provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
+											title : e.title.$t,
+											time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
+										},
+										timeDiff = Math.abs(ss.time - s.time),
+										sWords = ss.title.split(' '),
+										wCount = 0;
 
-										words.forEach(function(w) {
-											if(sWords.indexOf(w) === -1) return;
-											wCount++; 
-										});
-
-										if(wCount >= (words.length / 2) && minTimeDiff > timeDiff && maxWCount <= wCount) {
-											minTimeDiff = timeDiff;
-											maxWCount = wCount;
-											bestMatch = ss;
-										}
+									words.forEach(function(w) {
+										if(sWords.indexOf(w) === -1) return;
+										wCount++; 
 									});
-									bestMatch && PLAYER.load(bestMatch);
-								}
-							});
-						},
-						title = s.artist.name + ' ' + s.title,
-						words = title.split(' '),
-						maxWCount = 0, minTimeDiff = s.time,
-						bestMatch;
 
-					tr.dblclick(cf);
-					$('a.play', tr).click(cf);
+									if(wCount >= (words.length / 2) && minTimeDiff > timeDiff && maxWCount <= wCount) {
+										minTimeDiff = timeDiff;
+										maxWCount = wCount;
+										bestMatch = ss;
+									}
+								});
+								!bestMatch && !play && tr.addClass('error');
+								if(bestMatch) {
+									s.provider = bestMatch.provider;
+									s.provider_id = bestMatch.provider_id;
+									s.title = bestMatch.title;
+									s.time = bestMatch.time;
+									play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
+								}
+							}
+						});
+					},
+					title = s.artist.name + ' ' + s.title,
+					words = title.split(' '),
+					maxWCount = 0, minTimeDiff = s.time,
+					bestMatch;
+
+				tr.dblclick(cf);
+				$('a.play', tr).click(cf);
+				setTimeout(cf, i * 50);
+			});
+			TEMPLATE.playlist.setPlayingSong();
+			$('section menu li.remove button').click(function() {
+				DATA.albums.remove(data.dataKey.split(':')[1], function() {
+					ROUTER.update('/album');
 				});
-			} else $('section input').first().focus();
+			});
 		}
 	}
 };

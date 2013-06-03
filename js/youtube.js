@@ -85,7 +85,7 @@ YT = {
 						player.destroy();
 		            }
 				};
-				//PLAYLIST.setPlayingSong();
+				TEMPLATE.playlist.setPlayingSong();
 			};
 
 		if(PLAYER.IframeAPILoaded) return callback();
@@ -158,6 +158,8 @@ YT = {
             	sendMessage({func: 'destruct'});
             }
         };
+
+        TEMPLATE.playlist.setPlayingSong();
 
         window.addEventListener('message', onMessage);
         /*if(PLAYER.chromeAppPlayerLoaded) return */sendMessage({func: 'load', video: video_id});

@@ -118,7 +118,7 @@ SC = {
 			});
 			SC.reqArtworks();
 		}*/
-		//PLAYLIST.setPlayingSong();
+		TEMPLATE.playlist.setPlayingSong();
 	}
 };
 

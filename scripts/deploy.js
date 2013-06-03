@@ -56,7 +56,7 @@ function writeIndex(css, js) {
 
 	index = index.replace(/<html>/, '<html manifest="/app.manifest">');
 	index += '<link href="/' + css + '.css" rel="stylesheet" />';
-	index += '<script src="/' + js + '.js"></script>';
+	index += '<script src="/' + js + '.js" charset="utf-8"></script>';
 	index += html.substr(html.indexOf('<title>'));
 	fs.writeFileSync('bundle/index.html', str_replace_array(index, ["\n", "\r", "\t"], ['', '', '']));
 }
