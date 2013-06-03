@@ -20,6 +20,7 @@ aside {
 		padding: 5px 0 3px;
 		border-bottom: 1px solid #111215;
 		text-align: center;
+		cursor: default;
 		img {
 			width: 147px;
 			height: 36px;
@@ -288,9 +289,16 @@ section#playlist, section#album {
 }
 
 section#album {
-	table .img, table .img iframe {
-		width: 64px;
-		height: 64px;
+	table .img, table .img {
+		iframe, b {
+			float: left;
+			width: 64px;
+			height: 64px;
+		}
+		b {
+			position: relative;
+			margin: -64px 0 0;
+		}
 	}
 	div.cover iframe {
 		width: 300px;

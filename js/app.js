@@ -1,9 +1,9 @@
 DATA = {
 	providers : {
 		youtube : 1,
-		soundcloud : 2
+		soundcloud : 2,
+		lastfm : 3
 	},
-	onChange : {},
 	getItem : function(id, callback) {
 		if(!window.chrome.storage) callback(JSON.parse(window.localStorage.getItem(id)));
 		else window.chrome.storage.sync.get(id, function(items) {
@@ -13,7 +13,7 @@ DATA = {
 	setItem : function(id, value, callback) {
 		var onChange = function() {
 				var collection = id.split(':')[0];
-				DATA.onChange[collection] && DATA.onChange[collection](id.split(':')[1]);
+				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(collection.length + 1));
 				callback && callback();
 			};
 		
@@ -29,7 +29,7 @@ DATA = {
 	removeItem : function(id, callback) {
 		var onChange = function() {
 				var collection = id.split(':')[0];
-				DATA.onChange[collection] && DATA.onChange[collection](id.split(':')[1]);
+				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(collection.length + 1));
 				callback && callback();
 			};
 
@@ -38,50 +38,200 @@ DATA = {
 			onChange();
 		} else window.chrome.storage.sync.remove(id, onChange);
 	},
-	getPlaylists : function(callback) {
-		DATA.getItem('playlists', function(playlists) {
-			var data = [],
-				cb = function() {
-					count--;
-					if(count > 0) return;
-					callback(data);
-				};
+	playlists : {
+		getAll : function(callback) {
+			DATA.getItem('playlists', function(playlists) {
+				var data = [],
+					cb = function() {
+						count--;
+						if(count > 0) return;
+						callback(data);
+					};
 
-			if(!playlists) return callback(data);
-			var count = playlists.length;
-			playlists.forEach(function(id, index) {
-				DATA.getItem('playlist:' + id, function(p) {
-					p.id = id;
-					p.dataKey = 'playlist:' + id;
-					p.link = '/playlist/' + id;
-					data[index] = p;
-					cb();
+				if(!playlists) return callback(data);
+				var count = playlists.length;
+				playlists.forEach(function(id, index) {
+					DATA.getItem('playlist:' + id, function(p) {
+						p.id = id;
+						p.dataKey = 'playlist:' + id;
+						p.link = '/playlist/' + id;
+						data[index] = p;
+						cb();
+					});
 				});
 			});
-		});
+		},
+		get : function(id, callback) {
+			var dataKey = 'playlist:' + id;
+			DATA.getItem(dataKey, function(playlist) {
+				var cb = function() {
+						count--;
+						if(count > 0) return;
+						callback(playlist);
+					};
+
+				playlist.dataKey = dataKey;
+				if(!playlist.songs.length) return callback(playlist);
+				var count = playlist.songs.length;
+				playlist.songs.forEach(function(id, index) {
+					DATA.getItem('song:' + id, function(s) {
+						s.provider = parseInt(id.split(':')[0], 10);
+						s.provider_id = id.split(':')[1];
+						playlist.songs[index] = s;
+						cb();
+					});
+				});
+			});
+		},
+		add : function(title, callback) {
+			DATA.getItem('playlists', function(playlists) {
+				playlists = playlists || [];
+				var newId = 1;
+				playlists.forEach(function(id) {
+					id >= newId && (newId = id + 1);
+				});
+				playlists.unshift(newId);
+				DATA.setItem('playlist:' + newId, {
+					title : LIB.escapeHTML(title),
+					songs : []
+				}, function() {
+					DATA.setItem('playlists', playlists, function() {
+						callback && callback(newId);
+					});
+				});
+			});
+		},
+		addSongs : function(id, songs, callback) {
+			var cb = function(playlist) {
+					DATA.setItem('playlist:' + id, playlist, callback);
+				};
+
+			DATA.getItem('playlist:' + id, function(playlist) {
+				var index = playlist.songs.length, //TODO: This will be used for adding into a defined position (dragging)
+					count = songs.length;
+				
+				songs.forEach(function(s) {
+					var id = parseInt(s.provider, 10) + ':' + LIB.escapeHTML(s.provider_id),
+						add = function() {
+							playlist.songs.splice(index, 0, id);
+							index++;
+							count--;
+							if(count > 0) return;
+							cb(playlist);
+						};
+
+					DATA.getItem('song:' + id, function(song) {
+						if(song) return add();
+						DATA.setItem('song:' + id, {
+							title : LIB.escapeHTML(s.title),
+							time : parseInt(s.time, 10)
+						}, add);
+					});
+				});
+			});
+		},
+		removeSong : function(id, index, provider, provider_id, callback) {
+			DATA.getItem('playlist:' + id, function(playlist) {
+				var sid = playlist.songs[index];
+				if(!sid || parseInt(sid.split(':')[0], 10) !== provider || sid.split(':')[1] !== provider_id) return callback(playlist.songs);
+				playlist.songs.splice(index, 1);
+				DATA.setItem('playlist:' + id, playlist, callback);
+			});
+		}
 	},
-	getAlbums : function(callback) {
-		DATA.getItem('albums', function(albums) {
-			var data = [],
-				cb = function() {
-					count--;
-					if(count > 0) return;
-					callback(data);
-				};
+	albums : {
+		getAll : function(callback) {
+			DATA.getItem('albums', function(albums) {
+				var data = [],
+					cb = function() {
+						count--;
+						if(count > 0) return;
+						callback(data);
+					};
 
-			if(!albums) return callback(data);
-			var count = albums.length;
-			albums.forEach(function(mbid, index) {
-				DATA.getItem('album:' + mbid, function(a) {
-					a.mbid = mbid;
-					a.dataKey = 'album:' + mbid;
-					a.fullTitle = a.artist.name + ' - ' + a.title;
-					a.link = '/album/' + mbid;
-					data[index] = a;
-					cb();
+				if(!albums) return callback(data);
+				var count = albums.length;
+				albums.forEach(function(id, index) {
+					DATA.getItem('album:' + id, function(a) {
+						a.id = id;
+						a.dataKey = 'album:' + id;
+						a.fullTitle = a.artist.name + ' - ' + a.title;
+						a.link = '/album/' + id;
+						data[index] = a;
+						cb();
+					});
 				});
 			});
-		});
+		},
+		get : function(id, callback) {
+			var dataKey = 'album:' + id;
+			DATA.getItem(dataKey, function(album) {
+				var cb = function() {
+						count--;
+						if(count > 0) return;
+						callback(album);
+					};
+
+				album.dataKey = dataKey;
+				album.fullTitle = album.artist.name + ' - ' + album.title;
+				if(!album.songs.length) return callback(album);
+				var count = album.songs.length;
+				album.songs.forEach(function(id, index) {
+					DATA.getItem('song:' + id, function(s) {
+						s.provider = parseInt(id.split(':')[0], 10);
+						s.provider_id = id.split(':')[1];
+						album.songs[index] = s;
+						cb();
+					});
+				});
+			});
+		},
+		add : function(mbid, artist, title, image, songs, callback) {
+			DATA.getItem('albums', function(albums) {
+				albums = albums || [];
+				if(albums.indexOf(mbid) !== -1) return callback && callback(mbid);
+				albums.unshift(mbid);
+				var album = {
+						artist : {
+							mbid : LIB.escapeHTML(artist.mbid),
+							name : LIB.escapeHTML(artist.name)
+						},
+						title : LIB.escapeHTML(title),
+						image : LIB.escapeHTML(image),
+						songs : []
+					},
+					count = songs.length,
+					cb = function() {		
+						DATA.setItem('album:' + mbid, album, function() {
+							DATA.setItem('albums', albums, function() {
+								callback && callback(mbid);
+							});
+						});
+					};
+				
+				songs.forEach(function(s, index) {
+					var id = DATA.providers.lastfm + ':' + LIB.escapeHTML(s.mbid),
+						add = function() {
+							album.songs[index] = id;
+							count--;
+							if(count > 0) return;
+							cb();
+						};
+
+					DATA.getItem('song:' + id, function(song) {
+						if(song) return add();
+						DATA.setItem('song:' + id, {
+							title : LIB.escapeHTML(s.title),
+							time : parseInt(s.time, 10),
+							artist : {
+								mbid : LIB.escapeHTML(s.artist.mbid),
+								name : LIB.escapeHTML(s.artist.name)
+							}
+						}, add);
+					});
+				});
+			});
+		}
 	}
 };
 
@@ -93,11 +243,7 @@ TEMPLATE = {
 			if(!id) return callback({
 				title : L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date()))
 			});
-			var dataKey = 'playlist:' + id;
-			DATA.getItem(dataKey, function(p) {
-				p.dataKey = dataKey;
-				callback(p);
-			});
+			DATA.playlists.get(id, callback);
 		},
 		render : function(data) {
 			var form = $('section form');
@@ -243,37 +389,22 @@ TEMPLATE = {
 			h1 = $('section .header h1'),
 			cf = function() {
 				if(!song.search) return PLAYER.load(song);
-				var dataKey = h1.attr("key");
-				if(dataKey === 'undefined') {
-					DATA.getItem('playlists', function(playlists) {
-						playlists = playlists || [];
-						var newId = 1;
-						playlists.forEach(function(id) {
-							id >= newId && (newId = id + 1);
-						});
-						playlists.unshift(newId);
-						DATA.setItem('playlists', playlists, function() {
-							dataKey = 'playlist:' + newId;
-							h1.attr("key", dataKey);
-							var playlist = {
-								title : LIB.escapeHTML(h1.attr("value")),
-								songs : [
-									LIB.cleanSong(song)
-								]
-							};
-							DATA.setItem(dataKey, playlist, function() {
+				var dataKey = h1.attr("key"),
+					add = function() {
+						var id = dataKey.split(':')[1];
+						DATA.playlists.addSongs(id, [song], function() {
+							DATA.playlists.get(id, function(playlist) {
 								TEMPLATE.playlist.renderSongs(playlist.songs);
 							});
 						});
-					});
-				} else {
-					DATA.getItem(dataKey, function(playlist) {
-						playlist.songs.push(LIB.cleanSong(song));
-						DATA.setItem(dataKey, playlist, function() {
-							TEMPLATE.playlist.renderSongs(playlist.songs);
-						});
-					});
-				}
+					};
+				
+				if(dataKey === 'undefined') return DATA.playlists.add(h1.attr("value"), function(id) {
+					dataKey = 'playlist:' + id; 
+					h1.attr("key", dataKey);
+					add();
+				});
+				add();
 			};
 
 		LIB.preventSelection(tr, function(e) {
@@ -331,14 +462,9 @@ TEMPLATE = {
 		$('a.remove', tr).click(function() {
 			var dataKey = h1.attr("key");
 			if(dataKey === 'undefined') return;
-			DATA.getItem(dataKey, function(playlist) {
-				var r = false;
-				playlist.songs.forEach(function(s, i) {
-					if(r || s.provider !== song.provider || s.provider_id !== song.provider_id) return;
-					playlist.songs.splice(i, 1);
-					r = true;
-				});
-				DATA.setItem(dataKey, playlist, function() {
+			var id = dataKey.split(':')[1];
+			DATA.playlists.removeSong(id, tr[0].rowIndex, song.provider, song.provider_id, function() {
+				DATA.playlists.get(id, function(playlist) {
 					TEMPLATE.playlist.renderSongs(playlist.songs);
 				});
 			});
@@ -352,14 +478,12 @@ TEMPLATE = {
 			if(!id) return callback({
 				fullTitle : L.newAlbum
 			});
-			var dataKey = 'album:' + id;
-			DATA.getItem(dataKey, function(a) {
-				a.dataKey = dataKey;
-				a.fullTitle = a.artist.name + ' - ' + a.title;
-				a.songs.forEach(function(s, i) {
+			DATA.albums.get(id, function(album) {
+				album.songs.forEach(function(s, i) {
 					s.num = LIB.addZero(i + 1);
+					s.album = true;
 				});
-				callback(a);
+				callback(album);
 			});
 		},
 		render : function(data) {
@@ -374,33 +498,21 @@ TEMPLATE = {
 						userAlbums = userAlbums || [];
 						albums.forEach(function(a) {
 							if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
-							dest.append('<tr><td class="img"><iframe src="/image.html#' + a.image[1]['#text'] + '"></iframe></td><td>' + a.artist.name + ' - ' + a.name + '</td>');
+							dest.append('<tr><td class="img"><iframe src="/image.html#' + a.image[1]['#text'] + '"></iframe><b></b></td><td class="title">' + a.artist.name + ' - ' + a.name + '</td>');
 							$('td', dest.children().children().last()).click(function() {
 								LASTFM.getAlbum(a.mbid, function(data) {
-									delete a.artist.url;
-									var album = {
-										artist : a.artist,
-										image : a.image[a.image.length - 1]['#text'],
-										title : a.name,
-										songs : []
-									};
+									var songs = [];
 									(data.tracks.track.length ? data.tracks.track : [data.tracks.track]).forEach(function(t) {
-										if(album.songs.length >= 20) return; //TEMP BUGFIX FOR QUOTA_BYTES_PER_ITEM ERROR
-										delete t.artist.url;
-										album.songs.push({
+										if(!t.mbid) return;
+										songs.push({
+											mbid : t.mbid,
 											artist : t.artist,
 											title : t.name,
-											time : parseInt(t.duration, 10)
-										})
-									});
-									DATA.getItem('albums', function(albums) {
-										albums = albums || [];
-										albums.unshift(a.mbid);
-										DATA.setItem('album:' + a.mbid, album, function() {
-											DATA.setItem('albums', albums, function() {
-												ROUTER.update('/album/' + a.mbid);
-											});
+											time : t.duration
 										});
+									});
+									DATA.albums.add(a.mbid, a.artist, a.name, a.image[a.image.length - 1]['#text'], songs, function(mbid) {
+										ROUTER.update('/album/' + mbid);
 									});
 								});
 							});
@@ -409,7 +521,7 @@ TEMPLATE = {
 				});
 			});
 			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createAlbum')).addClass('selected');
-			data.image && $('section div.cover').html('<iframe src="image.html#' + data.image + '" />');
+			data.image && $('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			if(data.dataKey) {
 				data.songs.forEach(function(s, i) {
 					var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
@@ -462,6 +574,11 @@ $(window).load(function() {
 		return L[id] || id;
 	});
 
+	Handlebars.registerHelper('or', function(val1, val2, options) {
+		if(val1 || val2) return options.fn(this);
+		else return options.inverse(this);
+	});
+
 	Handlebars.registerHelper('empty', function(data, options) {
 		if(!data || !data.length) return options.fn(this);
 		else return options.inverse(this);
@@ -484,10 +601,10 @@ $(window).load(function() {
 	});
 
 	/* DATA handlers */
-	DATA.onChange.playlist = DATA.onChange.album = function() {
+	DATA.playlists.onChange = DATA.albums.onChange = function() {
 		/* Update Menu */
-		DATA.getPlaylists(function(playlists) {
-			DATA.getAlbums(function(albums) {
+		DATA.playlists.getAll(function(playlists) {
+			DATA.albums.getAll(function(albums) {
 				var menu = $('aside menu'),
 					selected = $('section .header h1').attr("key");
 
@@ -510,8 +627,8 @@ $(window).load(function() {
 		L = LANG[lang];
 		DATA.setItem('lang', lang);
 
-		DATA.getPlaylists(function(playlists) {
-			DATA.getAlbums(function(albums) {
+		DATA.playlists.getAll(function(playlists) {
+			DATA.albums.getAll(function(albums) {
 				/* Render the skin */
 				$('body').append(Handlebars.templates.skin({playlists : playlists, albums : albums}));
 				LIB.handleLinks('aside');
@@ -520,14 +637,9 @@ $(window).load(function() {
 				/* Init players */
 				PLAYER.init();
 
-				/* Disable console access */
-				//$(window).contextmenu(function(e) {
-				//	LIB.cancelHandler(e);
-				//});
-
 				/* Start the app */
 				if(!window.chrome.storage) ROUTER.init();
-				else ROUTER.update('/album' + (playlists.length ? 'playlist/' + playlists[0].id : ''));
+				else ROUTER.update(albums.length ? '/album/' + albums[0].id : playlists.length ? '/playlist/' + playlists[0].id : '/album/');
 			});
 		});
 	});

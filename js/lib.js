@@ -238,7 +238,7 @@ ROUTER = {
 			if(TEMPLATE[panel] && TEMPLATE[panel].data) return TEMPLATE[panel].data(params, cb);
 			cb({});
 		} else {
-			ROUTER.update('/playlist/');
+			ROUTER.update('/album/');
 		}
 	}
 };

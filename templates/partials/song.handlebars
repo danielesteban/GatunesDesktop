@@ -10,11 +10,11 @@
 		{{/if}}
 	</td>
 	<td class="time">
-		{{#if search}}
+		{{#or search album}}
 			{{timeFormatted}}
 		{{else}}
 			<span>{{timeFormatted}}</span>
 			<a class="remove"><i class="icon-trash"></i></a>
-		{{/if}}
+		{{/or}}
 	</td>
 </tr>
