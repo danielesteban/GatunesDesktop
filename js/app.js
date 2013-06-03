@@ -581,9 +581,6 @@ TEMPLATE = {
 		data : function(params, callback) {
 			var id = params[0];
 			delete TEMPLATE.playlist.selectedSongs;
-			if(!id) return callback({
-				fullTitle : L.newAlbum
-			});
 			DATA.albums.get(id, function(album) {
 				var cb = function(album) {
 						album.id = id;
@@ -606,7 +603,7 @@ TEMPLATE = {
 								},
 								title : LIB.escapeHTML(a.title),
 								fullTitle : LIB.escapeHTML(artist.name) + ' - ' + LIB.escapeHTML(a.name),
-								image : LIB.escapeHTML(a.image[a.image.length - 1]['#text']),
+								image : LIB.escapeHTML(a.image[3]['#text']),
 								songs : []
 							};
 
@@ -629,71 +626,6 @@ TEMPLATE = {
 			});
 		},
 		render : function(data) {
-			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createAlbum')).addClass('selected');		
-			if(!data.dataKey) {
-				var dest = $('section table'),
-					values,
-					renderAlbums = function(albums, fromArtistSearch) {
-						DATA.getItem('albums', function(userAlbums) {
-							userAlbums = userAlbums || [];
-							albums.forEach(function(a, i) {
-								if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
-								var tr = $('<tr><td class="img"><iframe></iframe><b></b></td><td class="title">' + a.artist.name + ' - ' + a.name + '</td>');
-								$('td', tr).click(function() {
-									LASTFM.getAlbum(a.mbid, function(data) {
-										if(!data) return tr.fadeOut(function() {
-											this.remove();
-										});
-										var songs = [];
-										(data.tracks.track.length ? data.tracks.track : [data.tracks.track]).forEach(function(t) {
-											if(!t.mbid) return;
-											songs.push({
-												mbid : t.mbid,
-												artist : t.artist,
-												title : t.name,
-												time : t.duration
-											});
-										});
-										DATA.albums.add(a.mbid, a.artist, a.name, a.image[a.image.length - 1]['#text'], songs, function(mbid) {
-											ROUTER.update('/album/' + mbid);
-										});
-									});
-								});
-								dest.append(tr);
-								setTimeout(function() {
-									$('td.img iframe', tr).attr('src', '/image.html#' + a.image[1]['#text']);
-								}, i * 150);
-							});
-							if(!fromArtistSearch && !$('tr', dest).length && values.artist) LASTFM.searchArtists(values.artist, function(artists) {
-								var hit = false;
-								artists && artists.forEach(function(a) {
-									if(hit || !a.mbid) return;
-									hit = true;
-									LASTFM.getTopAlbums(a.name, function(albums) {
-										renderAlbums(albums, true);
-									});
-								});
-							});
-						});
-					};
-
-				$('section form').first().submit(function(e) {
-					values = LIB.getForm(e, ['artist']);
-					if(values === null) return;
-					dest.empty();
-					$('section form').last()[0].reset();
-					LASTFM.getTopAlbums(values.artist, renderAlbums);
-				});
-				$('section form').last().submit(function(e) {
-					values = LIB.getForm(e, ['tag']);
-					if(values === null) return;
-					dest.empty();
-					$('section form').first()[0].reset()
-					LASTFM.getTagAlbums(values.tag, renderAlbums);
-				});
-				return $('section input').first().focus();
-			}
-			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
 					pf = function() {
@@ -739,14 +671,18 @@ TEMPLATE = {
 
 				tr.dblclick(cf);
 				$('a.play', tr).click(cf);
-				setTimeout(cf, i * 50);
+				setTimeout(function() {
+					cf();
+				}, i * 50);
 			});
 			TEMPLATE.playlist.setPlayingSong();
-			$('section menu li.remove button').click(function() {
+			/*$('section menu li.remove button').click(function() {
 				DATA.albums.remove(data.dataKey.split(':')[1], function() {
 					ROUTER.update('/album');
 				});
-			});
+			});*/
+			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');		
+			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			LASTFM.getTopAlbums(data.artist.name, function(artistAlbums) {
 				var dest = $('section div.artistAlbums'),
 					c = 0;
@@ -785,21 +721,59 @@ TEMPLATE = {
 		}
 	},
 	home : {
+		data : function(params, callback) {
+			var p = {};
+			switch(params[0]) {
+				case 'artist':
+					p.artist = params[1];
+				break;
+				case 'tag':
+					p.tag = params[1];
+				break;
+			}
+			callback(p);
+		},
 		render : function(data) {
-			var dest = $('section div.padding');
-			LASTFM.getTopArtistsAlbums(function(albums) {
-				albums.forEach(function(a, i) {
-					var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
-						img = $('<div class="img"><iframe></iframe><b></b></div>');
+			var dest = $('section div.padding'),
+				renderAlbums = function(albums) {
+					DATA.getItem('albums', function(userAlbums) {
+						userAlbums = userAlbums || [];
+						albums.forEach(function(a, i) {
+							if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
+							var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
+								img = $('<div class="img"><iframe></iframe><b></b></div>');
 
-					div.append(img);
-					div.append('<span>' + a.artist.name + ' - ' + a.name + '</span>')
-					dest.append(div);
-					setTimeout(function() {
-						$('iframe', img).attr('src', '/image.html#' + a.image[2]['#text']);
-					}, i * 150);
-				});
-				LIB.handleLinks('section');
+							div.append(img);
+							div.append('<span>' + a.artist.name + ' - ' + a.name + '</span>')
+							dest.append(div);
+							setTimeout(function() {
+								$('iframe', img).attr('src', '/image.html#' + a.image[2]['#text']);
+							}, i * 150);
+						});
+						LIB.handleLinks('section');
+						if(data.artist && !$('a', dest).length) LASTFM.searchArtists(data.artist, function(artists) {
+							var hit = false;
+							artists && (artists.length ? artists : [artists]).forEach(function(a) {
+								if(hit || !a.mbid) return;
+								hit = true;
+								delete data.artist;
+								LASTFM.getTopAlbums(a.name, renderAlbums);
+							});
+						});
+					});
+				};
+
+			if(data.artist) {
+				LASTFM.getTopAlbums(data.artist, renderAlbums);
+			} else if(data.tag) {
+				LASTFM.getTagAlbums(data.tag, renderAlbums);
+			} else {
+				LASTFM.getTopArtistsAlbums(renderAlbums);
+			}
+			$('section form').submit(function(e) {
+				LIB.cancelHandler(e);
+				if(e.target.artist) return ROUTER.update('/home/artist/' + $(e.target.artist).val());
+				ROUTER.update('/home/tag/' + $(e.target.tag).val());
 			});
 		}
 	}

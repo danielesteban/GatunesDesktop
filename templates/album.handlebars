@@ -1,58 +1,27 @@
 <div class="header">
-	<h1 key="{{dataKey}}">{{fullTitle}}{{#unless dataKey}}<br><small>(THIS SECTION WILL BE DEPRECATED WHEN THE HOME GETS DONE...)</small>{{/unless}}</h1>
+	<h1 key="{{dataKey}}">{{fullTitle}}</h1>
 	<hr>
 </div>
 <div class="half">
 	<div class="padding">
-		{{#unless dataKey}}
-			<form>
-				<div class="control-group">
-					<label>{{L 'albumArtist'}}</label>
-					<div class="controls">
-						<input type="text" placeholder="{{L 'albumArtistPrompt'}}..." name="artist" />
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-						<button class="btn" type="submit">{{L 'search'}}</button>
-					</div>
-				</div>
-			</form>
-		{{/unless}}
 		<table>
-			{{#if dataKey}}
-				{{#each songs}}
-					{{> song}}
-				{{/each}}
-				{{#empty songs}}
-					<tr><td class="empty">Sorry, this album does not contain any songs</td>
-				{{/empty}}
-			{{/if}}
+			{{#each songs}}
+				{{> song}}
+			{{/each}}
+			{{#empty songs}}
+				<tr><td class="empty">Sorry, this album does not contain any songs</td>
+			{{/empty}}
 		</table>
 	</div>
 </div>
 <div class="half">
 	<div class="padding">
-		{{#unless dataKey}}
-			<form>
-				<div class="control-group">
-					<label>{{L 'albumTag'}}</label>
-					<div class="controls">
-						<input type="text" placeholder="{{L 'albumTagPrompt'}}..." name="tag" />
-					</div>
-				</div>
-				<div class="control-group">
-					<div class="controls">
-						<button class="btn" type="submit">{{L 'search'}}</button>
-					</div>
-				</div>
-			</form>
-		{{else}}
-			<div class="cover"></div>
-			<div class="artistAlbums"></div>
-			<menu>
-				<li class="remove"><button class="btn btn-mini">{{L 'removeAlbum'}}</button></li>
-			</menu>
-		{{/unless}}
+		<div class="cover"></div>
+		<div class="artistAlbums"></div>
+		<!--
+		<menu>
+			<li class="remove"><button class="btn btn-mini">{{L 'removeAlbum'}}</button></li>
+		</menu>
+		-->
 	</div>
 </div>
