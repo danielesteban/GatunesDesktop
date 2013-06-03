@@ -102,22 +102,24 @@ SC = {
 			},
 			destruct : function() {
 				sound.destruct();
+				$('#SCPlayer').remove();
 			}
 		};
-		/*if(song.provider === DATA.providers.soundcloud && SC.artworks_req.indexOf(song.provider_id) === -1) {
+		if(song.provider === DATA.providers.soundcloud && SC.artworks_req.indexOf(song.provider_id) === -1) {
 			SC.artworks_req.push(song.provider_id);
 			SC.artworks_req_callbacks.push(function() {
 				if(!SC.artworks[song.provider_id]) return;
-				var i = $('<img/>');
-				i.attr("src", SC.artworks[song.provider_id]);
-				i.hide();
-				i.load(function() {
-					i.fadeIn('fast');
+				var div = $('<div id="SCPlayer" />'),
+					i = $('<iframe />');
+
+				div.append(i);
+				$('body').append(div);
+				setTimeout(function() {
+					i.attr("src", '/image.html#' + SC.artworks[song.provider_id]);
 				});
-				$('#playerSC').append(i);
 			});
 			SC.reqArtworks();
-		}*/
+		}
 		TEMPLATE.playlist.setPlayingSong();
 	}
 };

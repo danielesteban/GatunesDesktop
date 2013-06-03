@@ -351,15 +351,17 @@ TEMPLATE = {
 				});
 			});
 			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createPlaylist')).addClass('selected');
-			TEMPLATE.playlist.renderSongs(data.songs);
+			TEMPLATE.playlist.renderSongs(data);
 			$('section input').first().focus();
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
 			ROUTER.onUnload = function() {
 				$(window).unbind('mousedown', TEMPLATE.playlist.resetSelection);
 	    	};
 		},
-		renderSongs : function(songs) {
-			var dest = $('section table').first();
+		renderSongs : function(playlist) {
+			var dest = $('section table').first(),
+				songs = playlist.songs;
+
 			dest.empty();
 			if(!songs || !songs.length) {
 				var tr = $('<tr><td class="empty">' + L.emptyPlaylist + '</td></tr>');
@@ -368,7 +370,7 @@ TEMPLATE = {
 			}
 			songs.forEach(function(s, i) {
 				s.num = LIB.addZero(i + 1);
-				TEMPLATE.song(s, dest);
+				TEMPLATE.song(s, dest, playlist);
 			});
 			TEMPLATE.playlist.setPlayingSong();
 		},
@@ -481,18 +483,24 @@ TEMPLATE = {
 	    	$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
 	    }
 	},
-	song : function(song, dest) {
+	song : function(song, dest, playlist) {
 		dest.append(Handlebars.partials.song(song));
 		var tr = dest.children().children().last(),
 			h1 = $('section .header h1'),
 			cf = function() {
-				if(!song.search) return; //PLAYER.load(song);
+				if(!song.search) {
+						PLAYER.queue = playlist.songs;
+						PLAYER.queueDataKey = playlist.dataKey;
+						$('li.title a', 'footer').attr('href', '/playlist/' + playlist.id);
+						return PLAYER.load(tr[0].rowIndex);
+					}
+
 				var dataKey = h1.attr("key"),
 					add = function() {
 						var id = dataKey.split(':')[1];
 						DATA.playlists.addSongs(id, [song], function() {
 							DATA.playlists.get(id, function(playlist) {
-								TEMPLATE.playlist.renderSongs(playlist.songs);
+								TEMPLATE.playlist.renderSongs(playlist);
 							});
 						});
 					};
@@ -563,7 +571,7 @@ TEMPLATE = {
 			var id = dataKey.split(':')[1];
 			DATA.playlists.removeSong(id, tr[0].rowIndex, song.provider, song.provider_id, function() {
 				DATA.playlists.get(id, function(playlist) {
-					TEMPLATE.playlist.renderSongs(playlist.songs);
+					TEMPLATE.playlist.renderSongs(playlist);
 				});
 			});
 		});

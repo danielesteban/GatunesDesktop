@@ -156,12 +156,18 @@ footer {
 	}
 }
 
-#YTPlayer {
+#YTPlayer, #SCPlayer {
 	position: absolute;
 	top: -100%;
 	left: -100%;
 	width: 100%;
 	height: 100%;
+	background: #000;
+}
+
+#SCPlayer iframe {
+	width: 100%;
+	height: 99%;
 }
 
 /* Sections */
@@ -425,7 +431,7 @@ body.fullscreen {
 	aside, section {
 		display: none!important;
 	}
-	#YTPlayer {
+	#YTPlayer, #SCPlayer {
 		top: 0;
 		left: 0;
 	}
