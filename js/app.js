@@ -759,6 +759,7 @@ TEMPLATE = {
 					dest.append('<div>' + LIB.escapeHTML(album.name) + '</div>');
 					c++;
 				});
+				LIB.handleLinks(dest);
 			}, 12);
 		}
 	},
