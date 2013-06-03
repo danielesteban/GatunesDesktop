@@ -596,6 +596,9 @@ TEMPLATE = {
 								var tr = $('<tr><td class="img"><iframe></iframe><b></b></td><td class="title">' + a.artist.name + ' - ' + a.name + '</td>');
 								$('td', tr).click(function() {
 									LASTFM.getAlbum(a.mbid, function(data) {
+										if(!data) return tr.fadeOut(function() {
+											this.remove();
+										});
 										var songs = [];
 										(data.tracks.track.length ? data.tracks.track : [data.tracks.track]).forEach(function(t) {
 											if(!t.mbid) return;
