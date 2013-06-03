@@ -777,7 +777,10 @@ $(window).load(function() {
 				/* Render the skin */
 				$('body').append(Handlebars.templates.skin({playlists : playlists, albums : albums}));
 				LIB.handleLinks('aside');
-				$(window).resize(LIB.onResize).keydown(LIB.onKeyDown);
+				$(window)
+					.resize(LIB.onResize)
+					.keydown(LIB.onKeyDown)
+					.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
 
 				/* Init players */
 				PLAYER.init();

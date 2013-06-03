@@ -67,6 +67,7 @@ footer {
 	width: 100%;
 	background: #0b0c0e;
 	color: #c0c0c0;
+	z-index: 1030;
 	&.playing {
 		div.slider {
 			display: block;
@@ -158,10 +159,10 @@ footer {
 
 #YTPlayer {
 	position: absolute;
-	top: -200px;
-	left: -200px;
-	width: 200px;
-	height: 200px;
+	top: -100%;
+	left: -100%;
+	width: 100%;
+	height: 100%;
 }
 
 /* Sections */
@@ -351,5 +352,15 @@ section#album {
 		i {
 			fill: #a2da7f;
 		}
+	}
+}
+
+body.fullscreen {
+	aside, section {
+		display: none!important;
+	}
+	#YTPlayer {
+		top: 0;
+		left: 0;
 	}
 }

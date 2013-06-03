@@ -129,6 +129,7 @@ exec('rm -rf bundle', function() {
 							uglify([
 								'launch.js',
 								'js/app.js',
+								'js/fullscreen.js',
 								'js/lang.js',
 								'js/lastfm.js',
 								'js/lib.js',

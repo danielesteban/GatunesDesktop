@@ -41,7 +41,7 @@ PLAYER = {
         });
 
 		/* Buttons */
-		['play', 'prev', 'next', 'love'].forEach(function(bt) {
+		['play', 'prev', 'next', 'love', 'fullscreen'].forEach(function(bt) {
 			$('menu li.' + bt + ' button', controls).click(function() {
 				PLAYER[bt]();
 			});
@@ -228,34 +228,28 @@ PLAYER = {
 		});
 	},
 	fullscreen : function() {
-		//TODO
-		return;
-		var b = $('body')[0];
-		if(FULLSCREEN.active()) FULLSCREEN.cancel(b);
-		else FULLSCREEN.request(b);
+		var w = $('html')[0];
+		if(FULLSCREEN.active()) FULLSCREEN.cancel(w);
+		else FULLSCREEN.request(w);
 	},
 	onFullscreen : function() {
-		//TODO
-		return;
 		var a = FULLSCREEN.active();
 		$('body')[(a ? 'add' : 'remove') + 'Class']('fullscreen');
-        $(window)[a ? 'bind' : 'unbind']('mousemove', PLAYER.fullscreenMouseMove);
+		$(window)[a ? 'bind' : 'unbind']('mousemove', PLAYER.fullscreenMouseMove);
         if(a) PLAYER.fullscreenMouseMove({clientY : 0});
         else {
         	clearTimeout(PLAYER.controlsTimeout);
-        	$('#controls').stop().css('bottom', 0);
+        	$('footer').stop().css('bottom', 0);
 		}
 	},
 	fullscreenMouseMove : function(e) {
-		//TODO
-		return;
-		$('#controls').css('bottom') === '-41px' && $('#controls').stop().animate({
+		$('footer').css('bottom') === '-50px' && $('footer').stop().animate({
             bottom: 0
         });
         clearTimeout(PLAYER.controlsTimeout);
-        e.clientY <= $(window).height() - 41 && (PLAYER.controlsTimeout = setTimeout(function() {
-        	$('#controls').stop().animate({
-	            bottom: -41
+        e.clientY <= $(window).height() - 50 && (PLAYER.controlsTimeout = setTimeout(function() {
+        	$('footer').stop().animate({
+	            bottom: -50
 	        });
         }, 3000));
 	}

@@ -6,7 +6,8 @@
 	"permissions" : [
 		"storage",
 		"unlimitedStorage",
-		"webview"
+		"webview",
+		"fullscreen"
 	],
 	"sandbox": {
 		"pages": ["image.html"]
