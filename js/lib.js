@@ -207,6 +207,7 @@ ROUTER = {
 			panel = p != -1 ? url.substr(0, p) : url,
 			params = p != -1 ? url.substr(p + 1).split('/') : [],
 			validPanels = [
+				'home',
 				'playlist',
 				'album',
 				'loved'
@@ -218,6 +219,8 @@ ROUTER = {
 			ROUTER.onUnload();
 			delete ROUTER.onUnload;
 		}
+
+		panel === '' && (panel = 'home');
 
 		if(validPanels.indexOf(panel) !== -1) {
 			var cb = function(data) {
@@ -238,7 +241,7 @@ ROUTER = {
 			if(TEMPLATE[panel] && TEMPLATE[panel].data) return TEMPLATE[panel].data(params, cb);
 			cb({});
 		} else {
-			ROUTER.update('/album/');
+			ROUTER.update('/');
 		}
 	}
 };

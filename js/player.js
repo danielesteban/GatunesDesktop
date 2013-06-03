@@ -180,10 +180,7 @@ PLAYER = {
 		//LIB.setFavicon(paused ? 'pause' : 'play');
 	},
 	setTitle : function(song) {
-		$('li.title a', 'footer')
-			.text(song ? song.title : '');
-			//.attr('href', /*song && song.from ? LIB.playlistLink(song.from) : */'/queue');
-		
+		$('li.title a', 'footer').text(song ? song.title : '');
 		//LIB.setTitle(song ? '(0:00) ' + song.title : null);
 	},
 	setTimes : function(current, duration) {

@@ -1,5 +1,5 @@
 <div class="header">
-	<h1 key="{{dataKey}}">{{fullTitle}}</h1>
+	<h1 key="{{dataKey}}">{{fullTitle}}{{#unless dataKey}}<br><small>(THIS SECTION WILL BE DEPRECATED WHEN THE HOME GETS DONE...)</small>{{/unless}}</h1>
 	<hr>
 </div>
 <div class="half">
@@ -49,6 +49,7 @@
 			</form>
 		{{else}}
 			<div class="cover"></div>
+			<div class="artistAlbums"></div>
 			<menu>
 				<li class="remove"><button class="btn btn-mini">{{L 'removeAlbum'}}</button></li>
 			</menu>

@@ -166,6 +166,7 @@ DATA = {
 		get : function(id, callback) {
 			var dataKey = 'album:' + id;
 			DATA.getItem(dataKey, function(album) {
+				if(!album) return callback(null);
 				var cb = function() {
 						count--;
 						if(count > 0) return;
@@ -576,11 +577,47 @@ TEMPLATE = {
 				fullTitle : L.newAlbum
 			});
 			DATA.albums.get(id, function(album) {
-				album.songs.forEach(function(s, i) {
-					s.num = LIB.addZero(i + 1);
-					s.album = true;
+				var cb = function(album) {
+						album.id = id;
+						album.songs.forEach(function(s, i) {
+							s.num = LIB.addZero(i + 1);
+							s.album = true;
+						});
+						callback(album);
+					};
+
+				if(album) return cb(album);
+				LASTFM.getAlbum(id, function(a) {
+					if(!a) return ROUTER.update('/');
+					LASTFM.getArtist(a.artist, function(artist) {
+						var album = {
+								dataKey : 'albums:' + id,
+								artist : {
+									mbid : LIB.escapeHTML(artist.mbid),
+									name : LIB.escapeHTML(artist.name)
+								},
+								title : LIB.escapeHTML(a.title),
+								fullTitle : LIB.escapeHTML(artist.name) + ' - ' + LIB.escapeHTML(a.name),
+								image : LIB.escapeHTML(a.image[a.image.length - 1]['#text']),
+								songs : []
+							};
+
+						(a.tracks.track.length ? a.tracks.track : [a.tracks.track]).forEach(function(t) {
+							if(!t.mbid) return;
+							album.songs.push({
+								provider : DATA.providers.lastfm,
+								provider_id : t.mbid,
+								title : LIB.escapeHTML(t.name),
+								time : parseInt(t.duration, 10),
+								artist : {
+									mbid : LIB.escapeHTML(t.artist.mbid),
+									name : LIB.escapeHTML(t.artist.name)
+								}
+							});
+						});
+						cb(album);
+					});
 				});
-				callback(album);
 			});
 		},
 		render : function(data) {
@@ -616,7 +653,7 @@ TEMPLATE = {
 								});
 								dest.append(tr);
 								setTimeout(function() {
-									$('td.img iframe', tr).attr('src', '/image.html#' + a.image[1]['#text'])
+									$('td.img iframe', tr).attr('src', '/image.html#' + a.image[1]['#text']);
 								}, i * 150);
 							});
 							if(!fromArtistSearch && !$('tr', dest).length && values.artist) LASTFM.searchArtists(values.artist, function(artists) {
@@ -651,8 +688,14 @@ TEMPLATE = {
 			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
+					pf = function() {
+						PLAYER.queue = data.songs;
+						PLAYER.queueDataKey = data.dataKey;
+						PLAYER.load(i);
+						$('li.title a', 'footer').attr('href', '/album/' + data.id);
+					},
 					cf = function(play) {
-						if(s.bestMatch) return play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
+						if(s.bestMatch) return play && pf();
 						YT.search('videos', title + ' -cover -live', 0, function(r) {
 							if(r.entry) {
 								r.entry.forEach(function(e) {
@@ -678,7 +721,7 @@ TEMPLATE = {
 									}
 								});
 								!s.bestMatch && !play && tr.addClass('error');
-								s.bestMatch && play && (PLAYER.queue = data.songs) && (PLAYER.queueDataKey = data.dataKey) && PLAYER.load(i);
+								s.bestMatch && play && pf();
 							}
 						});
 					},
@@ -696,6 +739,27 @@ TEMPLATE = {
 					ROUTER.update('/album');
 				});
 			});
+			LASTFM.getTopAlbums(data.artist.name, function(artistAlbums) {
+				var dest = $('section div.artistAlbums'),
+					c = 0;
+
+				artistAlbums.forEach(function(a, i) {
+					if(c > 5 || !a.mbid || data.id === a.mbid) return;
+
+					var div = $('<a class="album mini" href="/album/' + a.mbid + '" title="' + a.name + '">'),
+						img = $('<div class="img"><iframe></iframe><b></b></div>');
+
+					div.append(img);
+					div.append('<span>' + a.name + '</span>')
+					dest.append(div);
+					setTimeout(function() {
+						$('iframe', img).attr('src', '/image.html#' + a.image[1]['#text']);
+					}, i * 150);
+
+					dest.append('<div>' + LIB.escapeHTML(album.name) + '</div>');
+					c++;
+				});
+			}, 12);
 		}
 	},
 	loved : {
@@ -708,6 +772,25 @@ TEMPLATE = {
 				callback({
 					songs : songs
 				});
+			});
+		}
+	},
+	home : {
+		render : function(data) {
+			var dest = $('section div.padding');
+			LASTFM.getTopArtistsAlbums(function(albums) {
+				albums.forEach(function(a, i) {
+					var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
+						img = $('<div class="img"><iframe></iframe><b></b></div>');
+
+					div.append(img);
+					div.append('<span>' + a.artist.name + ' - ' + a.name + '</span>')
+					dest.append(div);
+					setTimeout(function() {
+						$('iframe', img).attr('src', '/image.html#' + a.image[2]['#text']);
+					}, i * 150);
+				});
+				LIB.handleLinks('section');
 			});
 		}
 	}
@@ -776,7 +859,7 @@ $(window).load(function() {
 			DATA.albums.getAll(function(albums) {
 				/* Render the skin */
 				$('body').append(Handlebars.templates.skin({playlists : playlists, albums : albums}));
-				LIB.handleLinks('aside');
+				LIB.handleLinks('aside, footer');
 				$(window)
 					.resize(LIB.onResize)
 					.keydown(LIB.onKeyDown)
@@ -787,7 +870,7 @@ $(window).load(function() {
 
 				/* Start the app */
 				if(!window.chrome.storage) ROUTER.init();
-				else ROUTER.update(albums.length ? '/album/' + albums[0].id : playlists.length ? '/playlist/' + playlists[0].id : '/album/');
+				else ROUTER.update(albums.length ? '/album/' + albums[0].id : playlists.length ? '/playlist/' + playlists[0].id : '/');
 			});
 		});
 	});

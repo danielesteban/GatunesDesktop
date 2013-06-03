@@ -20,7 +20,6 @@ aside {
 		padding: 5px 0 3px;
 		border-bottom: 1px solid #111215;
 		text-align: center;
-		cursor: default;
 		img {
 			width: 147px;
 			height: 36px;
@@ -332,6 +331,73 @@ section#album {
 	div.cover iframe {
 		width: 300px;
 		height: 300px;
+	}
+	div.artistAlbums {
+		width: 300px;
+		padding: 0 4px;
+		overflow: hidden;
+	}
+}
+
+section#home {
+	div.padding {
+		padding: 15px 10px;
+		overflow: hidden;
+	}
+	div.right {
+		float: right;
+		width: 270px;
+		overflow: hidden;
+	}
+}
+
+section a.album {
+	float: left;
+	width: 126px;
+	margin: 5px 10px;
+	padding: 20px;
+	background: #eee;
+	border: 1px solid #c0c0c0;
+	text-align: center;
+	cursor: pointer;
+	.borderRadius();
+	div.img {
+		overflow: hidden;
+		width: 126px;
+		margin: 0 auto 10px;
+		iframe, b {
+			float: left;
+			width: 126px;
+			height: 126px;
+		}
+		b {
+			position: relative;
+			margin: -126px 0 0;
+		}
+	}
+	span {
+		display: block;
+		width: 126px;
+		color: #333;
+		.ellipsis();
+	}
+	&.mini {
+		width: 64px;
+		padding: 10px 14px;
+		margin: 0 5px 5px 0;
+		div.img {
+			width: 64px;
+			iframe, b {
+				width: 64px;
+				height: 64px;
+			}
+			b {
+				margin: -64px 0 0;
+			}
+		}
+		span {
+			width: 64px;
+		}
 	}
 }
 
