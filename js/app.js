@@ -636,7 +636,7 @@ TEMPLATE = {
 					},
 					cf = function(play) {
 						if(s.bestMatch) return play && pf();
-						YT.search('videos', title + ' -cover -live', 0, function(r) {
+						YT.search('videos', title + ' -cover -live -edit -remix -backwards', 0, function(r) {
 							if(r.entry) {
 								r.entry.forEach(function(e) {
 									var ss = {
