@@ -23,6 +23,9 @@
 			{{#each songs}}
 				{{> song}}
 			{{/each}}
+			{{#empty songs}}
+				<tr><td class="empty">Sorry, this album does not contain any songs</td>
+			{{/empty}}
 		</table>
 	</div>
 </div>

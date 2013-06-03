@@ -6,7 +6,7 @@ DATA = {
 	},
 	getItem : function(id, callback) {
 		if(!window.chrome.storage) callback(JSON.parse(window.localStorage.getItem(id)));
-		else window.chrome.storage.sync.get(id, function(items) {
+		else	 window.chrome.storage.sync.get(id, function(items) {
 			callback(items[id]);
 		});
 	},
@@ -209,6 +209,7 @@ DATA = {
 						});
 					};
 				
+				if(count === 0) return cb();
 				songs.forEach(function(s, index) {
 					var id = DATA.providers.lastfm + ':' + LIB.escapeHTML(s.mbid),
 						add = function() {
