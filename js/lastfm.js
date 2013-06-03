@@ -11,14 +11,14 @@ LASTFM = {
 		LASTFM.req('artist.gettopalbums', {
 			artist : query
 		}, function(data) {
-			callback(data.topalbums ? data.topalbums.album : []);
+			callback(data.topalbums && data.topalbums.album ? data.topalbums.album : []);
 		});
 	},
 	getTagAlbums : function(query, callback) {
 		LASTFM.req('tag.gettopalbums', {
 			tag : query
 		}, function(data) {
-			callback(data.topalbums.album);
+			callback(data.topalbums && data.topalbums.album ? data.topalbums.album : []);
 		});
 	},
 	getAlbum : function(mbid, callback) {
