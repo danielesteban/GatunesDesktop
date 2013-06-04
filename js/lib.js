@@ -169,6 +169,66 @@ LIB = {
 			time : parseInt(s.time, 10)
 		};
 	},
+    getSpeech : function(input) {
+        /* Speech recognition */
+        if(LIB.speech) {
+            LIB.speech.stop();
+            LIB.speech.onend();
+            delete LIB.speech;
+            return;
+        }
+
+        var recognition = LIB.speech = new webkitSpeechRecognition(),
+            placeholder = input.attr('placeholder'),
+            recognizing = true,
+            final_transcript = '',
+            timeout;
+
+        recognition.interimResults = true;
+        recognition.lang = navigator.language;
+        recognition.onresult = function(e) {
+            if(!recognizing) return;
+            var interim_transcript = '';
+            for(var i = e.resultIndex; i < e.results.length; ++i) {
+                if(e.results[i].isFinal) {
+                    final_transcript += e.results[i][0].transcript;
+                } else {
+                    interim_transcript += e.results[i][0].transcript;
+                }
+            }
+            if(interim_transcript !== '') {
+                input.val('');
+                input.attr('placeholder', interim_transcript);
+            } else if(final_transcript !== '') {
+                input.attr('placeholder', placeholder);
+                input.val(final_transcript);
+            }
+            clearTimeout(timeout);
+            timeout = setTimeout(recognition.onend, 2000);
+        };
+        recognition.onend = function() {
+            clearTimeout(timeout);
+            recognizing = false;
+            delete LIB.speech;
+            input.attr('placeholder', placeholder);
+            input.val(final_transcript);
+            input.parents('form').first().submit();
+        };
+        recognition.start();
+        timeout = setTimeout(recognition.onend, 5000);
+    },
+    onSectionScroll : function(more, callback) {
+        var s = $('section').first(),
+            onScroll = function() {
+                var bt = (s[0].scrollHeight - s.height()) * 0.8;
+                if(more && (bt < 200 || s.scrollTop() > bt)) {
+                    s.unbind('scroll', onScroll);
+                    callback();
+                }
+            };
+        
+        more && s.bind('scroll', onScroll);
+    },
     onKeyDown : function(e) {
         var t = e.target,
             n = t.nodeName,
@@ -233,6 +293,14 @@ ROUTER = {
 						})
 						.keydown(LIB.inlineOnKeyDown);
 					});
+                    $('section input[type="text"]').each(function(i, el) {
+                        el = $(el);
+                        var a = $('<a class="input-speech" />');
+                        a.click(function() {
+                            LIB.getSpeech(el);
+                        });
+                        el.before(a);
+                    });
 					LIB.onResize();
 					!fromPopEvent && window.history.pushState && window.history.state !== '/' + url && window.history.pushState('/' + url, '', '/' + url); 
 				};

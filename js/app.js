@@ -735,6 +735,17 @@ TEMPLATE = {
 		},
 		render : function(data) {
 			var dest = $('section div.padding'),
+				page = 1,
+				getAlbums = function() {
+					console.log(data, page);
+					if(data.artist) {
+						LASTFM.getTopAlbums(data.artist, renderAlbums, false, page);
+					} else if(data.tag) {
+						LASTFM.getTagAlbums(data.tag, renderAlbums, page);
+					} else {
+						LASTFM.getTopArtistsAlbums(renderAlbums, page);
+					}
+				},
 				renderAlbums = function(albums) {
 					DATA.getItem('albums', function(userAlbums) {
 						userAlbums = userAlbums || [];
@@ -751,25 +762,21 @@ TEMPLATE = {
 							}, i * 150);
 						});
 						LIB.handleLinks('section');
-						if(data.artist && !$('a', dest).length) LASTFM.searchArtists(data.artist, function(artists) {
-							var hit = false;
+						if(!data.artistSearched && !$('a', dest).length) return LASTFM.searchArtists(data.artist, function(artists) {
 							artists && (artists.length ? artists : [artists]).forEach(function(a) {
-								if(hit || !a.mbid) return;
-								hit = true;
-								delete data.artist;
+								if(data.artistSearched || !a.mbid) return;
+								data.artistSearched = true;
 								LASTFM.getTopAlbums(a.name, renderAlbums);
 							});
+						});
+						LIB.onSectionScroll(albums.length === 50, function() {
+							page++;
+							getAlbums();
 						});
 					});
 				};
 
-			if(data.artist) {
-				LASTFM.getTopAlbums(data.artist, renderAlbums);
-			} else if(data.tag) {
-				LASTFM.getTagAlbums(data.tag, renderAlbums);
-			} else {
-				LASTFM.getTopArtistsAlbums(renderAlbums);
-			}
+			getAlbums();
 			$('section form').submit(function(e) {
 				LIB.cancelHandler(e);
 				if(e.target.artist) return ROUTER.update('/home/artist/' + $(e.target.artist).val());

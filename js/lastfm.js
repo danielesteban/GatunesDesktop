@@ -7,20 +7,24 @@ LASTFM = {
 
 		$.get('http://ws.audioscrobbler.com/2.0/', params, callback, 'json');
 	},
-	getTopAlbums : function(query, callback, limit) {
+	getTopAlbums : function(query, callback, limit, page) {
 		var params = {
 				artist : query
 			};
 
 		limit && (params.limit = limit);
+		page && (params.page = page);
 		LASTFM.req('artist.gettopalbums', params, function(data) {
 			callback(data.topalbums && data.topalbums.album ? data.topalbums.album : []);
 		});
 	},
-	getTagAlbums : function(query, callback) {
-		LASTFM.req('tag.gettopalbums', {
-			tag : query
-		}, function(data) {
+	getTagAlbums : function(query, callback, page) {
+		var params = {
+				tag : query
+			};
+
+		page && (params.page = page);
+		LASTFM.req('tag.gettopalbums', params, function(data) {
 			callback(data.topalbums && data.topalbums.album ? data.topalbums.album : []);
 		});
 	},
@@ -31,10 +35,10 @@ LASTFM = {
 			callback(data.album);
 		});
 	},
-	getTopArtistsAlbums : function(callback) {
-		LASTFM.req('chart.getTopArtists', {
-			limit : 52
-		}, function(data) {
+	getTopArtistsAlbums : function(callback, page) {
+		var params = {};
+		page && (params.page = page);
+		LASTFM.req('chart.getTopArtists', params, function(data) {
 			var albums = [],
 				count = data.artists.artist.length,
 				cb = function() {

@@ -7,7 +7,8 @@
 		"storage",
 		"unlimitedStorage",
 		"webview",
-		"fullscreen"
+		"fullscreen",
+		"audioCapture"
 	],
 	"sandbox": {
 		"pages": ["image.html"]
