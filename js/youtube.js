@@ -155,6 +155,7 @@ YT = {
             	sendMessage({func: 'seekTo', fraction: fraction});
             },
             destruct : function() {
+            	window.removeEventListener('message', onMessage);
             	sendMessage({func: 'destruct'});
             }
         };
@@ -162,7 +163,9 @@ YT = {
         TEMPLATE.playlist.setPlayingSong();
 
         window.addEventListener('message', onMessage);
-        /*if(PLAYER.chromeAppPlayerLoaded) return */sendMessage({func: 'load', video: video_id});
+        sendMessage({func: 'load', video: video_id});
+
+        //if(PLAYER.chromeAppPlayerLoaded) return sendMessage({func: 'load', video: video_id});
         //webview.addEventListener('loadstop', onLoadStop);
 	}
 };
