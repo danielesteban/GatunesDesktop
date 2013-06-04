@@ -588,6 +588,12 @@ TEMPLATE = {
 							s.num = LIB.addZero(i + 1);
 							s.album = true;
 						});
+						album.tags.forEach(function(t, i) {
+							album.tags[i] = {
+								name : t.substr(0, 1).toUpperCase() + t.substr(1),
+								link : '/home/tag/' + t
+							};
+						});
 						callback(album);
 					};
 
@@ -604,7 +610,8 @@ TEMPLATE = {
 								},
 								title : LIB.escapeHTML(a.name),
 								image : LIB.escapeHTML(a.image[3]['#text']),
-								songs : []
+								songs : [],
+								tags : []
 							};
 
 						(a.tracks.track.length ? a.tracks.track : [a.tracks.track]).forEach(function(t) {
@@ -619,6 +626,9 @@ TEMPLATE = {
 									name : LIB.escapeHTML(t.artist.name)
 								}
 							});
+						});
+						a.toptags.tag.forEach(function(t) {
+							album.tags.push(LIB.escapeHTML(t.name));
 						});
 						cb(album);
 					}, a.artist);
@@ -738,7 +748,6 @@ TEMPLATE = {
 			var dest = $('section div.padding'),
 				page = 1,
 				getAlbums = function() {
-					console.log(data, page);
 					if(data.artist) {
 						LASTFM.getTopAlbums(data.artist, renderAlbums, false, page);
 					} else if(data.tag) {
@@ -778,6 +787,18 @@ TEMPLATE = {
 				};
 
 			getAlbums();
+			
+			var renderTags = function(tags) {
+					var dest = $('section div.tags');
+					tags.forEach(function(t) {
+						dest.append('<a href="/home/tag/' + t.name.replace(/"/g, '') + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>')
+					});
+				};
+
+			if(data.tag) LASTFM.getSimilarTags(data.tag, renderTags);
+			else if(data.artist) LASTFM.getArtist(null, function(a) {renderTags(a.tags.tag)}, data.artist);
+			else LASTFM.getTopTags(renderTags);
+
 			$('section form').submit(function(e) {
 				LIB.cancelHandler(e);
 				var v;

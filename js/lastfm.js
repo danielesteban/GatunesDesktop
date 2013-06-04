@@ -7,6 +7,13 @@ LASTFM = {
 
 		$.get('http://ws.audioscrobbler.com/2.0/', params, callback, 'json');
 	},
+	getAlbum : function(mbid, callback) {
+		LASTFM.req('album.getInfo', {
+			mbid : mbid
+		}, function(data) {
+			callback(data.album);
+		});
+	},
 	getTopAlbums : function(query, callback, limit, page) {
 		var params = {
 				artist : query
@@ -28,11 +35,19 @@ LASTFM = {
 			callback(data.topalbums && data.topalbums.album ? data.topalbums.album : []);
 		});
 	},
-	getAlbum : function(mbid, callback) {
-		LASTFM.req('album.getInfo', {
-			mbid : mbid
+	getTopTags : function(callback) {
+		LASTFM.req('chart.gettoptags', {
+			limit : 20
 		}, function(data) {
-			callback(data.album);
+			callback(data.tags.tag);
+		});
+	},
+	getSimilarTags : function(tag, callback) {
+		LASTFM.req('tag.getSimilar', {
+			tag : tag,
+			limit : 20
+		}, function(data) {
+			callback(data.similartags.tag);
 		});
 	},
 	getTopArtistsAlbums : function(callback, page) {
