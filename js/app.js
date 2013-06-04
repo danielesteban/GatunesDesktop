@@ -174,6 +174,7 @@ DATA = {
 					};
 
 				album.dataKey = dataKey;
+				album.stored = true;
 				album.artist.link = '/artist/' + id;
 				if(!album.songs.length) return callback(album);
 				var count = album.songs.length;
@@ -187,32 +188,36 @@ DATA = {
 				});
 			});
 		},
-		add : function(mbid, artist, title, image, songs, callback) {
+		add : function(data, callback) {
 			DATA.getItem('albums', function(albums) {
 				albums = albums || [];
-				if(albums.indexOf(mbid) !== -1) return callback && callback(mbid);
-				albums.unshift(mbid);
+				if(albums.indexOf(data.id) !== -1) return callback && callback(data.id);
+				albums.unshift(data.id);
 				var album = {
 						artist : {
-							mbid : LIB.escapeHTML(artist.mbid),
-							name : LIB.escapeHTML(artist.name)
+							mbid : LIB.escapeHTML(data.artist.mbid),
+							name : LIB.escapeHTML(data.artist.name)
 						},
-						title : LIB.escapeHTML(title),
-						image : LIB.escapeHTML(image),
-						songs : []
+						title : LIB.escapeHTML(data.title),
+						image : LIB.escapeHTML(data.image),
+						songs : [],
+						tags : []
 					},
-					count = songs.length,
-					cb = function() {		
-						DATA.setItem('album:' + mbid, album, function() {
+					count = data.songs.length,
+					cb = function() {
+						DATA.setItem('album:' + data.id, album, function() {
 							DATA.setItem('albums', albums, function() {
-								callback && callback(mbid);
+								callback && callback(data.id);
 							});
 						});
 					};
-				
+
+				data.tags.forEach(function(t) {
+					album.tags.push(LIB.escapeHTML(t.name));
+				});
 				if(count === 0) return cb();
-				songs.forEach(function(s, index) {
-					var id = DATA.providers.lastfm + ':' + LIB.escapeHTML(s.mbid),
+				data.songs.forEach(function(s, index) {
+					var id = DATA.providers.lastfm + ':' + LIB.escapeHTML(s.provider_id),
 						add = function() {
 							album.songs[index] = id;
 							count--;
@@ -708,11 +713,14 @@ TEMPLATE = {
 				}, i * 50);
 			});
 			TEMPLATE.playlist.setPlayingSong();
-			/*$('section menu li.remove button').click(function() {
-				DATA.albums.remove(data.dataKey.split(':')[1], function() {
-					ROUTER.update('/album');
-				});
-			});*/
+			$('section button.store, section button.remove').click(function() {
+				var cb = function() {
+						ROUTER.update(document.location.pathname, true);
+					};
+
+				if(data.stored) DATA.albums.remove(data.id, cb);
+				else DATA.albums.add(data, cb)
+			});
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');		
 			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
@@ -835,7 +843,7 @@ TEMPLATE = {
 			var id = params[0];
 			LASTFM.getArtist(id, function(a) {
 				if(!a) return ROUTER.update('/');
-				var bio = $('<div/>').html(a.bio.content).text(),
+				var bio = LIB.escapeHTML(a.bio.content),
 					p = bio.indexOf('Read more about ' + a.name + ' on Last.fm.'),
 					artist = {
 						name : a.name,

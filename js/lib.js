@@ -4,7 +4,7 @@ LIB = {
 		e.preventDefault();
 	},
 	escapeHTML : function(text) {
-		return $('<div/>').text(text).html();
+		return $('<div/>').html(text).text();
 	},
 	getForm : function(e, fields, customChecks) {
 		LIB.cancelHandler(e);

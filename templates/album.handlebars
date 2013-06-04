@@ -1,5 +1,10 @@
 <div class="header">
-	<h1 key="{{dataKey}}">{{a artist.name artist.link}} - {{title}}</h1>
+	<h1 key="{{dataKey}}">
+		{{a artist.name artist.link}} - {{title}} 
+		{{#unless stored}}
+			<button class="btn store"><i class="icon-plus"></i> {{L 'storeAlbum'}}</button>
+		{{/unless}}
+	</h1>
 	<hr>
 </div>
 <div class="half">
@@ -23,10 +28,10 @@
 			{{/each}}
 		</div>
 		<div class="similarAlbums"></div>
-		<!--
-		<menu>
-			<li class="remove"><button class="btn btn-mini">{{L 'removeAlbum'}}</button></li>
-		</menu>
-		-->
+		{{#if stored}}
+			<menu>
+				<li><button class="btn btn-mini remove"><i class="icon-remove"></i> {{L 'removeAlbum'}}</button></li>
+			</menu>
+		{{/if}}
 	</div>
 </div>
