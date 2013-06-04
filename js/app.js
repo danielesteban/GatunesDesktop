@@ -715,7 +715,7 @@ TEMPLATE = {
 			TEMPLATE.playlist.setPlayingSong();
 			$('section button.store, section button.remove').click(function() {
 				var cb = function() {
-						ROUTER.update(document.location.pathname, true);
+						ROUTER.update('/album/' + data.id, true);
 					};
 
 				if(data.stored) DATA.albums.remove(data.id, cb);
