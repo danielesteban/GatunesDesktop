@@ -204,7 +204,7 @@ LIB = {
                 input.val(final_transcript);
             }
             clearTimeout(timeout);
-            timeout = setTimeout(recognition.onend, 2000);
+            timeout = setTimeout(recognition.onend, 1000);
         };
         recognition.onend = function() {
             clearTimeout(timeout);
@@ -215,7 +215,7 @@ LIB = {
             input.parents('form').first().submit();
         };
         recognition.start();
-        timeout = setTimeout(recognition.onend, 5000);
+        timeout = setTimeout(recognition.onend, 3000);
     },
     onSectionScroll : function(more, callback) {
         var s = $('section').first(),
