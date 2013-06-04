@@ -59,10 +59,39 @@ LASTFM = {
 			});
 		});
 	},
-	getArtist : function(artist, callback) {
-		LASTFM.req('artist.getInfo', {
-			artist : artist
-		}, function(data) {
+	similarArtistsAlbums : function(mbid, callback, page, limit) {
+		var params = {
+				mbid : mbid
+			};
+
+		page && (params.page = page);
+		limit && (params.limit = limit);
+		LASTFM.req('artist.getsimilar', params, function(data) {
+			var albums = [],
+				count = data.similarartists.artist.length,
+				cb = function() {
+					count--;
+					if(count > 0) return;
+					callback(albums);
+				};
+
+			data.similarartists.artist.forEach(function(artist, i) {
+				LASTFM.getTopAlbums(artist.name, function(artistAlbums) {
+					for(var x=0; x<artistAlbums.length; x++) {
+						if(!artistAlbums[x].mbid) continue;
+						albums[i] = artistAlbums[x];
+						break;
+					}
+					cb();
+				}, 2);
+			});
+		});
+	},
+	getArtist : function(mbid, callback, artist) {
+		var params = {};
+		mbid && (params.mbid = mbid);
+		artist && (params.artist = artist);
+		LASTFM.req('artist.getInfo', params, function(data) {
 			callback(data.artist);
 		});
 	},

@@ -174,7 +174,7 @@ DATA = {
 					};
 
 				album.dataKey = dataKey;
-				album.fullTitle = album.artist.name + ' - ' + album.title;
+				album.artist.link = '/artist/' + id;
 				if(!album.songs.length) return callback(album);
 				var count = album.songs.length;
 				album.songs.forEach(function(id, index) {
@@ -594,15 +594,15 @@ TEMPLATE = {
 				if(album) return cb(album);
 				LASTFM.getAlbum(id, function(a) {
 					if(!a) return ROUTER.update('/');
-					LASTFM.getArtist(a.artist, function(artist) {
+					LASTFM.getArtist(null, function(artist) {
 						var album = {
 								dataKey : 'albums:' + id,
 								artist : {
 									mbid : LIB.escapeHTML(artist.mbid),
-									name : LIB.escapeHTML(artist.name)
+									name : LIB.escapeHTML(artist.name),
+									link : '/artist/' + LIB.escapeHTML(artist.mbid)
 								},
-								title : LIB.escapeHTML(a.title),
-								fullTitle : LIB.escapeHTML(artist.name) + ' - ' + LIB.escapeHTML(a.name),
+								title : LIB.escapeHTML(a.name),
 								image : LIB.escapeHTML(a.image[3]['#text']),
 								songs : []
 							};
@@ -621,7 +621,7 @@ TEMPLATE = {
 							});
 						});
 						cb(album);
-					});
+					}, a.artist);
 				});
 			});
 		},
@@ -683,11 +683,12 @@ TEMPLATE = {
 			});*/
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');		
 			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
-			LASTFM.getTopAlbums(data.artist.name, function(artistAlbums) {
-				var dest = $('section div.artistAlbums'),
+			LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
+				var dest = $('section div.similarAlbums'),
 					c = 0;
 
-				artistAlbums.forEach(function(a, i) {
+				dest.empty();
+				albums.forEach(function(a, i) {
 					if(c > 5 || !a.mbid || data.id === a.mbid) return;
 
 					var div = $('<a class="album mini" href="/album/' + a.mbid + '" title="' + a.name + '">'),
@@ -704,7 +705,7 @@ TEMPLATE = {
 					c++;
 				});
 				LIB.handleLinks(dest);
-			}, 12);
+			}, 0, 12);
 		}
 	},
 	loved : {
@@ -783,6 +784,51 @@ TEMPLATE = {
 				if(e.target.artist) return (v = $(e.target.artist).val()) && v !== '' && ROUTER.update('/home/artist/' + v);
 				(v = $(e.target.tag).val()) && v !== '' && ROUTER.update('/home/tag/' + v);
 			});
+		}
+	},
+	artist : {
+		data : function(params, callback) {
+			var id = params[0];
+			LASTFM.getArtist(id, function(a) {
+				if(!a) return ROUTER.update('/');
+				var bio = $('<div/>').html(a.bio.content).text(),
+					p = bio.indexOf('Read more about ' + a.name + ' on Last.fm.');
+
+				p !== -1 && (bio = bio.substr(0, p - 10));
+				callback({
+					name : a.name,
+					bio : bio,
+					image : LIB.escapeHTML(a.image[a.image.length - 1]['#text'])
+				});
+			});
+		},
+		render : function(data) {
+			var dest = $('section div.padding'),
+				page = 1,
+				getAlbums = function() {
+					/* COPY PASTE.. THIS SHOULD BE A TEMPLATE!!! */
+					LASTFM.getTopAlbums(data.name, function(albums) {
+						albums.forEach(function(a, i) {
+							if(!a.mbid) return;
+							var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
+								img = $('<div class="img"><iframe></iframe><b></b></div>');
+
+							div.append(img);
+							div.append('<span>' + a.artist.name + ' - ' + a.name + '</span>')
+							dest.append(div);
+							setTimeout(function() {
+								$('iframe', img).attr('src', '/image.html#' + a.image[2]['#text']);
+							}, i * 150);
+						});
+						LIB.handleLinks('section');
+						LIB.onSectionScroll(albums.length === 50, function() {
+							page++;
+							getAlbums();
+						});
+					}, false, page);
+				};
+
+			getAlbums();
 		}
 	}
 };

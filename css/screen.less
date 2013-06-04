@@ -57,6 +57,9 @@ section {
 	overflow-y: scroll;
 	div.header {
 		padding: 0 20px;
+		h1 a {
+			color: #0088cc;
+		}
 	}
 }
 
@@ -171,17 +174,69 @@ footer {
 }
 
 /* Sections */
-section#playlist, section#album, section#loved {
+section {
 	div.half {
 		float: left;
 		width: 50%;
-		div.padding {
-			padding: 0 20px 20px;
-			&.border {
-				border-left: 1px solid #eee;
+	}
+	div.padding {
+		padding: 0 20px 20px;
+		&.border {
+			border-left: 1px solid #eee;
+		}
+	}
+	a.album {
+		float: left;
+		width: 126px;
+		margin: 5px 10px;
+		padding: 20px;
+		background: #eee;
+		border: 1px solid #c0c0c0;
+		text-align: center;
+		cursor: pointer;
+		.borderRadius();
+		div.img {
+			overflow: hidden;
+			width: 126px;
+			margin: 0 auto 10px;
+			iframe, b {
+				float: left;
+				width: 126px;
+				height: 126px;
+			}
+			b {
+				position: relative;
+				margin: -126px 0 0;
+			}
+		}
+		span {
+			display: block;
+			width: 126px;
+			color: #333;
+			.ellipsis();
+		}
+		&.mini {
+			width: 64px;
+			padding: 10px 14px;
+			margin: 0 5px 5px 0;
+			div.img {
+				width: 64px;
+				iframe, b {
+					width: 64px;
+					height: 64px;
+				}
+				b {
+					margin: -64px 0 0;
+				}
+			}
+			span {
+				width: 64px;
 			}
 		}
 	}
+}
+
+section#playlist, section#album, section#loved {
 	div.border form {
 		margin-bottom: 20px;
 		label {
@@ -338,7 +393,7 @@ section#album {
 		width: 300px;
 		height: 300px;
 	}
-	div.artistAlbums {
+	div.similarAlbums {
 		width: 300px;
 		padding: 0 4px;
 		overflow: hidden;
@@ -357,53 +412,28 @@ section#home {
 	}
 }
 
-section a.album {
-	float: left;
-	width: 126px;
-	margin: 5px 10px;
-	padding: 20px;
-	background: #eee;
-	border: 1px solid #c0c0c0;
-	text-align: center;
-	cursor: pointer;
-	.borderRadius();
-	div.img {
+section#artist {
+	div.image iframe {
+		width: 300px;
+		height: 300px;
+	}
+	p.bio {
+		font-size: 14px;
+		line-height: 20px;
+		max-width: 300px;
+		margin: 20px 0 0;
+	}
+	div.right {
+		float: right;
+		width: 300px;
+		padding: 0 20px 0 0;
+	}
+	div.padding {
+		margin-right: 300px;
 		overflow: hidden;
-		width: 126px;
-		margin: 0 auto 10px;
-		iframe, b {
-			float: left;
-			width: 126px;
-			height: 126px;
-		}
-		b {
-			position: relative;
-			margin: -126px 0 0;
-		}
 	}
-	span {
-		display: block;
-		width: 126px;
-		color: #333;
-		.ellipsis();
-	}
-	&.mini {
-		width: 64px;
-		padding: 10px 14px;
+	a.album {
 		margin: 0 5px 5px 0;
-		div.img {
-			width: 64px;
-			iframe, b {
-				width: 64px;
-				height: 64px;
-			}
-			b {
-				margin: -64px 0 0;
-			}
-		}
-		span {
-			width: 64px;
-		}
 	}
 }
 

@@ -267,10 +267,11 @@ ROUTER = {
 			panel = p != -1 ? url.substr(0, p) : url,
 			params = p != -1 ? url.substr(p + 1).split('/') : [],
 			validPanels = [
-				'home',
-				'playlist',
 				'album',
-				'loved'
+                'artist',
+                'home',
+				'loved',
+                'playlist'
 			];
 
 		params.forEach(function(p, i) { params[i] = decodeURIComponent(p); });
@@ -301,6 +302,7 @@ ROUTER = {
                         });
                         el.before(a);
                     });
+                    LIB.handleLinks('section');
 					LIB.onResize();
 					!fromPopEvent && window.history.pushState && window.history.state !== '/' + url && window.history.pushState('/' + url, '', '/' + url); 
 				};
