@@ -813,14 +813,24 @@ TEMPLATE = {
 			LASTFM.getArtist(id, function(a) {
 				if(!a) return ROUTER.update('/');
 				var bio = $('<div/>').html(a.bio.content).text(),
-					p = bio.indexOf('Read more about ' + a.name + ' on Last.fm.');
+					p = bio.indexOf('Read more about ' + a.name + ' on Last.fm.'),
+					artist = {
+						name : a.name,
+						bio : bio,
+						image : LIB.escapeHTML(a.image[a.image.length - 1]['#text']),
+						tags : []
+					};
 
 				p !== -1 && (bio = bio.substr(0, p - 10));
-				callback({
-					name : a.name,
-					bio : bio,
-					image : LIB.escapeHTML(a.image[a.image.length - 1]['#text'])
+				a.tags.tag.forEach(function(t) {
+					t = t.name;
+					artist.tags.push({
+						name : t.substr(0, 1).toUpperCase() + t.substr(1),
+						link : '/home/tag/' + t
+					});
 				});
+
+				callback(artist);
 			});
 		},
 		render : function(data) {

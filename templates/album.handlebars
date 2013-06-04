@@ -1,10 +1,5 @@
 <div class="header">
 	<h1 key="{{dataKey}}">{{a artist.name artist.link}} - {{title}}</h1>
-	<div class="tags">
-		{{#each tags}}
-			{{a name link}}
-		{{/each}}
-	</div>
 	<hr>
 </div>
 <div class="half">
@@ -22,6 +17,11 @@
 <div class="half">
 	<div class="padding">
 		<div class="cover"></div>
+		<div class="tags">
+			{{#each tags}}
+				{{a name link}}
+			{{/each}}
+		</div>
 		<div class="similarAlbums"></div>
 		<!--
 		<menu>
