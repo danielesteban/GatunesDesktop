@@ -840,6 +840,7 @@ TEMPLATE = {
 						name : a.name,
 						bio : bio,
 						image : LIB.escapeHTML(a.image[a.image.length - 1]['#text']),
+						members : a.bandmembers ? a.bandmembers.member : [],
 						tags : []
 					};
 

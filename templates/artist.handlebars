@@ -12,6 +12,16 @@
 		{{/each}}
 	</div>
 	<p class="bio">{{bio}}</p>
+	<ul class="members">
+		{{#each members}}
+			<li>
+				<i class="icon-user"></i> {{name}} 
+				{{#or yearfrom yearto}}
+				<span>({{yearfrom}}{{#if yearfrom}}{{#if yearto}} - {{/if}}{{/if}}{{yearto}})</span>
+				{{/or}}
+			</li>
+		{{/each}}
+	</ul>
 </div>
 <div class="padding">
 	
