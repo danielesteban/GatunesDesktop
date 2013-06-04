@@ -821,7 +821,7 @@ TEMPLATE = {
 						tags : []
 					};
 
-				p !== -1 && (bio = bio.substr(0, p - 10));
+				p !== -1 && (artist.bio = artist.bio.substr(0, p - 10));
 				a.tags.tag.forEach(function(t) {
 					t = t.name;
 					artist.tags.push({
