@@ -627,7 +627,7 @@ TEMPLATE = {
 								}
 							});
 						});
-						a.toptags.tag.forEach(function(t) {
+						(a.toptags.tag.length ? a.toptags.tag : [a.toptags.tag]).forEach(function(t) {
 							album.tags.push(LIB.escapeHTML(t.name));
 						});
 						cb(album);
@@ -646,16 +646,17 @@ TEMPLATE = {
 					},
 					cf = function(play) {
 						if(s.bestMatch) return play && pf();
-						YT.search('videos', title + ' -cover -live -edit -remix -backwards', 0, function(r) {
-							if(r.entry) {
-								r.entry.forEach(function(e) {
-									var ss = {
-											provider : DATA.providers.youtube,
-											provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
-											title : e.title.$t,
-											time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
-										},
-										timeDiff = Math.abs(ss.time - s.time),
+						var title = s.artist.name + ' ' + s.title,
+							words = title.split(' '),
+							maxWCount = 0,
+							minTimeDiff = s.time,
+							songs = [],
+							c = 0,
+							process = function() {
+								c++;
+								if(c < 2) return;
+								songs.forEach(function(ss) {
+									var timeDiff = Math.abs(ss.time - s.time),
 										sWords = ss.title.split(' '),
 										wCount = 0;
 
@@ -664,7 +665,7 @@ TEMPLATE = {
 										wCount++; 
 									});
 
-									if(wCount >= (words.length / 2) && minTimeDiff > timeDiff && maxWCount <= wCount) {
+									if(wCount >= (words.length / 2) && minTimeDiff > timeDiff + 10 && maxWCount <= wCount) {
 										minTimeDiff = timeDiff;
 										maxWCount = wCount;
 										s.bestMatch = ss;
@@ -672,12 +673,33 @@ TEMPLATE = {
 								});
 								!s.bestMatch && !play && tr.addClass('error');
 								s.bestMatch && play && pf();
+							};
+
+						YT.search('videos', title + ' -cover -live -edit -remix -backwards', 0, function(r) {
+							if(r.entry) {
+								r.entry.forEach(function(e) {
+									songs.push({
+										provider : DATA.providers.youtube,
+										provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
+										title : e.title.$t,
+										time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
+									});
+								});
+								process();
 							}
 						});
-					},
-					title = s.artist.name + ' ' + s.title,
-					words = title.split(' '),
-					maxWCount = 0, minTimeDiff = s.time;
+						SC.search(title, function(r) {
+					        r.forEach(function(t, i) {
+					        	songs.push({
+				                    provider : DATA.providers.soundcloud,
+				                    provider_id : t.id,
+				                    title : t.user.username + ' - ' + t.title,
+				                    time : Math.round(t.duration / 1000)
+				                });
+					        });
+					        process();
+					    });
+					};
 
 				tr.dblclick(cf);
 				$('a.play', tr).click(cf);
