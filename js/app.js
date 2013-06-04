@@ -812,6 +812,7 @@ TEMPLATE = {
 			
 			var renderTags = function(tags) {
 					var dest = $('section div.tags');
+					dest.empty();
 					tags.forEach(function(t) {
 						dest.append('<a href="/home/tag/' + t.name.replace(/"/g, '') + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>')
 					});
