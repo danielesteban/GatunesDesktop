@@ -779,8 +779,9 @@ TEMPLATE = {
 			getAlbums();
 			$('section form').submit(function(e) {
 				LIB.cancelHandler(e);
-				if(e.target.artist) return ROUTER.update('/home/artist/' + $(e.target.artist).val());
-				ROUTER.update('/home/tag/' + $(e.target.tag).val());
+				var v;
+				if(e.target.artist) return (v = $(e.target.artist).val()) && v !== '' && ROUTER.update('/home/artist/' + v);
+				(v = $(e.target.tag).val()) && v !== '' && ROUTER.update('/home/tag/' + v);
 			});
 		}
 	}
