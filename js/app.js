@@ -175,7 +175,7 @@ DATA = {
 
 				album.dataKey = dataKey;
 				album.stored = true;
-				album.artist.link = '/artist/' + id;
+				album.artist.link = '/artist/' + album.artist.mbid;
 				if(!album.songs.length) return callback(album);
 				var count = album.songs.length;
 				album.songs.forEach(function(id, index) {
