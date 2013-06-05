@@ -712,7 +712,7 @@ TEMPLATE = {
 					callback && callback(s.bestMatch);
 				};
 
-			YT.search('videos', title + ' -cover -live -edit -remix -backwards', 0, function(r) {
+			YT.search('videos', title + ' -cover -live -edit -remix -reversed -backwards', 0, function(r) {
 				if(r.entry) {
 					r.entry.forEach(function(e) {
 						songs.push({
@@ -1077,17 +1077,15 @@ $(window).load(function() {
 	});
 
 	/* DATA handlers */
-	DATA.playlists.onChange = DATA.albums.onChange = function(id) {
+	DATA.playlists.onChange = DATA.albums.onChange = function() {
 		/* Update Menu */
 		DATA.playlists.getAll(function(playlists) {
 			DATA.albums.getAll(function(albums) {
 				var menu = $('aside menu').last(),
 					selected = $('section .header h1').attr("key");
 
-				if(id) {
-					menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums}));
-					menu = $('aside menu').last();
-				}
+				menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums}));
+				menu = $('aside menu').last();
 				playlists.forEach(function(p) {
 					var li = $('li[key="playlist:' + p.id + '"] a', menu);
 					li.length && (li[0].drop = {
@@ -1109,7 +1107,6 @@ $(window).load(function() {
 						}
 					});
 				});
-				if(!id) return;
 				LIB.handleLinks('aside menu');
 				if(selected) {
 					$('aside menu li').removeClass('selected');
@@ -1136,51 +1133,46 @@ $(window).load(function() {
 		L = LANG[lang];
 		DATA.setItem('lang', lang);
 
-		DATA.playlists.getAll(function(playlists) {
-			DATA.albums.getAll(function(albums) {
-				/* Render the skin */
-				$('body').append(Handlebars.templates.skin({playlists : playlists, albums : albums}));
-				LIB.handleLinks('aside, footer');
+		/* Render the skin */
+		$('body').append(Handlebars.templates.skin({}));
+		LIB.handleLinks('aside, footer');
 
-				/* Drop Handlers */
-				DATA.playlists.onChange();
-				$('aside menu li.create a')[0].drop = {
-					types : ['songs'],
-					cb : function(o) {
-						var songs = [];
-						o.data.forEach(function(d) {
-							songs.push(d.song);
-						});
-						DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
-							DATA.playlists.addSongs(id, songs, function() {
-								ROUTER.update('/playlist/' + id);
-							});
-						});
-					}
-				};
-				$('aside menu li.loved a')[0].drop = {
-					types : ['songs'],
-					cb : function(o) {
-						var songs = [];
-						o.data.forEach(function(d) {
-							songs.push(d.song);
-						});
-						DATA.loved.add(songs);
-					}
-				};
+		/* Drop Handlers */
+		DATA.playlists.onChange();
+		$('aside menu li.create a')[0].drop = {
+			types : ['songs'],
+			cb : function(o) {
+				var songs = [];
+				o.data.forEach(function(d) {
+					songs.push(d.song);
+				});
+				DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
+					DATA.playlists.addSongs(id, songs, function() {
+						ROUTER.update('/playlist/' + id);
+					});
+				});
+			}
+		};
+		$('aside menu li.loved a')[0].drop = {
+			types : ['songs'],
+			cb : function(o) {
+				var songs = [];
+				o.data.forEach(function(d) {
+					songs.push(d.song);
+				});
+				DATA.loved.add(songs);
+			}
+		};
 
-				$(window)
-					.resize(LIB.onResize)
-					.keydown(LIB.onKeyDown)
-					.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
+		$(window)
+			.resize(LIB.onResize)
+			.keydown(LIB.onKeyDown)
+			.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
 
-				/* Init players */
-				PLAYER.init();
+		/* Init players */
+		PLAYER.init();
 
-				/* Start the app */
-				if(!window.chrome.storage) ROUTER.init();
-				else ROUTER.update(albums.length ? '/album/' + albums[0].id : playlists.length ? '/playlist/' + playlists[0].id : '/');
-			});
-		});
+		/* Start the app */
+		ROUTER.init();
 	});
 });
