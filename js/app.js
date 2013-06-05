@@ -12,7 +12,7 @@ DATA = {
 	},
 	setItem : function(id, value, callback) {
 		var onChange = function() {
-				var collection = id.split(':')[0];
+				var collection = id.split(':')[0] + 's';
 				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(collection.length + 1));
 				callback && callback();
 			};
@@ -28,7 +28,7 @@ DATA = {
 	},
 	removeItem : function(id, callback) {
 		var onChange = function() {
-				var collection = id.split(':')[0];
+				var collection = id.split(':')[0] + 's';
 				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(collection.length + 1));
 				callback && callback();
 			};
@@ -70,6 +70,7 @@ DATA = {
 						callback(playlist);
 					};
 
+				if(!playlist) return callback && callback();
 				playlist.dataKey = dataKey;
 				if(!playlist.songs.length) return callback(playlist);
 				var count = playlist.songs.length;
@@ -276,7 +277,7 @@ DATA = {
 			DATA.getItem('loved', function(loved) {
 				loved = loved || [];
 
-				var index = loved.length, //TODO: This will be used for adding into a defined position (dragging)
+				var index = 0, //TODO: This will be used for adding into a defined position (dragging)
 					count = songs.length;
 				
 				songs.forEach(function(s) {
@@ -337,7 +338,10 @@ TEMPLATE = {
 			if(!id) return callback({
 				title : L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date()))
 			});
-			DATA.playlists.get(id, callback);
+			DATA.playlists.get(id, function(p) {
+				if(!p) return ROUTER.update('/');
+				callback(p);
+			});
 		},
 		render : function(data) {
 			var form = $('section form');
@@ -370,12 +374,12 @@ TEMPLATE = {
 			dest.empty();
 			if(!songs || !songs.length) {
 				var tr = $('<tr><td class="empty">' + L.emptyPlaylist + '</td></tr>');
-				TEMPLATE.playlist.hookReorder(tr);
+				TEMPLATE.song.hookReorder(tr);
 				return dest.append(tr);
 			}
 			songs.forEach(function(s, i) {
 				s.num = LIB.addZero(i + 1);
-				TEMPLATE.song(s, dest, playlist);
+				TEMPLATE.playlist.song(s, dest, playlist);
 			});
 			TEMPLATE.playlist.setPlayingSong();
 		},
@@ -405,7 +409,7 @@ TEMPLATE = {
 										};
 									
 									e.yt$hd && (s.hd = true);
-									TEMPLATE.song(s, dest);
+									TEMPLATE.playlist.song(s, dest);
 									count++;
 								});
 								
@@ -438,7 +442,7 @@ TEMPLATE = {
 				                    search : true
 				                };
 
-				            TEMPLATE.song(s, dest);
+				            TEMPLATE.playlist.song(s, dest);
 				        });
 				        if(r.length === 0) {
 				            dest.text("no soundcloud songs found.");
@@ -450,6 +454,63 @@ TEMPLATE = {
 				break;
 			}
 		},
+		song : function(song, dest, playlist) {
+			var tr = $(Handlebars.partials.song(song)),
+				h1 = $('section .header h1'),
+				pf = function() {
+					PLAYER.queue = playlist.songs;
+					PLAYER.queueDataKey = playlist.dataKey;
+					PLAYER.load(tr[0].rowIndex);
+					$('li.title a', 'footer').attr('href', '/playlist/' + playlist.id);
+				},
+				cf = function(play) {
+					if(!song.search) {
+						if(song.provider !== DATA.providers.lastfm) return play && pf();
+						return TEMPLATE.song.bestMatch(song, function(match) {
+							if(!match) return tr.addClass('error');
+							play && pf();
+						});
+					}
+
+					var dataKey = h1.attr("key"),
+						add = function() {
+							var id = dataKey.split(':')[1];
+							DATA.playlists.addSongs(id, [song], function() {
+								DATA.playlists.get(id, function(playlist) {
+									TEMPLATE.playlist.renderSongs(playlist);
+								});
+							});
+						};
+					
+					if(dataKey === 'undefined') return DATA.playlists.add(h1.attr("value"), function(id) {
+						dataKey = 'playlist:' + id; 
+						h1.attr("key", dataKey);
+						add();
+					});
+					add();
+				};
+
+			$(tr).dblclick(cf);
+			$('a.play', tr).click(cf);
+			TEMPLATE.song.hookDrag(tr, song);
+			if(!song.search) {
+				$('a.remove', tr).click(function() {
+					var dataKey = h1.attr("key");
+					if(dataKey === 'undefined') return;
+					var id = dataKey.split(':')[1];
+					DATA.playlists.removeSong(id, tr[0].rowIndex, song.provider, song.provider_id, function() {
+						DATA.playlists.get(id, function(playlist) {
+							TEMPLATE.playlist.renderSongs(playlist);
+						});
+					});
+				});
+			    TEMPLATE.song.hookReorder(tr, song);
+			}
+			dest.append(tr);
+			!song.search && song.provider === DATA.providers.lastfm && setTimeout(function() {
+				cf();
+			}, i * 50);
+		},
 		resetSelection : function() {
 			var sel = TEMPLATE.playlist.selectedSongs;
 	        if(!sel) return;
@@ -458,7 +519,69 @@ TEMPLATE = {
 	        });
 	        delete TEMPLATE.playlist.selectedSongs;
 	    },
-	    hookReorder : function(tr, song) {
+	    setPlayingSong : function() {
+	    	if(!PLAYER.current) return;
+	    	var t = $('section#playlist table').first();
+	    	!t.length && (t = $('section#album table').first());
+	    	!t.length && (t = $('section#loved table').first());
+	    	if(!t.length || PLAYER.queueDataKey !== $('section .header h1').attr("key")) return;
+	    	$('tr', t).removeClass('playing');
+	    	$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
+	    }
+	},
+	song : {
+		hookDrag : function(tr, song) {
+			LIB.preventSelection(tr, function(e) {
+		        var sel = TEMPLATE.playlist.selectedSongs,
+		            data = {
+		                song : song,
+		                tr : tr
+		            };
+
+		        !sel && (sel = []);
+		        var already = false;
+		        sel.forEach(function(s, i) {
+		            if(already !== false) return;
+		            s.song.provider === song.provider && s.song.provider_id === song.provider_id && (already = i);
+		        });
+		        if(e.metaKey || e.controlKey || e.shiftKey) { //case for e.shiftKey should be different...
+		            if(already !== false) {
+		                sel[already].tr.removeClass('selected');
+		                sel.splice(already, 1);
+		            } else {
+		                tr.addClass('selected');
+		                sel.push(data);
+		            }
+		        } else if(already === false) {
+		        	TEMPLATE.playlist.resetSelection();
+			        tr.addClass('selected');
+		            sel = [data];
+		        }
+		        sel.sort(function(a, b) {
+		            var x = a.tr[0].rowIndex,
+		                y = b.tr[0].rowIndex;
+
+		            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+		        });
+		        TEMPLATE.playlist.selectedSongs = sel;
+
+		        var ltr;
+		        LIB.drag(e, {
+		            title : sel.length > 1 ? sel.length + ' songs' : sel[0].song.title,
+		            type : 'songs',
+		            data : sel
+		        }, function() {
+					if(song.album || song.loved) return;
+					ltr = $('<tr class="ltr"><td colspan="3"/></tr>');
+					$('section table').first().append(ltr);
+					TEMPLATE.song.hookReorder(ltr);
+		        }, function() {
+		            ltr && ltr.remove();
+		            ltr = null;
+		        });
+		    });
+		},
+		hookReorder : function(tr, song) {
 			tr[0].drop = {
 	            types : ['songs'],
 	            check : function(o) {
@@ -479,108 +602,61 @@ TEMPLATE = {
 	            }
 	        }
 	    },
-	    setPlayingSong : function() {
-	    	if(!PLAYER.current) return;
-	    	var t = $('section#playlist table').first();
-	    	!t.length && (t = $('section#album table').first());
-	    	if(!t.length || PLAYER.queueDataKey !== $('section .header h1').attr("key")) return;
-	    	$('tr', t).removeClass('playing');
-	    	$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
-	    }
-	},
-	song : function(song, dest, playlist) {
-		dest.append(Handlebars.partials.song(song));
-		var tr = dest.children().children().last(),
-			h1 = $('section .header h1'),
-			cf = function() {
-				if(!song.search) {
-						PLAYER.queue = playlist.songs;
-						PLAYER.queueDataKey = playlist.dataKey;
-						$('li.title a', 'footer').attr('href', '/playlist/' + playlist.id);
-						return PLAYER.load(tr[0].rowIndex);
-					}
+	    bestMatch : function(s, callback) {
+	    	if(s.bestMatch) return callback && callback(s.bestMatch);
+			var title = s.artist.name + ' ' + s.title,
+				words = title.split(' '),
+				maxWCount = 0,
+				minTimeDiff = s.time,
+				songs = [],
+				c = 0,
+				process = function() {
+					c++;
+					if(c < 2) return;
+					songs.forEach(function(ss) {
+						var timeDiff = Math.abs(ss.time - s.time),
+							sWords = ss.title.split(' '),
+							wCount = 0;
 
-				var dataKey = h1.attr("key"),
-					add = function() {
-						var id = dataKey.split(':')[1];
-						DATA.playlists.addSongs(id, [song], function() {
-							DATA.playlists.get(id, function(playlist) {
-								TEMPLATE.playlist.renderSongs(playlist);
-							});
+						words.forEach(function(w) {
+							if(sWords.indexOf(w) === -1) return;
+							wCount++; 
 						});
-					};
-				
-				if(dataKey === 'undefined') return DATA.playlists.add(h1.attr("value"), function(id) {
-					dataKey = 'playlist:' + id; 
-					h1.attr("key", dataKey);
-					add();
-				});
-				add();
-			};
 
-		LIB.preventSelection(tr, function(e) {
-	        var sel = TEMPLATE.playlist.selectedSongs,
-	            data = {
-	                song : song,
-	                tr : tr
-	            };
+						if(wCount >= (words.length / 2) && minTimeDiff > timeDiff + 10 && maxWCount <= wCount) {
+							minTimeDiff = timeDiff;
+							maxWCount = wCount;
+							s.bestMatch = ss;
+						}
+					});
+					callback && callback(s.bestMatch);
+				};
 
-	        !sel && (sel = []);
-	        var already = false;
-	        sel.forEach(function(s, i) {
-	            if(already !== false) return;
-	            s.song.provider === song.provider && s.song.provider_id === song.provider_id && (already = i);
-	        });
-	        if(e.metaKey || e.controlKey || e.shiftKey) { //case for e.shiftKey should be different...
-	            if(already !== false) {
-	                sel[already].tr.removeClass('selected');
-	                sel.splice(already, 1);
-	            } else {
-	                tr.addClass('selected');
-	                sel.push(data);
-	            }
-	        } else if(already === false) {
-	        	TEMPLATE.playlist.resetSelection();
-		        tr.addClass('selected');
-	            sel = [data];
-	        }
-	        sel.sort(function(a, b) {
-	            var x = a.tr[0].rowIndex,
-	                y = b.tr[0].rowIndex;
-
-	            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-	        });
-	        TEMPLATE.playlist.selectedSongs = sel;
-
-	        var ltr;
-	        LIB.drag(e, {
-	            title : sel.length > 1 ? sel.length + ' songs' : sel[0].song.title,
-	            type : 'songs',
-	            data : sel
-	        }, function() {
-				ltr = $('<tr class="ltr"><td colspan="3"/></tr>');
-				$('section table').first().append(ltr);
-				TEMPLATE.playlist.hookReorder(ltr);
-	        }, function() {
-	            ltr && ltr.remove();
-	            ltr = null;
-	        });
-	    });
-
-		$(tr).dblclick(cf);
-		$('a.play', tr).click(cf);
-		if(song.search) return;
-		$('a.remove', tr).click(function() {
-			var dataKey = h1.attr("key");
-			if(dataKey === 'undefined') return;
-			var id = dataKey.split(':')[1];
-			DATA.playlists.removeSong(id, tr[0].rowIndex, song.provider, song.provider_id, function() {
-				DATA.playlists.get(id, function(playlist) {
-					TEMPLATE.playlist.renderSongs(playlist);
-				});
+			YT.search('videos', title + ' -cover -live -edit -remix -backwards', 0, function(r) {
+				if(r.entry) {
+					r.entry.forEach(function(e) {
+						songs.push({
+							provider : DATA.providers.youtube,
+							provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
+							title : e.title.$t,
+							time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
+						});
+					});
+					process();
+				}
 			});
-		});
-	    TEMPLATE.playlist.hookReorder(tr, song);
+			SC.search(title, function(r) {
+		        r.forEach(function(t, i) {
+		        	songs.push({
+	                    provider : DATA.providers.soundcloud,
+	                    provider_id : t.id,
+	                    title : t.user.username + ' - ' + t.title,
+	                    time : Math.round(t.duration / 1000)
+	                });
+		        });
+		        process();
+		    });
+	    }
 	},
 	album : {
 		data : function(params, callback) {
@@ -643,71 +719,20 @@ TEMPLATE = {
 		render : function(data) {
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
-					pf = function() {
-						PLAYER.queue = data.songs;
-						PLAYER.queueDataKey = data.dataKey;
-						PLAYER.load(i);
-						$('li.title a', 'footer').attr('href', '/album/' + data.id);
-					},
 					cf = function(play) {
-						if(s.bestMatch) return play && pf();
-						var title = s.artist.name + ' ' + s.title,
-							words = title.split(' '),
-							maxWCount = 0,
-							minTimeDiff = s.time,
-							songs = [],
-							c = 0,
-							process = function() {
-								c++;
-								if(c < 2) return;
-								songs.forEach(function(ss) {
-									var timeDiff = Math.abs(ss.time - s.time),
-										sWords = ss.title.split(' '),
-										wCount = 0;
-
-									words.forEach(function(w) {
-										if(sWords.indexOf(w) === -1) return;
-										wCount++; 
-									});
-
-									if(wCount >= (words.length / 2) && minTimeDiff > timeDiff + 10 && maxWCount <= wCount) {
-										minTimeDiff = timeDiff;
-										maxWCount = wCount;
-										s.bestMatch = ss;
-									}
-								});
-								!s.bestMatch && !play && tr.addClass('error');
-								s.bestMatch && play && pf();
-							};
-
-						YT.search('videos', title + ' -cover -live -edit -remix -backwards', 0, function(r) {
-							if(r.entry) {
-								r.entry.forEach(function(e) {
-									songs.push({
-										provider : DATA.providers.youtube,
-										provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
-										title : e.title.$t,
-										time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
-									});
-								});
-								process();
-							}
+						TEMPLATE.song.bestMatch(s, function(match) {
+							if(!match) return tr.addClass('error');
+							if(!play) return;
+							PLAYER.queue = data.songs;
+							PLAYER.queueDataKey = data.dataKey;
+							PLAYER.load(i);
+							$('li.title a', 'footer').attr('href', '/album/' + data.id);
 						});
-						SC.search(title, function(r) {
-					        r.forEach(function(t, i) {
-					        	songs.push({
-				                    provider : DATA.providers.soundcloud,
-				                    provider_id : t.id,
-				                    title : t.user.username + ' - ' + t.title,
-				                    time : Math.round(t.duration / 1000)
-				                });
-					        });
-					        process();
-					    });
 					};
 
 				tr.dblclick(cf);
 				$('a.play', tr).click(cf);
+				TEMPLATE.song.hookDrag(tr, s);
 				setTimeout(function() {
 					cf();
 				}, i * 50);
@@ -746,6 +771,10 @@ TEMPLATE = {
 				});
 				LIB.handleLinks(dest);
 			}, 0, 12);
+			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
+			ROUTER.onUnload = function() {
+				$(window).unbind('mousedown', TEMPLATE.playlist.resetSelection);
+	    	};
 		}
 	},
 	loved : {
@@ -753,12 +782,48 @@ TEMPLATE = {
 			DATA.loved.getAll(function(songs) {
 				songs.forEach(function(s, i) {
 					s.num = LIB.addZero(i + 1);
-					s.album = true;
+					s.loved = true;
 				});
 				callback({
 					songs : songs
 				});
 			});
+		},
+		render : function(data) {
+			data.songs.forEach(function(s, i) {
+				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
+					pf = function() {
+						PLAYER.queue = data.songs;
+						PLAYER.queueDataKey = data.dataKey;
+						PLAYER.load(i);
+						$('li.title a', 'footer').attr('href', '/loved');
+					},
+					cf = function(play) {
+						if(s.provider !== DATA.providers.lastfm) return play && pf();
+						TEMPLATE.song.bestMatch(s, function(match) {
+							if(!match) return tr.addClass('error');
+							play && pf();
+						});
+					};
+
+				tr.dblclick(cf);
+				$('a.play', tr).click(cf);
+				TEMPLATE.song.hookDrag(tr, s);
+				$('a.remove', tr).click(function() {
+					DATA.loved.remove(s.provider + ':' + s.provider_id, function() {
+						ROUTER.update('/loved');
+					});
+				});
+				s.provider === DATA.providers.lastfm && setTimeout(function() {
+					cf();
+				}, i * 50);
+			});
+			TEMPLATE.playlist.setPlayingSong();
+			$('aside menu li.loved').addClass('selected');
+			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
+			ROUTER.onUnload = function() {
+				$(window).unbind('mousedown', TEMPLATE.playlist.resetSelection);
+	    	};
 		}
 	},
 	home : {

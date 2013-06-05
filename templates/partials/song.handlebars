@@ -4,6 +4,9 @@
 		<a class="play"><i class="icon-{{#if search}}plus{{else}}play{{/if}}"></i></a>
 	</td>
 	<td class="title">
+		{{#unless album}}
+		{{#if artist}}{{artist.name}} - {{/if}}
+		{{/unless}}
 		{{title}}
 		{{#if hd}}
 			 <b>HD</b>
