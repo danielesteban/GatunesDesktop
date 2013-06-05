@@ -250,6 +250,13 @@ section {
 }
 
 section#playlist, section#album, section#loved {
+	div.header menu.actions {
+		float: right;
+		margin: 10px 0 0;
+		span.red {
+			color: #f09;
+		}
+	}
 	div.border form {
 		margin-bottom: 20px;
 		label {
@@ -418,16 +425,19 @@ section#album {
 
 section#home {
 	div.padding {
-		padding: 15px 10px;
+		padding: 15px 0 15px 10px;
 		overflow: hidden;
 	}
 	div.right {
 		float: right;
-		padding: 0 20px 20px;
-		width: 270px;
+		padding: 0 20px 20px 20px;
+		width: 300px;
 		overflow: hidden;
-		form button[type="submit"] {
-			display: none;
+		form { 
+			padding: 0 40px;
+			button[type="submit"] {
+				display: none;
+			}
 		}
 	}
 	div.tags {

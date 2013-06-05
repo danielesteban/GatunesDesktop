@@ -14,7 +14,7 @@ DATA = {
 		var onChange = function() {
 				var collection = id.split(':')[0];
 				!DATA[collection] && (collection += 's');
-				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(id.split(':')[0].length + 1));
+				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(id.split(':')[0].length + 1) || true);
 				callback && callback();
 			};
 		
@@ -31,7 +31,7 @@ DATA = {
 		var onChange = function() {
 				var collection = id.split(':')[0];
 				!DATA[collection] && (collection += 's');
-				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(id.split(':')[0].length + 1));
+				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(id.split(':')[0].length + 1) || true);
 				callback && callback();
 			};
 
@@ -101,6 +101,16 @@ DATA = {
 					DATA.setItem('playlists', playlists, function() {
 						callback && callback(newId);
 					});
+				});
+			});
+		},
+		remove : function(id, callback) {
+			DATA.getItem('playlists', function(playlists) {
+				var index = playlists.indexOf(id);
+				if(index === -1) return callback && callback();
+				playlists.splice(index, 1);
+				DATA.setItem('playlists', playlists, function() {
+					DATA.removeItem('playlist:' + id, callback);
 				});
 			});
 		},
@@ -272,8 +282,8 @@ DATA = {
 				var index = albums.indexOf(id);
 				if(index === -1) return callback && callback();
 				albums.splice(index, 1);
-				DATA.removeItem('album:' + id, function() {
-					DATA.setItem('albums', albums, callback);
+				DATA.setItem('albums', albums, function() {
+					DATA.removeItem('album:' + id, callback);
 				});
 			});
 		}
@@ -384,6 +394,18 @@ TEMPLATE = {
 					if(parseInt(pi.val(), 10) === p) return;
 					pi.val(p);
 					form.submit();
+				});
+			});
+			var actions = $('div.header menu.actions');
+			$('a.remove', actions).click(function() {
+				$(this).parent().hide().next().show();
+			});
+			$('a.cancel', actions).click(function() {
+				$(this).parent().hide().prev().show();
+			});
+			$('a.ok', actions).click(function() {
+				DATA.playlists.remove(parseInt(data.dataKey.split(':')[1], 10), function() {
+					ROUTER.update('/');
 				});
 			});
 			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createPlaylist')).addClass('selected');
