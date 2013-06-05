@@ -933,7 +933,7 @@ TEMPLATE = {
 					DATA.getItem('albums', function(userAlbums) {
 						userAlbums = userAlbums || [];
 						albums.forEach(function(a, i) {
-							if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
+							if(!a.mbid || (!data.artist && userAlbums.indexOf(a.mbid) !== -1)) return;
 							var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
 								img = $('<div class="img"><iframe></iframe><b></b></div>');
 
