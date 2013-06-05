@@ -6,7 +6,7 @@ DATA = {
 	},
 	getItem : function(id, callback) {
 		if(!window.chrome.storage) callback(JSON.parse(window.localStorage.getItem(id)));
-		else	 window.chrome.storage.sync.get(id, function(items) {
+		else     window.chrome.storage.sync.get(id, function(items) {
 			callback(items[id]);
 		});
 	},
@@ -367,7 +367,7 @@ TEMPLATE = {
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
 			ROUTER.onUnload = function() {
 				$(window).unbind('mousedown', TEMPLATE.playlist.resetSelection);
-	    	};
+			};
 		},
 		renderSongs : function(playlist) {
 			var dest = $('section table').first(),
@@ -433,26 +433,26 @@ TEMPLATE = {
 				break;
 				case DATA.providers.soundcloud:
 					SC.search(query, function(r) {
-				        r.forEach(function(t, i) {
-				            var s = {
-				                    num : LIB.addZero(i + 1),
-				                    id : 'searchSC' + query + i,
-				                    provider : DATA.providers.soundcloud,
-				                    provider_id : t.id,
-				                    title : t.user.username + ' - ' + t.title,
-				                    time : Math.round(t.duration / 1000),
-				                    search : true
-				                };
+						r.forEach(function(t, i) {
+							var s = {
+									num : LIB.addZero(i + 1),
+									id : 'searchSC' + query + i,
+									provider : DATA.providers.soundcloud,
+									provider_id : t.id,
+									title : t.user.username + ' - ' + t.title,
+									time : Math.round(t.duration / 1000),
+									search : true
+								};
 
-				            TEMPLATE.playlist.song(s, dest);
-				        });
-				        if(r.length === 0) {
-				            dest.text("no soundcloud songs found.");
-				        } else {
-				            SC.reqArtworks();
-				        }
-				        dest.parent().show();
-			        });
+							TEMPLATE.playlist.song(s, dest);
+						});
+						if(r.length === 0) {
+							dest.text("no soundcloud songs found.");
+						} else {
+							SC.reqArtworks();
+						}
+						dest.parent().show();
+					});
 				break;
 			}
 		},
@@ -506,7 +506,7 @@ TEMPLATE = {
 						});
 					});
 				});
-			    TEMPLATE.song.hookReorder(tr, song);
+				TEMPLATE.song.hookReorder(tr, song);
 			}
 			dest.append(tr);
 			!song.search && song.provider === DATA.providers.lastfm && setTimeout(function() {
@@ -515,97 +515,97 @@ TEMPLATE = {
 		},
 		resetSelection : function() {
 			var sel = TEMPLATE.playlist.selectedSongs;
-	        if(!sel) return;
-	        sel.forEach(function(s) {
-	            s.tr.removeClass('selected');
-	        });
-	        delete TEMPLATE.playlist.selectedSongs;
-	    },
-	    setPlayingSong : function() {
-	    	if(!PLAYER.current) return;
-	    	var t = $('section#playlist table').first();
-	    	!t.length && (t = $('section#album table').first());
-	    	!t.length && (t = $('section#loved table').first());
-	    	if(!t.length || PLAYER.queueDataKey !== $('section .header h1').attr("key")) return;
-	    	$('tr', t).removeClass('playing');
-	    	$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
-	    }
+			if(!sel) return;
+			sel.forEach(function(s) {
+				s.tr.removeClass('selected');
+			});
+			delete TEMPLATE.playlist.selectedSongs;
+		},
+		setPlayingSong : function() {
+			if(!PLAYER.current) return;
+			var t = $('section#playlist table').first();
+			!t.length && (t = $('section#album table').first());
+			!t.length && (t = $('section#loved table').first());
+			if(!t.length || PLAYER.queueDataKey !== $('section .header h1').attr("key")) return;
+			$('tr', t).removeClass('playing');
+			$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
+		}
 	},
 	song : {
 		hookDrag : function(tr, song) {
 			LIB.preventSelection(tr, function(e) {
-		        var sel = TEMPLATE.playlist.selectedSongs,
-		            data = {
-		                song : song,
-		                tr : tr
-		            };
+				var sel = TEMPLATE.playlist.selectedSongs,
+					data = {
+						song : song,
+						tr : tr
+					};
 
-		        !sel && (sel = []);
-		        var already = false;
-		        sel.forEach(function(s, i) {
-		            if(already !== false) return;
-		            s.song.provider === song.provider && s.song.provider_id === song.provider_id && (already = i);
-		        });
-		        if(e.metaKey || e.controlKey || e.shiftKey) { //case for e.shiftKey should be different...
-		            if(already !== false) {
-		                sel[already].tr.removeClass('selected');
-		                sel.splice(already, 1);
-		            } else {
-		                tr.addClass('selected');
-		                sel.push(data);
-		            }
-		        } else if(already === false) {
-		        	TEMPLATE.playlist.resetSelection();
-			        tr.addClass('selected');
-		            sel = [data];
-		        }
-		        sel.sort(function(a, b) {
-		            var x = a.tr[0].rowIndex,
-		                y = b.tr[0].rowIndex;
+				!sel && (sel = []);
+				var already = false;
+				sel.forEach(function(s, i) {
+					if(already !== false) return;
+					s.song.provider === song.provider && s.song.provider_id === song.provider_id && (already = i);
+				});
+				if(e.metaKey || e.controlKey || e.shiftKey) { //case for e.shiftKey should be different...
+					if(already !== false) {
+						sel[already].tr.removeClass('selected');
+						sel.splice(already, 1);
+					} else {
+						tr.addClass('selected');
+						sel.push(data);
+					}
+				} else if(already === false) {
+					TEMPLATE.playlist.resetSelection();
+					tr.addClass('selected');
+					sel = [data];
+				}
+				sel.sort(function(a, b) {
+					var x = a.tr[0].rowIndex,
+						y = b.tr[0].rowIndex;
 
-		            return ((x < y) ? -1 : ((x > y) ? 1 : 0));
-		        });
-		        TEMPLATE.playlist.selectedSongs = sel;
+					return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+				});
+				TEMPLATE.playlist.selectedSongs = sel;
 
-		        var ltr;
-		        LIB.drag(e, {
-		            title : sel.length > 1 ? sel.length + ' songs' : sel[0].song.title,
-		            type : 'songs',
-		            data : sel
-		        }, function() {
+				var ltr;
+				LIB.drag(e, {
+					title : sel.length > 1 ? sel.length + ' songs' : sel[0].song.title,
+					type : 'songs',
+					data : sel
+				}, function() {
 					if(song.album || song.loved) return;
 					ltr = $('<tr class="ltr"><td colspan="3"/></tr>');
 					$('section table').first().append(ltr);
 					TEMPLATE.song.hookReorder(ltr);
-		        }, function() {
-		            ltr && ltr.remove();
-		            ltr = null;
-		        });
-		    });
+				}, function() {
+					ltr && ltr.remove();
+					ltr = null;
+				});
+			});
 		},
 		hookReorder : function(tr, song) {
 			tr[0].drop = {
-	            types : ['songs'],
-	            check : function(o) {
-	                var sel = TEMPLATE.playlist.selectedSongs,
-	                    inSel = false;
+				types : ['songs'],
+				check : function(o) {
+					var sel = TEMPLATE.playlist.selectedSongs,
+						inSel = false;
 
-	                sel.forEach(function(s) {
-	                    if(inSel) return;
-	                    !s.song.search && s.tr[0].rowIndex === tr[0].rowIndex && (inSel = 1);
-	                });
-	                return inSel === false && (sel[sel.length - 1].song.search || sel[sel.length - 1].tr[0].rowIndex !== tr[0].rowIndex - 1);
-	            },
-	            cb : function(o) {
-	        	    var dataKey = $('section .header h1').attr("key");
-	                console.log('reorder', dataKey, o.data, song);
-	                //remoteStorage.playlists.reorderSongs(PLAYLIST.current.id, ids, ltr ? null : song);
-	            	//delete TEMPLATE.playlist.selectedSongs;
-	            }
-	        }
-	    },
-	    bestMatch : function(s, callback) {
-	    	if(s.bestMatch) return callback && callback(s.bestMatch);
+					sel.forEach(function(s) {
+						if(inSel) return;
+						!s.song.search && s.tr[0].rowIndex === tr[0].rowIndex && (inSel = 1);
+					});
+					return inSel === false && (sel[sel.length - 1].song.search || sel[sel.length - 1].tr[0].rowIndex !== tr[0].rowIndex - 1);
+				},
+				cb : function(o) {
+					var dataKey = $('section .header h1').attr("key");
+					console.log('reorder', dataKey, o.data, song);
+					//remoteStorage.playlists.reorderSongs(PLAYLIST.current.id, ids, ltr ? null : song);
+					//delete TEMPLATE.playlist.selectedSongs;
+				}
+			}
+		},
+		bestMatch : function(s, callback) {
+			if(s.bestMatch) return callback && callback(s.bestMatch);
 			var title = s.artist.name + ' ' + s.title,
 				words = title.split(' '),
 				maxWCount = 0,
@@ -648,17 +648,17 @@ TEMPLATE = {
 				}
 			});
 			SC.search(title, function(r) {
-		        r.forEach(function(t, i) {
-		        	songs.push({
-	                    provider : DATA.providers.soundcloud,
-	                    provider_id : t.id,
-	                    title : t.user.username + ' - ' + t.title,
-	                    time : Math.round(t.duration / 1000)
-	                });
-		        });
-		        process();
-		    });
-	    }
+				r.forEach(function(t, i) {
+					songs.push({
+						provider : DATA.providers.soundcloud,
+						provider_id : t.id,
+						title : t.user.username + ' - ' + t.title,
+						time : Math.round(t.duration / 1000)
+					});
+				});
+				process();
+			});
+		}
 	},
 	album : {
 		data : function(params, callback) {
@@ -748,7 +748,7 @@ TEMPLATE = {
 				if(data.stored) DATA.albums.remove(data.id, cb);
 				else DATA.albums.add(data, cb)
 			});
-			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');		
+			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');        
 			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
 			LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
 				var dest = $('section div.similarAlbums'),
@@ -776,7 +776,7 @@ TEMPLATE = {
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
 			ROUTER.onUnload = function() {
 				$(window).unbind('mousedown', TEMPLATE.playlist.resetSelection);
-	    	};
+			};
 		}
 	},
 	loved : {
@@ -823,7 +823,7 @@ TEMPLATE = {
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
 			ROUTER.onUnload = function() {
 				$(window).unbind('mousedown', TEMPLATE.playlist.resetSelection);
-	    	};
+			};
 		}
 	},
 	home : {
@@ -985,8 +985,8 @@ $(window).load(function() {
 	Handlebars.registerHelper('inline', function(text, key, field, tag) {
 		typeof tag !== 'string' && (tag = 'span');
 		text = LIB.escapeHTML(text);
-	    var edit = true;
-	    return new Handlebars.SafeString('<' + tag + ' ' + (edit ? 'contenteditable="true" key="' + key +'" field="' + field +'" value="' + text.replace(/"/g, "'") + '"' : '') + '>' + text + '</' + tag + '>');
+		var edit = true;
+		return new Handlebars.SafeString('<' + tag + ' ' + (edit ? 'contenteditable="true" key="' + key +'" field="' + field +'" value="' + text.replace(/"/g, "'") + '"' : '') + '>' + text + '</' + tag + '>');
 	});
 
 	Handlebars.registerHelper('timeFormatted', function(data) {
@@ -1004,23 +1004,23 @@ $(window).load(function() {
 				id && menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums})) && (menu = $('aside menu').last());
 				playlists.forEach(function(p) {
 					$('li[key="playlist:' + p.id + '"] a', menu)[0].drop = {
-			            types : ['songs'],
-			            check : function(o) {
-			            	var err = false;
-			            	o.data.forEach(function(d) {
-			        	    	var from = $('h1', d.tr.parents('section')).attr("key");
-			        	    	from && parseInt(from.split(':')[1], 10) === p.id && (err = true); 
-			        	    });
-			        	    return !err;
-			            },
-			            cb : function(o) {
-			        	    var songs = [];
-			        	    o.data.forEach(function(d) {
-			        	    	songs.push(d.song);
-			        	    });
-			        	    DATA.playlists.addSongs(p.id, songs, TEMPLATE.playlist.resetSelection);
-			            }
-			        };
+						types : ['songs'],
+						check : function(o) {
+							var err = false;
+							o.data.forEach(function(d) {
+								var from = $('h1', d.tr.parents('section')).attr("key");
+								from && parseInt(from.split(':')[1], 10) === p.id && (err = true); 
+							});
+							return !err;
+						},
+						cb : function(o) {
+							var songs = [];
+							o.data.forEach(function(d) {
+								songs.push(d.song);
+							});
+							DATA.playlists.addSongs(p.id, songs, TEMPLATE.playlist.resetSelection);
+						}
+					};
 				});
 				if(!id) return;
 				LIB.handleLinks('aside menu');
@@ -1058,15 +1058,15 @@ $(window).load(function() {
 				/* Drop Handlers */
 				DATA.playlists.onChange();
 				$('aside menu li.loved a')[0].drop = {
-		            types : ['songs'],
-		            cb : function(o) {
-		        	    var songs = [];
-		        	    o.data.forEach(function(d) {
-		        	    	songs.push(d.song);
-		        	    });
-		        	    DATA.loved.add(songs);
-		            }
-		        };
+					types : ['songs'],
+					cb : function(o) {
+						var songs = [];
+						o.data.forEach(function(d) {
+							songs.push(d.song);
+						});
+						DATA.loved.add(songs);
+					}
+				};
 
 				$(window)
 					.resize(LIB.onResize)

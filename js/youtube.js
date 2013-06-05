@@ -52,11 +52,11 @@ YT = {
 							autoplay: 1,
 							controls: 0,
 							showinfo: 0,
-	            			modestbranding: 1,
-	            			iv_load_policy: 3,
-	            			rel: 0,
-	            			hd: 1,
-	            			html5: 1
+							modestbranding: 1,
+							iv_load_policy: 3,
+							rel: 0,
+							hd: 1,
+							html5: 1
 						}
 					});
 
@@ -83,7 +83,7 @@ YT = {
 					},
 					destruct : function() {
 						player.destroy();
-		            }
+					}
 				};
 				TEMPLATE.playlist.setPlayingSong();
 			};
@@ -129,44 +129,44 @@ YT = {
 			}*/;
 
 		PLAYER.current = {
-            song : song,
-            play : function() {
-                sendMessage({func: 'play'});
-            },
-            pause : function() {
-                sendMessage({func: 'pause'});
-            },
-            getCurrentTime : function(callback) {
-            	var cbid = ++YT.chromeAppPlayerCallback;
-            	YT.chromeAppPlayerCallbacks[cbid] = callback;
-            	sendMessage({func: 'currentTime', callback: cbid});
-            },
-            getDuration : function(callback) {
-            	var cbid = ++YT.chromeAppPlayerCallback;
-            	YT.chromeAppPlayerCallbacks[cbid] = callback;
-            	sendMessage({func: 'duration', callback: cbid});
-            },
-            getLoadedFraction : function(callback) {
-            	var cbid = ++YT.chromeAppPlayerCallback;
-            	YT.chromeAppPlayerCallbacks[cbid] = callback;
-            	sendMessage({func: 'loadedFraction', callback: cbid});
-            },
-            seekTo : function(fraction) {
-            	sendMessage({func: 'seekTo', fraction: fraction});
-            },
-            destruct : function() {
-            	window.removeEventListener('message', onMessage);
-            	sendMessage({func: 'destruct'});
-            }
-        };
+			song : song,
+			play : function() {
+				sendMessage({func: 'play'});
+			},
+			pause : function() {
+				sendMessage({func: 'pause'});
+			},
+			getCurrentTime : function(callback) {
+				var cbid = ++YT.chromeAppPlayerCallback;
+				YT.chromeAppPlayerCallbacks[cbid] = callback;
+				sendMessage({func: 'currentTime', callback: cbid});
+			},
+			getDuration : function(callback) {
+				var cbid = ++YT.chromeAppPlayerCallback;
+				YT.chromeAppPlayerCallbacks[cbid] = callback;
+				sendMessage({func: 'duration', callback: cbid});
+			},
+			getLoadedFraction : function(callback) {
+				var cbid = ++YT.chromeAppPlayerCallback;
+				YT.chromeAppPlayerCallbacks[cbid] = callback;
+				sendMessage({func: 'loadedFraction', callback: cbid});
+			},
+			seekTo : function(fraction) {
+				sendMessage({func: 'seekTo', fraction: fraction});
+			},
+			destruct : function() {
+				window.removeEventListener('message', onMessage);
+				sendMessage({func: 'destruct'});
+			}
+		};
 
-        TEMPLATE.playlist.setPlayingSong();
+		TEMPLATE.playlist.setPlayingSong();
 
-        window.addEventListener('message', onMessage);
-        sendMessage({func: 'load', video: video_id});
+		window.addEventListener('message', onMessage);
+		sendMessage({func: 'load', video: video_id});
 
-        //if(PLAYER.chromeAppPlayerLoaded) return sendMessage({func: 'load', video: video_id});
-        //webview.addEventListener('loadstop', onLoadStop);
+		//if(PLAYER.chromeAppPlayerLoaded) return sendMessage({func: 'load', video: video_id});
+		//webview.addEventListener('loadstop', onLoadStop);
 	}
 };
 

@@ -70,7 +70,7 @@ function genManifest(css, js, callback) {
 			"/" + css + ".css\n" +
 			"/" + js + ".js\n";
 
-		md5(imgs.slice(), '/img/', function(md5s) {	
+		md5(imgs.slice(), '/img/', function(md5s) { 
 			for(var x=0; x<2; x++) {
 				imgs.forEach(function(img, i) {
 					if(x === 1) manifest += "/img/" + img + " ";
@@ -147,11 +147,13 @@ exec('rm -rf bundle', function() {
 											console.log('generating index & manifest...');
 											writeIndex(cssMD5, jsMD5);
 											genManifest(cssMD5, jsMD5, function() {
+												exec('mv bundle/ Gatunes', function() {
 												//exec('tar -jcf bundle.tar.bz2 bundle', function() {
-												//	exec('rm -rf bundle', function() {
-														console.log('Done!');		
-												//	});
+												//  exec('rm -rf bundle', function() {
+														console.log('Done!');       
+												//  });
 												//});
+												});
 											});
 										});
 									});

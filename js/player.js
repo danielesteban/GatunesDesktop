@@ -18,27 +18,27 @@ PLAYER = {
 			slider = $('div.slider', controls);
 
 		LIB.preventSelection(slider, function(e) {
-            if(!PLAYER.current) return;
-            var mm = function(e) {
-                    PLAYER.setSlider({
-                        progress : e.clientX / slider.width(),
-                        fromSlider : true
-                    });
-                },
-                mu = function() {
-                    $(window).unbind('mousemove', mm);
-                    $(window).unbind('mouseup', mu);
-                    controls.removeClass('sliding');
-                    PLAYER.sliding = false;
-                    PLAYER.current.seekTo(PLAYER.sliderValue);
-                };
-            
-            PLAYER.sliding = true;
-            mm(e);
-            $(window).bind('mousemove', mm);
-            $(window).bind('mouseup', mu);
-            controls.addClass('sliding');
-        });
+			if(!PLAYER.current) return;
+			var mm = function(e) {
+					PLAYER.setSlider({
+						progress : e.clientX / slider.width(),
+						fromSlider : true
+					});
+				},
+				mu = function() {
+					$(window).unbind('mousemove', mm);
+					$(window).unbind('mouseup', mu);
+					controls.removeClass('sliding');
+					PLAYER.sliding = false;
+					PLAYER.current.seekTo(PLAYER.sliderValue);
+				};
+			
+			PLAYER.sliding = true;
+			mm(e);
+			$(window).bind('mousemove', mm);
+			$(window).bind('mouseup', mu);
+			controls.addClass('sliding');
+		});
 
 		/* Buttons */
 		['play', 'prev', 'next', 'love', 'fullscreen'].forEach(function(bt) {
@@ -132,7 +132,7 @@ PLAYER = {
 					//HISTORY.add(PLAYER.current.song);
 					PLAYER.current.destruct && PLAYER.current.destruct();
 					delete PLAYER.current;
-				}	
+				}   
 				PLAYER.next();
 		}
 	},
@@ -198,7 +198,7 @@ PLAYER = {
 			s.children().first().css('width', s.width() * p);
 		}
 		
-		p = data.progress;		
+		p = data.progress;      
 		if(((p || p === 0) && !PLAYER.sliding) || data.fromSlider) {
 			if(p > 1) p = 1;
 			if(p < 0) p = 0;
@@ -233,21 +233,21 @@ PLAYER = {
 		var a = FULLSCREEN.active();
 		$('body')[(a ? 'add' : 'remove') + 'Class']('fullscreen');
 		$(window)[a ? 'bind' : 'unbind']('mousemove', PLAYER.fullscreenMouseMove);
-        if(a) PLAYER.fullscreenMouseMove({clientY : 0});
-        else {
-        	clearTimeout(PLAYER.controlsTimeout);
-        	$('footer').stop().css('bottom', 0);
+		if(a) PLAYER.fullscreenMouseMove({clientY : 0});
+		else {
+			clearTimeout(PLAYER.controlsTimeout);
+			$('footer').stop().css('bottom', 0);
 		}
 	},
 	fullscreenMouseMove : function(e) {
 		$('footer').css('bottom') === '-50px' && $('footer').stop().animate({
-            bottom: 0
-        });
-        clearTimeout(PLAYER.controlsTimeout);
-        e.clientY <= $(window).height() - 50 && (PLAYER.controlsTimeout = setTimeout(function() {
-        	$('footer').stop().animate({
-	            bottom: -50
-	        });
-        }, 3000));
+			bottom: 0
+		});
+		clearTimeout(PLAYER.controlsTimeout);
+		e.clientY <= $(window).height() - 50 && (PLAYER.controlsTimeout = setTimeout(function() {
+			$('footer').stop().animate({
+				bottom: -50
+			});
+		}, 3000));
 	}
 };
