@@ -121,6 +121,7 @@ exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
 			exec('rm -rf bundle/scripts  && rm -rf bundle/releases && rm -rf bundle/bundle', function() {
+				fs.writeFileSync('bundle/image.html', str_replace_array(fs.readFileSync('bundle/image.html', 'utf8'), ["\n", "\r", "\t"], ['', '', '']));
 				console.log('compiling templates...');
 				genTemplates(function() {
 					console.log('compiling css...');
@@ -147,12 +148,10 @@ exec('rm -rf bundle', function() {
 											console.log('generating index & manifest...');
 											writeIndex(cssMD5, jsMD5);
 											genManifest(cssMD5, jsMD5, function() {
-												exec('mv bundle/ Gatunes', function() {
-												//exec('tar -jcf bundle.tar.bz2 bundle', function() {
-												//  exec('rm -rf bundle', function() {
+												exec('cd bundle/ && zip ../Gatunes.zip -r .', function() {
+													exec('rm -rf bundle', function() {
 														console.log('Done!');       
-												//  });
-												//});
+													});
 												});
 											});
 										});
