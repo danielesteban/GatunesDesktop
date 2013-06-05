@@ -141,7 +141,7 @@ LIB = {
 
         if(value === '') return;
         t.text(value).attr('value', value);
-    	DATA.getItem(key, function(data) {
+    	key !== "undefined" && DATA.getItem(key, function(data) {
         	data[field] = value;
         	DATA.setItem(key, data);
         });

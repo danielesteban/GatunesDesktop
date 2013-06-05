@@ -80,7 +80,7 @@ PLAYER = {
 			loading : 0
 		});
 		DATA.loved.check(id, function(loved) {
-			$('menu li.love button i').attr('class', 'icon-' + (loved ? 'remove' : 'heart'));
+			$('menu li.love button i').attr('class', 'icon-' + (loved ? 'ok' : 'heart'));
 		});
 	},
 	startInterval : function() {
@@ -215,7 +215,7 @@ PLAYER = {
 			id = s.provider + ':' + s.provider_id,
 			cb = function(loved) {
 				return function() {
-					$('menu li.love button i').attr('class', 'icon-' + (loved ? 'remove' : 'heart'));
+					$('menu li.love button i').attr('class', 'icon-' + (loved ? 'ok' : 'heart'));
 				}
 			};
 

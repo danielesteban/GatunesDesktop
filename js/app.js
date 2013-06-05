@@ -12,8 +12,9 @@ DATA = {
 	},
 	setItem : function(id, value, callback) {
 		var onChange = function() {
-				var collection = id.split(':')[0] + 's';
-				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(collection.length + 1));
+				var collection = id.split(':')[0];
+				!DATA[collection] && (collection += 's');
+				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(id.split(':')[0].length + 1));
 				callback && callback();
 			};
 		
@@ -28,8 +29,9 @@ DATA = {
 	},
 	removeItem : function(id, callback) {
 		var onChange = function() {
-				var collection = id.split(':')[0] + 's';
-				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(collection.length + 1));
+				var collection = id.split(':')[0];
+				!DATA[collection] && (collection += 's');
+				DATA[collection] && DATA[collection].onChange && DATA[collection].onChange(id.substr(id.split(':')[0].length + 1));
 				callback && callback();
 			};
 
@@ -509,7 +511,7 @@ TEMPLATE = {
 			dest.append(tr);
 			!song.search && song.provider === DATA.providers.lastfm && setTimeout(function() {
 				cf();
-			}, i * 50);
+			}, tr[0].rowIndex * 50);
 		},
 		resetSelection : function() {
 			var sel = TEMPLATE.playlist.selectedSongs;
@@ -810,9 +812,7 @@ TEMPLATE = {
 				$('a.play', tr).click(cf);
 				TEMPLATE.song.hookDrag(tr, s);
 				$('a.remove', tr).click(function() {
-					DATA.loved.remove(s.provider + ':' + s.provider_id, function() {
-						ROUTER.update('/loved');
-					});
+					DATA.loved.remove(s.provider + ':' + s.provider_id);
 				});
 				s.provider === DATA.providers.lastfm && setTimeout(function() {
 					cf();
@@ -994,19 +994,48 @@ $(window).load(function() {
 	});
 
 	/* DATA handlers */
-	DATA.playlists.onChange = DATA.albums.onChange = function() {
+	DATA.playlists.onChange = DATA.albums.onChange = function(id) {
 		/* Update Menu */
 		DATA.playlists.getAll(function(playlists) {
 			DATA.albums.getAll(function(albums) {
-				var menu = $('aside menu'),
+				var menu = $('aside menu').last(),
 					selected = $('section .header h1').attr("key");
 
-				menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums}));
+				id && menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums})) && (menu = $('aside menu').last());
+				playlists.forEach(function(p) {
+					$('li[key="playlist:' + p.id + '"] a', menu)[0].drop = {
+			            types : ['songs'],
+			            check : function(o) {
+			            	var err = false;
+			            	o.data.forEach(function(d) {
+			        	    	var from = $('h1', d.tr.parents('section')).attr("key");
+			        	    	from && parseInt(from.split(':')[1], 10) === p.id && (err = true); 
+			        	    });
+			        	    return !err;
+			            },
+			            cb : function(o) {
+			        	    var songs = [];
+			        	    o.data.forEach(function(d) {
+			        	    	songs.push(d.song);
+			        	    });
+			        	    DATA.playlists.addSongs(p.id, songs, TEMPLATE.playlist.resetSelection);
+			            }
+			        };
+				});
+				if(!id) return;
 				LIB.handleLinks('aside menu');
-				if(!selected) return $('aside menu li').first().addClass('selected');
-				$('aside menu li[key="' + selected + '"]').addClass('selected');
+				if(selected) {
+					$('aside menu li').removeClass('selected');
+					$('aside menu li[key="' + selected + '"]').addClass('selected');
+				}
 			});
 		});
+	};
+
+	DATA.loved.onChange = function() {
+		/* Update Loved */
+		if($('section .header h1').attr("key") !== 'loved') return;
+		ROUTER.update('/loved');
 	};
 
 	/* Lang detection/setup */
@@ -1025,6 +1054,20 @@ $(window).load(function() {
 				/* Render the skin */
 				$('body').append(Handlebars.templates.skin({playlists : playlists, albums : albums}));
 				LIB.handleLinks('aside, footer');
+
+				/* Drop Handlers */
+				DATA.playlists.onChange();
+				$('aside menu li.loved a')[0].drop = {
+		            types : ['songs'],
+		            cb : function(o) {
+		        	    var songs = [];
+		        	    o.data.forEach(function(d) {
+		        	    	songs.push(d.song);
+		        	    });
+		        	    DATA.loved.add(songs);
+		            }
+		        };
+
 				$(window)
 					.resize(LIB.onResize)
 					.keydown(LIB.onKeyDown)
