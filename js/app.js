@@ -951,7 +951,12 @@ TEMPLATE = {
 								data.artistSearched = true;
 								LASTFM.getTopAlbums(a.name, renderAlbums);
 							});
+							if(!data.artistSearched) { //no results case.. call it again so it renders the feedback.
+								data.artistSearched = true;
+								renderAlbums(albums);
+							}
 						});
+						!$('a', dest).length && dest.append('<p class="empty">' + L['emptyHome' + (data.artist ? 'Artist' : 'Tag')] + '</p>');
 						LIB.onSectionScroll(albums.length === 50, function() {
 							page++;
 							getAlbums();

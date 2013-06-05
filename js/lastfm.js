@@ -47,7 +47,7 @@ LASTFM = {
 			tag : tag,
 			limit : 20
 		}, function(data) {
-			callback(data.similartags.tag);
+			callback(data.similartags ? data.similartags.tag : []);
 		});
 	},
 	getTopArtistsAlbums : function(callback, page) {
@@ -114,7 +114,7 @@ LASTFM = {
 		LASTFM.req('artist.search', {
 			artist : query
 		}, function(data) {
-			callback(data.results.artistmatches.artist);
+			callback(data.results ? data.results.artistmatches.artist : []);
 		});
 	}
 };

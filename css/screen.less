@@ -247,6 +247,15 @@ section {
 			.borderRadius();
 		}
 	}
+	table td.empty, p.empty {
+		padding: 20px 60px;
+		color: #c0c0c0;
+		font-weight: bold;
+		font-size: 31.5px;
+		line-height: 40px;
+		text-rendering: optimizelegibility;
+		text-align: center;
+	}
 }
 
 section#playlist, section#album, section#loved {
@@ -330,15 +339,6 @@ section#playlist, section#album, section#loved {
 			}
 			&.title {
 				width: 90%;
-			}
-			&.empty {
-				padding: 20px 60px;
-				color: #c0c0c0;
-				font-weight: bold;
-				font-size: 31.5px;
-				line-height: 40px;
-				text-rendering: optimizelegibility;
-				text-align: center;
 			}
 		}
 		tr:nth-child(even) td {

@@ -16,6 +16,8 @@ LANG = {
 		search : 'Search',
 		loved : 'Songs you love',
 		emptyLoved : 'You didn\'t loved any song',
+		emptyHomeArtist : 'There aren\'t any available albums from that artist',
+		emptyHomeTag : 'There aren\'t any available albums with that genre', 
 		months : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 		date : '{{month}} {{date}}'
 	},
@@ -36,6 +38,8 @@ LANG = {
 		search : 'Buscar',
 		loved : 'Canciones que amas',
 		emptyLoved : 'No has amado ninguna canción',
+		emptyHomeArtist : 'No hay ningun álbum disponible de ese artista',
+		emptyHomeTag : 'No hay ningun álbum disponible con ese género',
 		months : ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
 		date : '{{date}} {{month}}'
 	}
