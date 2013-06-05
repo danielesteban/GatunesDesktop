@@ -408,7 +408,7 @@ TEMPLATE = {
 					ROUTER.update('/');
 				});
 			});
-			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.createPlaylist')).addClass('selected');
+			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.create')).addClass('selected');
 			TEMPLATE.playlist.renderSongs(data);
 			$('section input').first().focus();
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
@@ -1139,6 +1139,20 @@ $(window).load(function() {
 
 				/* Drop Handlers */
 				DATA.playlists.onChange();
+				$('aside menu li.create a')[0].drop = {
+					types : ['songs'],
+					cb : function(o) {
+						var songs = [];
+						o.data.forEach(function(d) {
+							songs.push(d.song);
+						});
+						DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
+							DATA.playlists.addSongs(id, songs, function() {
+								ROUTER.update('/playlist/' + id);
+							});
+						});
+					}
+				};
 				$('aside menu li.loved a')[0].drop = {
 					types : ['songs'],
 					cb : function(o) {
