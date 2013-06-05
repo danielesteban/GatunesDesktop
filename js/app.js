@@ -607,7 +607,7 @@ TEMPLATE = {
 					if(!a) return ROUTER.update('/');
 					LASTFM.getArtist(null, function(artist) {
 						var album = {
-								dataKey : 'albums:' + id,
+								dataKey : 'album:' + id,
 								artist : {
 									mbid : LIB.escapeHTML(artist.mbid),
 									name : LIB.escapeHTML(artist.name),
