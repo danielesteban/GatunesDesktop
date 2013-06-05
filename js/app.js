@@ -972,6 +972,7 @@ TEMPLATE = {
 					tags.forEach(function(t) {
 						dest.append('<a href="/home/tag/' + t.name.replace(/"/g, '') + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>')
 					});
+					LIB.handleLinks(dest);
 				};
 
 			if(data.tag) LASTFM.getSimilarTags(data.tag, renderTags);
@@ -1009,7 +1010,6 @@ TEMPLATE = {
 						link : '/home/tag/' + t
 					});
 				});
-
 				callback(artist);
 			});
 		},
