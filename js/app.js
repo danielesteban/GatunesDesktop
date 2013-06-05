@@ -632,7 +632,7 @@ TEMPLATE = {
 								}
 							});
 						});
-						(a.toptags.tag.length ? a.toptags.tag : [a.toptags.tag]).forEach(function(t) {
+						a.toptags.tag && (a.toptags.tag.length ? a.toptags.tag : [a.toptags.tag]).forEach(function(t) {
 							album.tags.push(LIB.escapeHTML(t.name));
 						});
 						cb(album);
