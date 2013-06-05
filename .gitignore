@@ -2,5 +2,6 @@
 .DS_Store
 *~
 \#*\#
-releases/*
-nginx.pid
+releases/
+bundle/
+scripts/nginx.pid
