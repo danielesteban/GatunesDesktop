@@ -54,7 +54,7 @@ function writeIndex(css, js) {
 	var html = fs.readFileSync('bundle/index.html', 'utf8'),
 		index = html.substr(0, html.indexOf('<link'));
 
-	index = index.replace(/<html>/, '<html manifest="/app.manifest">');
+	//index = index.replace(/<html>/, '<html manifest="/app.manifest">');
 	index += '<link href="/' + css + '.css" rel="stylesheet" />';
 	index += '<script src="/' + js + '.js" charset="utf-8"></script>';
 	index += html.substr(html.indexOf('<title>'));
@@ -146,13 +146,13 @@ exec('rm -rf bundle', function() {
 										exec('rm -rf bundle/js bundle/css', function() {
 											console.log('generating index & manifest...');
 											writeIndex(cssMD5, jsMD5);
-											genManifest(cssMD5, jsMD5, function() {
+											//genManifest(cssMD5, jsMD5, function() {
 												exec('cd bundle/ && zip ../Gatunes.zip -r .', function() {
 													exec('rm -rf bundle', function() {
 														console.log('Done!');       
 													});
 												});
-											});
+											//});
 										});
 									});
 								});
