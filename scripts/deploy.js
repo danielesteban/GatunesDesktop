@@ -120,7 +120,7 @@ console.log("Creating bundle...");
 exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
-			exec('rm -rf bundle/scripts bundle/releases bundle/CHANGELOG.md bundle/LICENSE bundle/bundle', function() {
+			exec('rm -rf bundle/scripts bundle/releases bundle/CHANGELOG.md bundle/LICENSE bundle/README.md bundle/bundle', function() {
 				fs.writeFileSync('bundle/image.html', str_replace_array(fs.readFileSync('bundle/image.html', 'utf8'), ["\n", "\r", "\t"], ['', '', '']));
 				console.log('compiling templates...');
 				genTemplates(function() {
