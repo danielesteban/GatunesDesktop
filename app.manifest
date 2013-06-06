@@ -1,0 +1,25 @@
+CACHE MANIFEST
+
+# 2699a4dc7d375c4f0791d334175ba0c9
+
+CACHE:
+/
+/e09099bfc48634af80c9d79f9b089479.css
+/688adf004099a5b5df22ac350c713ad3.js
+/img/brand.jpg?4e745f5d877172b09e65a353f322e9b8
+/img/brand.png?c0e81edca6451e9441603a8a9c85eb85
+/img/favicon.png?c7155d105780d900c85259ba72fb4193
+/img/fork.png?5330c88f5cea3a396d4ba8fc90ac6c31
+/img/screenshot.webp?626d24aa1f856285a5a461855c840e3d
+
+FALLBACK:
+/ /
+/img/brand.jpg /img/brand.jpg?4e745f5d877172b09e65a353f322e9b8
+/img/brand.png /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
+/img/favicon.png /img/favicon.png?c7155d105780d900c85259ba72fb4193
+/img/fork.png /img/fork.png?5330c88f5cea3a396d4ba8fc90ac6c31
+/img/screenshot.webp /img/screenshot.webp?626d24aa1f856285a5a461855c840e3d
+
+NETWORK:
+/app.manifest
+*
