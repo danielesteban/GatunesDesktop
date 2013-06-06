@@ -6,7 +6,7 @@ DATA = {
 	},
 	getItem : function(id, callback) {
 		if(!window.chrome.storage) callback(JSON.parse(window.localStorage.getItem(id)));
-		else     window.chrome.storage.sync.get(id, function(items) {
+		else window.chrome.storage.sync.get(id, function(items) {
 			callback(items[id]);
 		});
 	},
@@ -1124,7 +1124,7 @@ $(window).load(function() {
 
 	/* Lang detection/setup */
 	DATA.getItem('lang', function(cookie_lang) {
-		var browser_lang = navigator.language ? navigator.language.substr(navigator.language.length - 2).toLowerCase() : navigator.browserLanguage,
+		var browser_lang = navigator.language ? navigator.language.substr(0, 2).toLowerCase() : navigator.browserLanguage,
 			available_langs = ['en', 'es'],
 			lang = 'en'; //the default
 

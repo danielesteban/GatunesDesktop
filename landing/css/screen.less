@@ -1,0 +1,54 @@
+@import "../../css/reset.less";
+@import "../../css/lib.less";
+@import "../../css/typo.less";
+@import "../../css/components.less";
+
+body {
+	background: #0b0c0e;
+	color: #c0c0c0;
+	text-shadow: #000 0 0.1em;
+}
+
+header {
+	margin: 20px 0;
+	text-align: center;
+	img.brand {
+		width: 147px;
+		height: 36px;
+	}
+	img.fork {
+		position: absolute;
+		top: 0;
+		right: 0;
+		width: 149px;
+		height: 149px;
+	}
+}
+
+section {
+	padding: 40px 0;
+	div.install {
+		width: 640px;
+		height: 400px;
+		margin: 0 auto;
+		text-align: center;
+		img {
+			width: 640px;
+			height: 400px;
+			vertical-align: middle;
+			opacity: 0.65;
+			filter: alpha(opacity=65);
+			.borderRadius();
+			.transition(opacity linear 0.3s);
+		}
+		button {
+			position: relative;
+			margin: -42px 0 0;
+			top: -221px;
+		}
+		&:hover img {
+			opacity: 1;
+			filter: alpha(opacity=100);
+		}
+	}
+}
