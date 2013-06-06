@@ -5,6 +5,8 @@ Gatunes
 
 [Install the app](https://chrome.google.com/webstore/detail/gatunes/jcbcnbikbcidmnkbfomplfjbclpfogbn)
 
+[Dev Roadmap](https://trello.com/board/gatunes/51b0b0a7ffbf85fd02000804)
+
 **License:**
 
 This program is free software: you can redistribute it and/or modify
