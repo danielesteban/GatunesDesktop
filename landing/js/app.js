@@ -23,7 +23,10 @@ $(window).load(function() {
 			}, goToStore);
 		};
 	
-	lang === 'es' && $('.install button').text('Instalar la aplicación');
+	$('[class*="lang-"]').hide();
+	$('[class*="lang-' + lang + '"]').show();
+
+	$('body').fadeIn();
 	if(window.chrome && window.chrome.app && window.chrome.app.isInstalled) return $('a.install button').remove();
 	$('.install a').bind('click', install);
 	$('.install button').bind('click', install);

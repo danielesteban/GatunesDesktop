@@ -14,6 +14,9 @@
 		<meta property="og:url" content="http://gatunes.com/" />
 		<link rel="shortcut icon" href="/img/favicon.png" type="image/png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<script>
+			window.location.host !== 'gatunes.com' && (window.location.href = 'http://gatunes.com');
+		</script>
 	</head>
 	<body>
 		<header>
@@ -26,10 +29,17 @@
 		</header>
 		<section>
 			<div class="install">
-				<a>
+				<a title="Install the app">
 					<img src="/img/screenshot.webp" alt="Install the app">
 				</a>
-				<button class="btn btn-inverse btn-large">Install the app</button>
+				<button class="btn btn-inverse btn-large">
+					<span class="lang-en">Install the app</span>
+					<span class="lang-es">Instalar la aplicaci&oacute;n</span>
+				</button>
+				<p class="requirements">
+					<span class="lang-en">* You'll need a <a href="https://accounts.google.com/SignUp">Google account</a> and to have <a href="https://google.com/chrome">Google Chrome</a> installed on your computer.</span>
+					<span class="lang-es">* Necesitar&aacute;s una <a href="https://accounts.google.com/SignUp">Cuenta de Google</a> y tener <a href="https://google.com/chrome">Google Chrome</a> instalado en tu ordenador.</span>
+				</p>
 			</div>
 		</section>
 	</body>
