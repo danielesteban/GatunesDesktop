@@ -1123,66 +1123,47 @@ $(window).load(function() {
 	};
 
 	/* Lang detection/setup */
-	DATA.getItem('lang', function(cookie_lang) {
-		var browser_lang = navigator.language ? navigator.language.substr(0, 2).toLowerCase() : navigator.browserLanguage,
-			available_langs = ['en', 'es'],
-			lang = 'en'; //the default
+	LIB.setupLang(function() {
+		/* Render the skin */
+		$('body').append(Handlebars.templates.skin({})).fadeIn();
+		LIB.handleLinks('aside, footer');
 
-		if(available_langs.indexOf(cookie_lang) !== -1) lang = cookie_lang;    
-		else if(available_langs.indexOf(browser_lang) !== -1) lang = browser_lang;
-		$.get('/_locales/' + lang +  '/messages.json', function(messages) {
-			L = {};
-			for(var i in messages) L[i] = messages[i].message;
-			switch(lang) {
-				case 'es':
-					L.months =  ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-				break;
-				default:
-					L.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		/* Drop Handlers */
+		DATA.playlists.onChange();
+		$('aside menu li.create a')[0].drop = {
+			types : ['songs'],
+			cb : function(o) {
+				var songs = [];
+				o.data.forEach(function(d) {
+					songs.push(d.song);
+				});
+				DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
+					DATA.playlists.addSongs(id, songs, function() {
+						ROUTER.update('/playlist/' + id);
+					});
+				});
 			}
-			DATA.setItem('lang', lang);
-		
-			/* Render the skin */
-			$('body').append(Handlebars.templates.skin({}));
-			LIB.handleLinks('aside, footer');
+		};
+		$('aside menu li.loved a')[0].drop = {
+			types : ['songs'],
+			cb : function(o) {
+				var songs = [];
+				o.data.forEach(function(d) {
+					songs.push(d.song);
+				});
+				DATA.loved.add(songs);
+			}
+		};
 
-			/* Drop Handlers */
-			DATA.playlists.onChange();
-			$('aside menu li.create a')[0].drop = {
-				types : ['songs'],
-				cb : function(o) {
-					var songs = [];
-					o.data.forEach(function(d) {
-						songs.push(d.song);
-					});
-					DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
-						DATA.playlists.addSongs(id, songs, function() {
-							ROUTER.update('/playlist/' + id);
-						});
-					});
-				}
-			};
-			$('aside menu li.loved a')[0].drop = {
-				types : ['songs'],
-				cb : function(o) {
-					var songs = [];
-					o.data.forEach(function(d) {
-						songs.push(d.song);
-					});
-					DATA.loved.add(songs);
-				}
-			};
+		$(window)
+			.resize(LIB.onResize)
+			.keydown(LIB.onKeyDown)
+			.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
 
-			$(window)
-				.resize(LIB.onResize)
-				.keydown(LIB.onKeyDown)
-				.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
+		/* Init players */
+		PLAYER.init();
 
-			/* Init players */
-			PLAYER.init();
-
-			/* Start the app */
-			ROUTER.init();
-		}, 'json');
+		/* Start the app */
+		ROUTER.init();
 	});
 });

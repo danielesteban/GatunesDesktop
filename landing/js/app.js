@@ -9,7 +9,7 @@ window.applicationCache && window.applicationCache.addEventListener('updateready
 
 /* Start the app */
 $(window).load(function() {
-	var lang = navigator.language ? navigator.language.substr(0, 2).toLowerCase() : navigator.browserLanguage,
+	var lang = navigator.language ? navigator.language.substr(navigator.language.length - 2).toLowerCase() : navigator.browserLanguage,
 		install = function() {
 			var goToStore = function() {
 					window.location.href = $('link[rel="chrome-webstore-item"]').attr('href');
@@ -23,6 +23,7 @@ $(window).load(function() {
 			}, goToStore);
 		};
 	
+	['en', 'es'].indexOf(lang) === -1 && (lang = 'en');
 	$('[class*="lang-"]').hide();
 	$('[class*="lang-' + lang + '"]').show();
 

@@ -161,13 +161,29 @@ LIB = {
 	formatDate : function(date) {
 		return L.date.replace(/{{month}}/g, L.months[date.getMonth()]).replace(/{{date}}/g, LIB.addZero(date.getDate()));
 	},
-	cleanSong : function(s) {
-		return {
-			provider : parseInt(s.provider, 10),
-			provider_id : LIB.escapeHTML(s.provider_id),
-			title : LIB.escapeHTML(s.title),
-			time : parseInt(s.time, 10)
-		};
+	setupLang : function(callback) {
+		/* Lang detection/setup */
+		DATA.getItem('lang', function(cookie_lang) {
+			var browser_lang = navigator.language ? navigator.language.split('-') : [navigator.browserLanguage],
+				available_langs = ['en', 'es'],
+				lang = 'en'; //the default
+
+			if(available_langs.indexOf(cookie_lang) !== -1) lang = cookie_lang;    
+			else if(available_langs.indexOf(browser_lang[0].toLowerCase()) !== -1) lang = browser_lang[0].toLowerCase();
+			else if(browser_lang[1] && available_langs.indexOf(browser_lang[1].toLowerCase()) !== -1) lang = browser_lang[1].toLowerCase();
+			$.get('/_locales/' + lang +  '/messages.json', function(messages) {
+				L = {};
+				for(var i in messages) L[i] = messages[i].message;
+				switch(lang) {
+					case 'es':
+						L.months =  ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+					break;
+					default:
+						L.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+				}
+				DATA.setItem('lang', lang, callback);
+			}, 'json');
+		});
 	},
 	getSpeech : function(input) {
 		/* Speech recognition */
@@ -257,7 +273,7 @@ LIB = {
 
 ROUTER = {
 	init : function() {
-		if(window.history.pushState) return $(window).bind('popstate', function(e) {
+		window.history.pushState && $(window).bind('popstate', function(e) {
 			ROUTER.update(e.originalEvent.state !== null ? e.originalEvent.state : document.location.pathname, true);
 		});
 		ROUTER.update('/');
