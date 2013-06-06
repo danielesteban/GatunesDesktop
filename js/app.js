@@ -1125,54 +1125,64 @@ $(window).load(function() {
 	/* Lang detection/setup */
 	DATA.getItem('lang', function(cookie_lang) {
 		var browser_lang = navigator.language ? navigator.language.substr(navigator.language.length - 2).toLowerCase() : navigator.browserLanguage,
+			available_langs = ['en', 'es'],
 			lang = 'en'; //the default
 
-		if(LANG[cookie_lang]) lang = cookie_lang;    
-		else if(LANG[browser_lang]) lang = browser_lang;
+		if(available_langs.indexOf(cookie_lang) !== -1) lang = cookie_lang;    
+		else if(available_langs.indexOf(browser_lang) !== -1) lang = browser_lang;
+		$.get('/_locales/' + lang +  '/messages.json', function(messages) {
+			L = {};
+			for(var i in messages) L[i] = messages[i].message;
+			switch(lang) {
+				case 'es':
+					L.months =  ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+				break;
+				default:
+					L.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			}
+			DATA.setItem('lang', lang);
+		
+			/* Render the skin */
+			$('body').append(Handlebars.templates.skin({}));
+			LIB.handleLinks('aside, footer');
 
-		L = LANG[lang];
-		DATA.setItem('lang', lang);
-
-		/* Render the skin */
-		$('body').append(Handlebars.templates.skin({}));
-		LIB.handleLinks('aside, footer');
-
-		/* Drop Handlers */
-		DATA.playlists.onChange();
-		$('aside menu li.create a')[0].drop = {
-			types : ['songs'],
-			cb : function(o) {
-				var songs = [];
-				o.data.forEach(function(d) {
-					songs.push(d.song);
-				});
-				DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
-					DATA.playlists.addSongs(id, songs, function() {
-						ROUTER.update('/playlist/' + id);
+			/* Drop Handlers */
+			DATA.playlists.onChange();
+			$('aside menu li.create a')[0].drop = {
+				types : ['songs'],
+				cb : function(o) {
+					var songs = [];
+					o.data.forEach(function(d) {
+						songs.push(d.song);
 					});
-				});
-			}
-		};
-		$('aside menu li.loved a')[0].drop = {
-			types : ['songs'],
-			cb : function(o) {
-				var songs = [];
-				o.data.forEach(function(d) {
-					songs.push(d.song);
-				});
-				DATA.loved.add(songs);
-			}
-		};
+					DATA.playlists.add(L.newPlaylist.replace(/{{date}}/, LIB.formatDate(new Date())), function(id) {
+						DATA.playlists.addSongs(id, songs, function() {
+							ROUTER.update('/playlist/' + id);
+						});
+					});
+				}
+			};
+			$('aside menu li.loved a')[0].drop = {
+				types : ['songs'],
+				cb : function(o) {
+					var songs = [];
+					o.data.forEach(function(d) {
+						songs.push(d.song);
+					});
+					DATA.loved.add(songs);
+				}
+			};
 
-		$(window)
-			.resize(LIB.onResize)
-			.keydown(LIB.onKeyDown)
-			.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
+			$(window)
+				.resize(LIB.onResize)
+				.keydown(LIB.onKeyDown)
+				.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
 
-		/* Init players */
-		PLAYER.init();
+			/* Init players */
+			PLAYER.init();
 
-		/* Start the app */
-		ROUTER.init();
+			/* Start the app */
+			ROUTER.init();
+		}, 'json');
 	});
 });

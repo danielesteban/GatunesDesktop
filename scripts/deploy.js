@@ -120,7 +120,7 @@ console.log("Creating bundle...");
 exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
-			exec('rm -rf bundle/scripts  && rm -rf bundle/releases && rm -rf bundle/bundle', function() {
+			exec('rm -rf bundle/scripts bundle/releases bundle/CHANGELOG.md bundle/LICENSE bundle/bundle', function() {
 				fs.writeFileSync('bundle/image.html', str_replace_array(fs.readFileSync('bundle/image.html', 'utf8'), ["\n", "\r", "\t"], ['', '', '']));
 				console.log('compiling templates...');
 				genTemplates(function() {
@@ -131,7 +131,6 @@ exec('rm -rf bundle', function() {
 								'launch.js',
 								'js/app.js',
 								'js/fullscreen.js',
-								'js/lang.js',
 								'js/lastfm.js',
 								'js/lib.js',
 								'js/player.js',

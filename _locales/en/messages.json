@@ -1,6 +1,63 @@
 {
-	"appDesc": {
+	"appDesc" : {
 		"message" : "Listen to music online wherever you want and with whomever you want", 
-		"description" : "The description of the application, displayed in the web store."
+		"description" : "The description of the application, displayed in the web store"
+	},
+	"createPlaylist" : {
+		"message" : "Create Playlist"
+	},
+	"newPlaylist" : {
+		"message" : "Playlist ({{date}})"
+	},
+	"emptyPlaylist" : {
+		"message" : "Search for music and drag it here"
+	},
+	"createAlbum" : {
+		"message" : "Create Album"
+	},
+	"emptyAlbum" : {
+		"message" : "Sorry, this album does not contain any songs"
+	},
+	"storeAlbum" : {
+		"message" : "Save Album"
+	},
+	"removeAlbum" : {
+		"message" : "Remove album"
+	},
+	"addSongs" : {
+		"message" : "Add songs"
+	},
+	"removePlaylist" : {
+		"message" : "Remove playlist"
+	},
+	"areYouSure" : {
+		"message" : "Are you sure?"
+	},
+	"albumTagPrompt" : {
+		"message" : "Search by genre"
+	},
+	"albumArtistPrompt" : {
+		"message" : "Search by artist"
+	},
+	"searchPrompt" : {
+		"message" : "Type a song, artist or genre"
+	},
+	"search" : {
+		"message" : "Search"
+	},
+	"loved" : {
+		"message" : "Songs you love"
+	},
+	"emptyLoved" : {
+		"message" : "You didn't loved any song"
+	},
+	"emptyHomeArtist" : {
+		"message" : "There aren't any available albums from that artist"
+	},
+	"emptyHomeTag" : {
+		"message" : "There aren't any available albums with that genre" 
+	},
+	"date" : {
+		"message" : "{{month}} {{date}}"
 	}
 }
