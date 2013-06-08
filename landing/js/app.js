@@ -47,9 +47,9 @@ $(window).load(function() {
 			ctx.lineJoin = 'round';
 			ctx.stroke();
 
-			(forceFiller || $('footer').css('position') !== 'static') && $('div.filler').css('height', Math.max($('footer').height(), $(window).height()) + canvas.height);
 			var p = $(window).height() - 500;
 			$('section').css('paddingBottom', p > 60 ? p : 60);
+			(forceFiller || $('footer').css('position') !== 'static') && $('div.filler').css('height', Math.max($('footer').height(), $(window).height()) + canvas.height);
 		};
 
 	$('.donate button').click(function() {
@@ -66,7 +66,7 @@ $(window).load(function() {
 		}
 	});
 	$('body').fadeIn();
-	draw();
+	draw();draw();
 	if(window.chrome && window.chrome.app && window.chrome.app.isInstalled) return $('a.install button').remove();
 	$('.install a').bind('click', install);
 	$('.install button').bind('click', install);
