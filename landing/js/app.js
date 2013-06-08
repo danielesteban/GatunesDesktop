@@ -51,10 +51,7 @@ $(window).load(function() {
 			$('section').css('paddingBottom', p > 60 ? p : 60);
 			(forceFiller || $('footer').css('position') !== 'static') && $('div.filler').css('height', Math.max($('footer').height(), $(window).height()) + canvas.height);
 		};
-
-	$('.donate button').click(function() {
-		alert('MUCHAS GRACIAS!.. Pero esto aún no esta puesto en marcha, vuelve dentro de un par de dias jeje');
-	});
+	
 	$(window).resize(draw);
 	$(window).scroll(function() {
 		if($(window).scrollTop() >= ($('header').height() + $('section').height() + parseInt($('section').css('paddingBottom'), 10) + 125)) {
