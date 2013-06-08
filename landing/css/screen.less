@@ -5,13 +5,14 @@
 
 body {
 	display: none;
-	background: #0b0c0e;
+	background: #e6e6e6;
 	color: #c0c0c0;
 	text-shadow: #000 0 0.1em;
 }
 
 header {
-	margin: 20px 0;
+	background: #0b0c0e;
+	padding: 20px 0;
 	text-align: center;
 	img.brand {
 		width: 147px;
@@ -27,7 +28,8 @@ header {
 }
 
 section {
-	padding: 40px 0;
+	background: #0b0c0e;
+	padding: 40px 0 0;
 	div.install {
 		width: 640px;
 		height: 400px;
@@ -56,5 +58,43 @@ section {
 	}
 	p a {
 		color: #fff;
+	}
+}
+
+header, section, div.filler {
+	position: relative;
+	z-index: 1;
+}
+
+header {
+	z-index: 2;
+}
+
+footer {
+	position: fixed;
+	width: 100%;
+	top: 0;
+	color: #333;
+	text-shadow: none;
+	div {
+		margin: 0 auto 40px;
+		padding: 20px 40px;
+		max-width: 860px;
+		background: #fff;
+		.borderRadius(0 0 4px 4px);
+		h1 {
+			margin-bottom: 20px;
+		}
+		p {
+			font-size: 14px;
+			line-height: 20px;
+			a {
+				color: #0088cc;
+			}
+			&.donate {
+				padding: 10px 0 0;
+				text-align: center;
+			}
+		}
 	}
 }
