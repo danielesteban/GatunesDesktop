@@ -1,16 +1,16 @@
 CACHE MANIFEST
 
-# 3e1f9200f0afa874cfd7b2f53303a9be
+# bf004e5d4ea43b2a24bd0e155625d896
 
 CACHE:
 /
-/f779767ed58aa005005f44dc91c6a83d.css
-/77d379be521a111c7414c572036a3cdf.js
+/4f7a13ed748ed554c2402b247e5ff147.css
+/e7097a3db434b5f7f2b8500696840e16.js
 /img/brand.jpg?4e745f5d877172b09e65a353f322e9b8
 /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
 /img/favicon.png?c7155d105780d900c85259ba72fb4193
 /img/fork.png?5330c88f5cea3a396d4ba8fc90ac6c31
-/img/screenshot.webp?626d24aa1f856285a5a461855c840e3d
+/img/screenshot.jpg?05e977de54ace09a897459db1be24173
 
 FALLBACK:
 / /
@@ -18,7 +18,7 @@ FALLBACK:
 /img/brand.png /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
 /img/favicon.png /img/favicon.png?c7155d105780d900c85259ba72fb4193
 /img/fork.png /img/fork.png?5330c88f5cea3a396d4ba8fc90ac6c31
-/img/screenshot.webp /img/screenshot.webp?626d24aa1f856285a5a461855c840e3d
+/img/screenshot.jpg /img/screenshot.jpg?05e977de54ace09a897459db1be24173
 
 NETWORK:
 /app.manifest
