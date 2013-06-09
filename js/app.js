@@ -897,18 +897,16 @@ TEMPLATE = {
 				dest.empty();
 				albums.forEach(function(a, i) {
 					if(c > 5 || !a.mbid || data.id === a.mbid) return;
+					var div = $(Handlebars.partials.album({
+							title : a.name,
+							link : '/album/' + a.mbid,
+							mini : true
+						}));
 
-					var div = $('<a class="album mini" href="/album/' + a.mbid + '" title="' + a.name + '">'),
-						img = $('<div class="img"><iframe></iframe><b></b></div>');
-
-					div.append(img);
-					div.append('<span>' + a.name + '</span>')
 					dest.append(div);
 					setTimeout(function() {
-						$('iframe', img).attr('src', '/image.html#' + a.image[1]['#text']);
+						$('div.img iframe', div).attr('src', '/image.html#' + a.image[1]['#text']);
 					}, i * 150);
-
-					dest.append('<div>' + LIB.escapeHTML(album.name) + '</div>');
 					c++;
 				});
 				LIB.handleLinks(dest);
@@ -996,14 +994,14 @@ TEMPLATE = {
 						userAlbums = userAlbums || [];
 						albums.forEach(function(a, i) {
 							if(!a.mbid || (!data.artist && userAlbums.indexOf(a.mbid) !== -1)) return;
-							var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
-								img = $('<div class="img"><iframe></iframe><b></b></div>');
+							var div = $(Handlebars.partials.album({
+									title : a.artist.name + ' - ' + a.name,
+									link : '/album/' + a.mbid
+								}));
 
-							div.append(img);
-							div.append('<span>' + a.artist.name + ' - ' + a.name + '</span>')
 							dest.append(div);
 							setTimeout(function() {
-								$('iframe', img).attr('src', '/image.html#' + a.image[2]['#text']);
+								$('div.img iframe', div).attr('src', '/image.html#' + a.image[2]['#text']);
 							}, i * 150);
 						});
 						LIB.handleLinks('section');
@@ -1079,18 +1077,17 @@ TEMPLATE = {
 			var dest = $('section div.padding'),
 				page = 1,
 				getAlbums = function() {
-					/* COPY PASTE.. THIS SHOULD BE A TEMPLATE!!! */
 					LASTFM.getTopAlbums(data.name, function(albums) {
 						albums.forEach(function(a, i) {
 							if(!a.mbid) return;
-							var div = $('<a class="album" href="/album/' + a.mbid + '" title="' + LIB.escapeHTML(a.artist.name + ' - ' + a.name).replace(/"/g, '') + '">'),
-								img = $('<div class="img"><iframe></iframe><b></b></div>');
+							var div = $(Handlebars.partials.album({
+									title : a.artist.name + ' - ' + a.name,
+									link : '/album/' + a.mbid
+								}));
 
-							div.append(img);
-							div.append('<span>' + a.artist.name + ' - ' + a.name + '</span>')
 							dest.append(div);
 							setTimeout(function() {
-								$('iframe', img).attr('src', '/image.html#' + a.image[2]['#text']);
+								$('div.img iframe', div).attr('src', '/image.html#' + a.image[2]['#text']);
 							}, i * 150);
 						});
 						LIB.handleLinks('section');

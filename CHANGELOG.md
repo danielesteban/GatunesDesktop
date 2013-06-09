@@ -1,3 +1,7 @@
+## v1.2.0 (Jun 9, 2013)
+
+  - Create album partial template
+
 ## v1.1.1 (Jun 9, 2013)
 
   - Love songs also from the playlist/album UI
