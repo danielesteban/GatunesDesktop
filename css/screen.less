@@ -42,6 +42,60 @@ aside {
 		button[type="submit"] {
 			display: none;
 		}
+		ul {
+			position: absolute;
+			display: none;
+			top: 82px;
+			left: 5px;
+			width: 188px;
+			max-height: 188px;
+			padding: 0 0 10px;
+			background: #fff;
+			text-shadow: none;
+			border: 1px solid #ccc;
+			border-top: 0;
+			overflow-y: auto;
+			.borderRadius(0 0 10px 10px);
+			li {
+				&.header {
+					display: block;
+					padding: 3px 10px;
+					font-size: 11px;
+					font-weight: bold;
+					line-height: 20px;
+					color: #999;
+					text-transform: uppercase;
+					margin: 9px 0 0;
+					&:first-child {
+						margin: 0;
+					}
+				}
+				a {
+					display: block;
+					padding: 4px 10px;
+					color: #333;
+				}
+				&.selected a, a:hover {
+					color: #fff;
+					background: #0088cc;
+				}
+			}
+			&::-webkit-scrollbar {
+				width: 7px;
+			}
+			&::-webkit-scrollbar-thumb {
+				background: rgba(0, 0, 0, 0.3);
+				.borderRadius(10px);
+			}
+		}
+		&.autofill {
+			input[type="text"] {
+				.borderRadius(4px 4px 0 0);
+			}
+			ul {
+				display: block;
+			}
+		}
 	}
 	menu {
 		a {
@@ -78,6 +132,9 @@ aside {
 			&.dropping-reorder {
 				height: 9px;
 			}
+		}
+		&.s {
+			.boxShadow(0 8px 6px -6px #000);
 		}
 		&:last-child {
 			padding: 0 0 10px;
@@ -485,7 +542,7 @@ section#album {
 	}
 }
 
-section#home {
+section#explore {
 	div.padding {
 		padding: 15px 0 15px 10px;
 		overflow: hidden;
@@ -495,12 +552,6 @@ section#home {
 		padding: 0 20px 20px 20px;
 		width: 300px;
 		overflow: hidden;
-		form { 
-			padding: 0 40px;
-			button[type="submit"] {
-				display: none;
-			}
-		}
 	}
 	div.tags {
 		margin: 20px 0;

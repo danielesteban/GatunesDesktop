@@ -50,6 +50,14 @@ LASTFM = {
 			callback(data.similartags ? typeof data.similartags.tag === 'string' ? [{name: data.similartags.tag}] : data.similartags.tag : []);
 		});
 	},
+	searchTags : function(tag, callback, limit) {
+		LASTFM.req('tag.search', {
+			tag : tag,
+			limit : limit || 8
+		}, function(data) {
+			callback(data.results ? typeof data.results.tagmatches.tag === 'string' ? [{name: data.results.tagmatches.tag}] : data.results.tagmatches.tag : []);
+		});
+	},
 	getTopArtistsAlbums : function(callback, page) {
 		var params = {};
 		page && (params.page = page);
@@ -110,9 +118,10 @@ LASTFM = {
 			callback(data.artist);
 		});
 	},
-	searchArtists : function(query, callback) {
+	searchArtists : function(query, callback, limit) {
 		LASTFM.req('artist.search', {
-			artist : query
+			artist : query,
+			limit : limit || 8
 		}, function(data) {
 			callback(data.results ? data.results.artistmatches.artist : []);
 		});

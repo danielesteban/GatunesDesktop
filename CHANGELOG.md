@@ -1,6 +1,8 @@
 ## v1.1.3 (Jun ??, 2013)
 
-  - Better menu scrolling style
+  - Search on aside. Just one search bar.
+  - Search Autofill for artists & tags.
+  - Better aside scrollbar styling
 
 ## v1.1.2 (Jun 9, 2013)
 

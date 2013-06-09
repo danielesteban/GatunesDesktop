@@ -3,8 +3,9 @@
 		<img src="/img/brand.png" />
 	</a>
 	<form>
-		<input type="text" placeholder="{{L 'searchPrompt'}}..." name="query" /> 
+		<input type="text" placeholder="{{L 'searchPrompt'}}..." name="query" autocomplete="off" /> 
 		<button class="btn" type="submit">{{L 'search'}}</button>
+		<ul></ul>
 	</form>
 	<menu>
 		<li class="create">{{a 'createPlaylist' '/playlist' null 'plus icon-white'}}</li>

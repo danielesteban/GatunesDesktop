@@ -45,6 +45,12 @@
 	"search" : {
 		"message" : "Search"
 	},
+	"artists" : {
+		"message" : "Artists"
+	},
+	"genres" : {
+		"message" : "Genres"
+	},
 	"loved" : {
 		"message" : "Songs you love"
 	},

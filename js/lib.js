@@ -298,7 +298,7 @@ ROUTER = {
 			validPanels = [
 				'album',
 				'artist',
-				'home',
+				'explore',
 				'loved',
 				'playlist'
 			];
@@ -310,7 +310,7 @@ ROUTER = {
 			delete ROUTER.onUnload;
 		}
 
-		panel === '' && (panel = 'home');
+		panel === '' && (panel = 'explore');
 
 		if(validPanels.indexOf(panel) !== -1) {
 			var cb = function(data) {

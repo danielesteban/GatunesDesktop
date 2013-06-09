@@ -812,7 +812,7 @@ TEMPLATE = {
 							album.tags.forEach(function(t, i) {
 								album.tags[i] = {
 									name : t.substr(0, 1).toUpperCase() + t.substr(1),
-									link : '/home/tag/' + t
+									link : '/explore/' + t
 								};
 							});
 							callback(album);
@@ -985,26 +985,17 @@ TEMPLATE = {
 			};
 		}
 	},
-	home : {
+	explore : {
 		data : function(params, callback) {
-			var p = {};
-			switch(params[0]) {
-				case 'artist':
-					p.artist = params[1];
-				break;
-				case 'tag':
-					p.tag = params[1];
-				break;
-			}
-			callback(p);
+			callback({
+				tag : params[0]
+			});
 		},
 		render : function(data) {
 			var dest = $('section div.padding'),
 				page = 1,
 				getAlbums = function() {
-					if(data.artist) {
-						LASTFM.getTopAlbums(data.artist, renderAlbums, false, page);
-					} else if(data.tag) {
+					if(data.tag) {
 						LASTFM.getTagAlbums(data.tag, renderAlbums, page);
 					} else {
 						LASTFM.getTopArtistsAlbums(renderAlbums, page);
@@ -1014,7 +1005,7 @@ TEMPLATE = {
 					DATA.getItem('albums', function(userAlbums) {
 						userAlbums = userAlbums || [];
 						albums.forEach(function(a, i) {
-							if(!a.mbid || (!data.artist && userAlbums.indexOf(a.mbid) !== -1)) return;
+							if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
 							var div = $(Handlebars.partials.album({
 									title : a.artist.name + ' - ' + a.name,
 									link : '/album/' + a.mbid
@@ -1026,18 +1017,7 @@ TEMPLATE = {
 							}, i * 150);
 						});
 						LIB.handleLinks('section');
-						if(!data.artistSearched && !$('a', dest).length) return LASTFM.searchArtists(data.artist, function(artists) {
-							artists && (artists.length ? artists : [artists]).forEach(function(a) {
-								if(data.artistSearched || !a.mbid) return;
-								data.artistSearched = true;
-								LASTFM.getTopAlbums(a.name, renderAlbums);
-							});
-							if(!data.artistSearched) { //no results case.. call it again so it renders the feedback.
-								data.artistSearched = true;
-								renderAlbums(albums);
-							}
-						});
-						!$('a', dest).length && dest.append('<p class="empty">' + L['emptyHome' + (data.artist ? 'Artist' : 'Tag')] + '</p>');
+						!$('a', dest).length && dest.append('<p class="empty">' + L.emptyHomeTag + '</p>');
 						LIB.onSectionScroll(albums.length === 50, function() {
 							page++;
 							getAlbums();
@@ -1051,35 +1031,113 @@ TEMPLATE = {
 					var dest = $('section div.tags');
 					dest.empty();
 					tags.forEach(function(t) {
-						dest.append('<a href="/home/tag/' + t.name.replace(/"/g, '') + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>')
+						dest.append('<a href="/explore/' + t.name.replace(/"/g, '') + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>')
 					});
 					LIB.handleLinks(dest);
 				};
 
 			if(data.tag) LASTFM.getSimilarTags(data.tag, renderTags);
-			else if(data.artist) LASTFM.getArtist(null, function(a) {renderTags(a.tags.tag)}, data.artist);
 			else LASTFM.getTopTags(renderTags);
-
-			$('section form').submit(function(e) {
-				LIB.cancelHandler(e);
-				var v;
-				if(e.target.artist) return (v = $(e.target.artist).val()) && v !== '' && ROUTER.update('/home/artist/' + v);
-				(v = $(e.target.tag).val()) && v !== '' && ROUTER.update('/home/tag/' + v);
-			});
 		},
 		initSearch : function() {
-			$('aside form').submit(function(e) {
-				var values = LIB.getForm(e, ['query']);
-				if(values === null) return;
-				LASTFM.searchArtists(values.query, function(artists) {
-					var hit = false;
-					artists && (artists.length ? artists : [artists]).forEach(function(a) {
-						if(hit || !a.mbid) return;
-						hit = true;
-						ROUTER.update('/artist/' + a.mbid);
+			var autofill = $('aside form ul'),
+				input = $('aside form input[type="text"]'),
+				timeout,
+				lastQuery,
+				submit = function() {
+					var query = input.val().trim();
+					if(query === '') return;
+					autofill.scrollTop(0);
+					if(query === lastQuery) {
+						autofill.parent().addClass('autofill');
+						$(window).bind('mouseup', hide);
+						return;
+					}
+					lastQuery = query;
+					var ah = $('<li class="header" style="display:none">' + L.artists + '</li>'),
+						gh = $('<li class="header" style="display:none">' + L.genres + '</li>');
+
+					autofill.empty()
+						.append(ah)
+						.append(gh)
+						.parent().removeClass('autofill');
+					
+					LASTFM.searchArtists(query, function(artists) {
+						var c = 0,
+							tophit;
+
+						artists.forEach(function(a) {
+							if(c > 3 || !a.mbid) return;
+							gh.before('<li' + (c === 0 ? ' class="selected"' : '') + '><a href="/artist/' + a.mbid + '">' + a.name + '</a></li>');
+							c === 0 && (tophit = a.mbid);
+							c++;
+						});
+						LIB.handleLinks(autofill);
+						if(c === 0) return;
+						ah.show();
+						autofill.parent().addClass('autofill');
+						tophit && ROUTER.update('/artist/' + tophit);
 					});
-					if(!hit) return ROUTER.update('/home/tag/' + values.query);
-				});
+					LASTFM.searchTags(query, function(tags) {
+						var c = 0;
+						tags.forEach(function(t) {
+							if(c > 3) return;
+							autofill.append('<li><a href="/explore/' + t.name.replace(/"/g, "'") + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a></li>');
+							c++;
+						});
+						if(c === 0) return;
+						LIB.handleLinks(autofill);
+						gh.show();
+						autofill.parent().addClass('autofill');
+					});
+					$(window).bind('mouseup', hide);
+				},
+				hide = function(e) {
+					if(e.target === input[0]) return;
+					$(window).unbind('mouseup', hide);
+					autofill.parent().removeClass('autofill');
+				};
+
+			input.keyup(function(e) {
+				timeout && clearTimeout(timeout);
+				switch(e.keyCode) {
+					case 13:
+						if(!autofill.parent().hasClass('autofill')) return submit();
+						 $('li.selected a', autofill).click();
+						 hide({});
+					break;
+					case 38:
+						var sel = $('li.selected', autofill);
+						if(sel.prev().length) {
+							sel.prev().hasClass('header') && (sel = sel.prev());
+							if(!sel.prev().length) return;
+							$('li', autofill).removeClass('selected');
+							sel.prev().addClass('selected')[0].scrollIntoView();
+							LIB.cancelHandler(e);
+						}
+					break;
+					case 40:
+						var sel = $('li.selected', autofill);
+						if(sel.next().length) {
+							sel.next().hasClass('header') && (sel = sel.next());
+							if(!sel.next().length) return;
+							$('li', autofill).removeClass('selected');
+							sel.next().addClass('selected')[0].scrollIntoView();
+							LIB.cancelHandler(e);
+						}
+					break;
+					default:
+						timeout = setTimeout(submit, 500);
+				}
+			});
+			input.click(function(e) {
+				if(input.val() === '') return;
+				timeout && clearTimeout(timeout);
+				submit();
+			});
+			$('aside form').submit(function(e) {
+				LIB.cancelHandler(e);
+				submit();
 			});
 		}
 	},
@@ -1103,7 +1161,7 @@ TEMPLATE = {
 					t = t.name;
 					artist.tags.push({
 						name : t.substr(0, 1).toUpperCase() + t.substr(1),
-						link : '/home/tag/' + t
+						link : '/explore/' + t
 					});
 				});
 				callback(artist);
@@ -1138,7 +1196,7 @@ TEMPLATE = {
 			var members = $('section ul.members');
 			data.members.forEach(function(m, i) {
 				LASTFM.getArtist(null, function(artist) {
-					if(!artist.mbid) return;
+					if(!artist || !artist.mbid) return;
 					var li = $('li:nth-child(' + (i + 1) + ')', members),
 						a = $('<a href="/artist/' + artist.mbid + '" />');
 
@@ -1257,6 +1315,10 @@ $(window).load(function() {
 					    });
 					}
 				});
+				/* menu shadow */
+				menu.bind('scroll', function(e) {
+					menu.prev()[(menu.scrollTop() > 0 ? 'add' : 'remove') + 'Class']('s');
+				});
 				LIB.handleLinks('aside menu');
 				if(selected) {
 					$('aside menu li').removeClass('selected');
@@ -1278,7 +1340,7 @@ $(window).load(function() {
 		$('body').append(Handlebars.templates.skin({})).fadeIn();
 		LIB.handleSpeech('aside');
 		LIB.handleLinks('aside, footer');
-		TEMPLATE.home.initSearch();
+		TEMPLATE.explore.initSearch();
 
 		/* Drop Handlers */
 		DATA.playlists.onChange();

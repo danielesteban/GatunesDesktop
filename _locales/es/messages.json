@@ -44,6 +44,12 @@
 	"search" : {
 		"message" : "Buscar"
 	},
+	"artists" : {
+		"message" : "Artistas"
+	},
+	"genres" : {
+		"message" : "Géneros"
+	},
 	"loved" : {
 		"message" : "Canciones que amas"
 	},
