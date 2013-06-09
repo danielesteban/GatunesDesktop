@@ -403,7 +403,7 @@ TEMPLATE = {
 		render : function(data) {
 			var form = $('section form');
 			form.submit(TEMPLATE.playlist.search);
-			$('section menu li a').each(function(i, a) {
+			$('section div.half menu li a').each(function(i, a) {
 				a = $(a);
 				a.click(function() {
 					$('li', a.parents('menu').first()).removeClass('selected');
@@ -600,7 +600,10 @@ TEMPLATE = {
 			!t.length && (t = $('section#loved table').first());
 			if(!t.length || PLAYER.queueDataKey !== $('section .header h1').attr("key")) return;
 			$('tr', t).removeClass('playing');
-			$('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t).addClass('playing');
+			$('tr a.play i', t).attr('class', 'icon-play');
+			var tr = $('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t);
+			tr.addClass('playing');
+			$('a.play i', tr).attr('class', 'icon-headphones');
 		}
 	},
 	song : {
