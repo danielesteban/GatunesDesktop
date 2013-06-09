@@ -35,13 +35,10 @@
 	"areYouSure" : {
 		"message" : "¿Estás seguro?"
 	},
-	"albumTagPrompt" : {
-		"message" : "Buscar por género"
-	},
-	"albumArtistPrompt" : {
-		"message" : "Buscar por artista"
-	},
 	"searchPrompt" : {
+		"message" : "Buscar por artista o género"
+	},
+	"searchSongPrompt" : {
 		"message" : "Teclea una canción, artista o género"
 	},
 	"search" : {

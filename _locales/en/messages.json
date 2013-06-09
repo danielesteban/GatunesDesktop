@@ -36,14 +36,11 @@
 	"areYouSure" : {
 		"message" : "Are you sure?"
 	},
-	"albumTagPrompt" : {
-		"message" : "Search by genre"
-	},
-	"albumArtistPrompt" : {
-		"message" : "Search by artist"
-	},
 	"searchPrompt" : {
-		"message" : "Type a song, artist or genre"
+		"message" : "Search by artist or genre"
+	},
+	"searchSongPrompt" : {
+		"message" : "Type a song or artist"
 	},
 	"search" : {
 		"message" : "Search"

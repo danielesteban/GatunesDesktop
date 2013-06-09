@@ -233,6 +233,16 @@ LIB = {
 		recognition.start();
 		timeout = setTimeout(recognition.onend, 3000);
 	},
+	handleSpeech : function(selector) {
+		$(selector + ' input[type="text"]').each(function(i, el) {
+			el = $(el);
+			var a = $('<a class="input-speech" />');
+			a.click(function() {
+				LIB.getSpeech(el);
+			});
+			el.before(a);
+		});
+	},
 	onSectionScroll : function(more, callback) {
 		var s = $('section').first(),
 			onScroll = function() {
@@ -268,7 +278,7 @@ LIB = {
 		var content_height = $(window).height() - 51;
 		$('section#playlist div.border').css('min-height', content_height - 100);
 		$('section').css('height', content_height);
-		$('aside menu').last().css('height', content_height - $('aside menu').first().height() - 50);
+		$('aside menu').last().css('height', content_height - $('aside input').first().height() - $('aside menu').first().height() - 75);
 	}
 };
 
@@ -313,14 +323,7 @@ ROUTER = {
 						})
 						.keydown(LIB.inlineOnKeyDown);
 					});
-					$('section input[type="text"]').each(function(i, el) {
-						el = $(el);
-						var a = $('<a class="input-speech" />');
-						a.click(function() {
-							LIB.getSpeech(el);
-						});
-						el.before(a);
-					});
+					LIB.handleSpeech('section');
 					LIB.handleLinks('section');
 					LIB.onResize();
 					!fromPopEvent && window.history.pushState && window.history.state !== '/' + url && window.history.pushState('/' + url, '', '/' + url); 

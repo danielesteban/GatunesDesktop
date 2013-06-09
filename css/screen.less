@@ -28,8 +28,22 @@ aside {
 			height: 36px;
 		}
 	}
+	form {
+		padding: 0 5px;
+		input[type="text"] {
+			width: 176px;
+			font-size: 12px;
+			background: #eee;
+			margin-bottom: 5px;
+		}
+		a.input-speech {
+			left: 169px;
+		}
+		button[type="submit"] {
+			display: none;
+		}
+	}
 	menu {
-		overflow-y: auto;
 		a {
 			display: block;
 			color: #c0c0c0;
@@ -64,6 +78,10 @@ aside {
 			&.dropping-reorder {
 				height: 9px;
 			}
+		}
+		&:last-child {
+			padding: 0 0 10px;
+			overflow-y: auto;
 		}
 		&::-webkit-scrollbar {
 			width: 7px;

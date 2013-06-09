@@ -1066,6 +1066,21 @@ TEMPLATE = {
 				if(e.target.artist) return (v = $(e.target.artist).val()) && v !== '' && ROUTER.update('/home/artist/' + v);
 				(v = $(e.target.tag).val()) && v !== '' && ROUTER.update('/home/tag/' + v);
 			});
+		},
+		initSearch : function() {
+			$('aside form').submit(function(e) {
+				var values = LIB.getForm(e, ['query']);
+				if(values === null) return;
+				LASTFM.searchArtists(values.query, function(artists) {
+					var hit = false;
+					artists && (artists.length ? artists : [artists]).forEach(function(a) {
+						if(hit || !a.mbid) return;
+						hit = true;
+						ROUTER.update('/artist/' + a.mbid);
+					});
+					if(!hit) return ROUTER.update('/home/tag/' + values.query);
+				});
+			});
 		}
 	},
 	artist : {
@@ -1261,7 +1276,9 @@ $(window).load(function() {
 	LIB.setupLang(function() {
 		/* Render the skin */
 		$('body').append(Handlebars.templates.skin({})).fadeIn();
+		LIB.handleSpeech('aside');
 		LIB.handleLinks('aside, footer');
+		TEMPLATE.home.initSearch();
 
 		/* Drop Handlers */
 		DATA.playlists.onChange();

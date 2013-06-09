@@ -2,6 +2,10 @@
 	<a href="/" class="brand">
 		<img src="/img/brand.png" />
 	</a>
+	<form>
+		<input type="text" placeholder="{{L 'searchPrompt'}}..." name="query" /> 
+		<button class="btn" type="submit">{{L 'search'}}</button>
+	</form>
 	<menu>
 		<li class="create">{{a 'createPlaylist' '/playlist' null 'plus icon-white'}}</li>
 		<li class="loved">{{a 'loved' '/loved' null 'heart icon-white'}}</li>
