@@ -738,9 +738,9 @@ TEMPLATE = {
 						ss.titleMatch = titleWCount === titleWords.length;
 					});
 					songs.sort(function(a, b) {
-						return a.wCount > b.wCount ? -1 : (a.wCount < b.wCount ? 1 : 
-							(a.exactMatch > b.exactMatch ? -1 : (a.exactMatch < b.exactMatch ? 1 : 
-								(a.titleMatch > b.titleMatch ? -1 : (a.titleMatch < b.titleMatch ? 1 : 
+						return a.exactMatch > b.exactMatch ? -1 : (a.exactMatch < b.exactMatch ? 1 : 
+							(a.titleMatch > b.titleMatch ? -1 : (a.titleMatch < b.titleMatch ? 1 : 
+								(a.wCount > b.wCount ? -1 : (a.wCount < b.wCount ? 1 : 
 									(b.timeDiff > a.timeDiff ? -1 : (b.timeDiff < a.timeDiff ? 1 : 
 										(a.hd > b.hd ? -1 : (a.hd < b.hd ? 1 :
 											(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
