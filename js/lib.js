@@ -273,10 +273,11 @@ LIB = {
 
 ROUTER = {
 	init : function() {
-		window.history.pushState && $(window).bind('popstate', function(e) {
+		var ps = window.history.pushState;
+		ps && $(window).bind('popstate', function(e) {
 			ROUTER.update(e.originalEvent.state !== null ? e.originalEvent.state : document.location.pathname, true);
 		});
-		ROUTER.update('/');
+		ROUTER.update(ps ? document.location.pathname : '/', ps);
 	},
 	update : function(url, fromPopEvent) {
 		url = url.substr(1);

@@ -114,6 +114,21 @@ DATA = {
 				});
 			});
 		},
+		reorder : function(playlistId, below, album, callback) {
+			var dataKey = album ? 'albums' : 'playlists';
+			DATA.getItem(dataKey, function(playlists) {
+				var ids = [],
+					indexes = [],
+					reordered = [];
+
+				playlists.forEach(function(id, i) {
+					id === below && reordered.push(playlistId);
+					id !== playlistId && reordered.push(id);
+				});
+				below === null && reordered.push(playlistId);
+				DATA.setItem(dataKey, reordered, callback);
+			});
+		},
 		addSongs : function(id, songs, callback, index) {
 			var cb = function(playlist) {
 					DATA.setItem('playlist:' + id, playlist, callback);
@@ -151,7 +166,7 @@ DATA = {
 				DATA.setItem('playlist:' + id, playlist, callback);
 			});
 		},
-		reorder : function(id, songs, callback, index) {
+		reorderSongs : function(id, songs, callback, index) {
 			DATA.getItem('playlist:' + id, function(playlist) {
 				var ids = [],
 					indexes = [],
@@ -678,7 +693,7 @@ TEMPLATE = {
 					TEMPLATE.playlist.resetSelection();
 
 					if(!songs_reorder.length) return add();
-					DATA.playlists.reorder(dataKey.split(':')[1], songs_reorder, add, song ? tr[0].rowIndex : null);
+					DATA.playlists.reorderSongs(dataKey.split(':')[1], songs_reorder, add, song ? tr[0].rowIndex : null);
 				}
 			}
 		},
@@ -1086,26 +1101,69 @@ $(window).load(function() {
 
 				menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums}));
 				menu = $('aside menu').last();
-				playlists.forEach(function(p) {
-					var li = $('li[key="playlist:' + p.id + '"] a', menu);
-					li.length && (li[0].drop = {
-						types : ['songs'],
-						check : function(o) {
-							var err = false;
-							o.data.forEach(function(d) {
-								var from = $('h1', d.tr.parents('section')).attr("key");
-								from && parseInt(from.split(':')[1], 10) === p.id && (err = true); 
-							});
-							return !err;
-						},
-						cb : function(o) {
-							var songs = [];
-							o.data.forEach(function(d) {
-								songs.push(d.song);
-							});
-							DATA.playlists.addSongs(p.id, songs, TEMPLATE.playlist.resetSelection);
-						}
-					});
+				albums.concat(playlists).forEach(function(p) {
+					var lnk = $('li[key="' + p.dataKey + '"] a', menu),
+						album = p.dataKey.substr(0, 6) === 'album:';
+
+					if(lnk[0]) {
+						lnk[0].drop = {
+							types : album ? ['albums'] : ['playlists', 'songs'],
+							check : function(o) {
+								switch(o.type) {
+					        		case 'songs':
+					        			lnk[0].drop.className = 'dropping';
+					        			var err = false;
+										o.data.forEach(function(d) {
+											var from = $('h1', d.tr.parents('section')).attr("key");
+											from && parseInt(from.split(':')[1], 10) === p.id && (err = true); 
+										});
+										return !err;
+					        		break;
+					        		case 'albums':
+					        		case 'playlists':
+					        			lnk[0].drop.className = 'dropping-reorder';
+					        			return o.data[0].id !== p.id;		
+					        	}		
+							},
+							cb : function(o) {
+								var songs = [];
+								o.data.forEach(function(d) {
+									songs.push(d.song);
+								});
+								switch(o.type) {
+					        		case 'songs':
+					        			DATA.playlists.addSongs(p.id, songs, TEMPLATE.playlist.resetSelection);
+					        		break;
+					        		case 'albums':
+					        		case 'playlists':
+					        			DATA.playlists.reorder(o.data[0].id, p.id, album);
+					        	}
+							}
+						};
+
+						LIB.preventSelection(lnk, function(e) {
+							var lli;
+					        LIB.drag(e, {
+					            title : p.title,
+					            type : album ? 'albums' : 'playlists',
+					            data : [p]
+					        }, function() {
+					        	lli = $('<li class="lli"><a></a></li>');
+					            lli.children()[0].drop = {
+							        types : album ? 'albums' : 'playlists',
+							        className : 'dropping-reorder',
+							        cb : function(o) {
+							        	DATA.playlists.reorder(o.data[0].id, null, album);
+							        }
+							    }
+							    if(album) $('li.header', menu).last().before(lli);
+							    else menu.append(lli);
+					        }, function() {
+					            lli.remove();
+					            lli = null;
+					        });
+					    });
+					}
 				});
 				LIB.handleLinks('aside menu');
 				if(selected) {

@@ -39,6 +39,10 @@ aside {
 				color: #fff;
 				background: #222326;
 			}
+			&.dropping-reorder {
+				border-top: 1px solid #0088cc;
+				padding-top: 4px;
+			}
 		}
 		li.header {
 			display: block;
@@ -53,6 +57,13 @@ aside {
 		li.selected a {
 			color: #fff;
 			background: #f09;
+		}
+		li.lli a {
+			padding: 0;
+			height: 10px;
+			&.dropping-reorder {
+				height: 9px;
+			}
 		}
 	}
 }
