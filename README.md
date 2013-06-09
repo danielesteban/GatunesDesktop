@@ -1,7 +1,7 @@
 Gatunes
 =======
 
-[![Install the app](http://gatunes.com/img/screenshot.jpg)](https://chrome.google.com/webstore/detail/gatunes/jcbcnbikbcidmnkbfomplfjbclpfogbn)
+[![Install the app](http://gatunes.com/img/screenshoot.jpg)](https://chrome.google.com/webstore/detail/gatunes/jcbcnbikbcidmnkbfomplfjbclpfogbn)
 
 [Install the app](https://chrome.google.com/webstore/detail/gatunes/jcbcnbikbcidmnkbfomplfjbclpfogbn)
 
