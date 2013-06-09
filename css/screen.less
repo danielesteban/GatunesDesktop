@@ -347,6 +347,13 @@ section#playlist, section#album, section#loved {
 				text-align: right;
 				a {
 					display: none;
+					&.love {
+						position: relative;
+						margin: -14px 0 0;
+						top: 13px;
+						height: 14px;
+						left: -28px;
+					}
 				}
 			}
 			&:first-child {
@@ -388,6 +395,9 @@ section#playlist, section#album, section#loved {
 				}
 				a {
 					display: inline;
+					&.love {
+						display: block;
+					}
 				}
 			}
 			&.error {

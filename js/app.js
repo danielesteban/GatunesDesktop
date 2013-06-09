@@ -446,11 +446,15 @@ TEMPLATE = {
 				TEMPLATE.song.hookDrop(tr);
 				return dest.append(tr);
 			}
-			songs.forEach(function(s, i) {
-				s.num = LIB.addZero(i + 1);
-				TEMPLATE.playlist.song(s, dest, playlist);
+			DATA.getItem('loved', function(loved) {
+				loved = loved || [];
+				songs.forEach(function(s, i) {
+					s.num = LIB.addZero(i + 1);
+					loved.indexOf(s.provider + ':' + s.provider_id) !== -1 && (s.love = true);
+					TEMPLATE.playlist.song(s, dest, playlist);
+				});
+				TEMPLATE.playlist.setPlayingSong();
 			});
-			TEMPLATE.playlist.setPlayingSong();
 		},
 		search : function(e) {
 			LIB.cancelHandler(e);
@@ -562,7 +566,8 @@ TEMPLATE = {
 			$(tr).dblclick(cf);
 			$('a.play', tr).click(cf);
 			TEMPLATE.song.hookDrag(tr, song);
-			if(!song.search) {
+			!song.search && TEMPLATE.song.hookLove(tr, song);
+			if(!song.search && !song.album) {
 				$('a.remove', tr).click(function() {
 					var dataKey = h1.attr("key");
 					if(dataKey === 'undefined') return;
@@ -769,6 +774,22 @@ TEMPLATE = {
 				});
 				process();
 			});
+		},
+		hookLove : function(tr, song) {
+			$('a.love', tr).click(function() {
+				var i = $('i', this),
+					id = song.provider + ':' + song.provider_id,
+					cb = function(loved) {
+						return function() {
+							i.attr('class', 'icon-' + (loved ? 'ok' : 'heart'));
+						}
+					};
+							
+				DATA.loved.check(id, function(loved) {
+					if(loved) return DATA.loved.remove(id, cb(false));
+					else DATA.loved.add([song], cb(true));
+				});
+			});
 		}
 	},
 	album : {
@@ -777,18 +798,22 @@ TEMPLATE = {
 			delete TEMPLATE.playlist.selectedSongs;
 			DATA.albums.get(id, function(album) {
 				var cb = function(album) {
-						album.id = id;
-						album.songs.forEach(function(s, i) {
-							s.num = LIB.addZero(i + 1);
-							s.album = true;
+						DATA.getItem('loved', function(loved) {
+							loved = loved || [];
+							album.id = id;
+							album.songs.forEach(function(s, i) {
+								s.num = LIB.addZero(i + 1);
+								s.album = true;
+								loved.indexOf(s.provider + ':' + s.provider_id) !== -1 && (s.love = true);
+							});
+							album.tags.forEach(function(t, i) {
+								album.tags[i] = {
+									name : t.substr(0, 1).toUpperCase() + t.substr(1),
+									link : '/home/tag/' + t
+								};
+							});
+							callback(album);
 						});
-						album.tags.forEach(function(t, i) {
-							album.tags[i] = {
-								name : t.substr(0, 1).toUpperCase() + t.substr(1),
-								link : '/home/tag/' + t
-							};
-						});
-						callback(album);
 					};
 
 				if(album) return cb(album);
@@ -846,6 +871,7 @@ TEMPLATE = {
 				tr.dblclick(cf);
 				$('a.play', tr).click(cf);
 				TEMPLATE.song.hookDrag(tr, s);
+				TEMPLATE.song.hookLove(tr, s);
 				setTimeout(function() {
 					cf();
 				}, i * 50);
