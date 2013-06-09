@@ -1,6 +1,6 @@
 CACHE MANIFEST
 
-# 95ab61cb5f215516de07be818c21a34d
+# 0c4de64b1c4b00aecd873f7f815fbf46
 
 CACHE:
 /
@@ -10,7 +10,7 @@ CACHE:
 /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
 /img/favicon.png?c7155d105780d900c85259ba72fb4193
 /img/fork.png?5330c88f5cea3a396d4ba8fc90ac6c31
-/img/screenshot.jpg?05e977de54ace09a897459db1be24173
+/img/screenshoot.jpg?2fc6b6697dca7a507d5e8fcd8fd23c53
 
 FALLBACK:
 / /
@@ -18,7 +18,7 @@ FALLBACK:
 /img/brand.png /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
 /img/favicon.png /img/favicon.png?c7155d105780d900c85259ba72fb4193
 /img/fork.png /img/fork.png?5330c88f5cea3a396d4ba8fc90ac6c31
-/img/screenshot.jpg /img/screenshot.jpg?05e977de54ace09a897459db1be24173
+/img/screenshoot.jpg /img/screenshoot.jpg?2fc6b6697dca7a507d5e8fcd8fd23c53
 
 NETWORK:
 /app.manifest
