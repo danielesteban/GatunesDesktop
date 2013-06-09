@@ -1058,7 +1058,7 @@ TEMPLATE = {
 						name : a.name,
 						bio : bio,
 						image : LIB.escapeHTML(a.image[a.image.length - 1]['#text']),
-						members : a.bandmembers ? a.bandmembers.member : [],
+						members : a.bandmembers ? (a.bandmembers.member.length ? a.bandmembers.member : [a.bandmembers.member]) : [],
 						tags : []
 					};
 
@@ -1099,6 +1099,18 @@ TEMPLATE = {
 				};
 
 			getAlbums();
+			var members = $('section ul.members');
+			data.members.forEach(function(m, i) {
+				LASTFM.getArtist(null, function(artist) {
+					if(!artist.mbid) return;
+					var li = $('li:nth-child(' + (i + 1) + ')', members),
+						a = $('<a href="/artist/' + artist.mbid + '" />');
+
+					a.html(li.html());
+					LIB.handleLinks(a);
+					li.empty().append(a);
+				}, m.name);
+			});
 		}
 	}
 };

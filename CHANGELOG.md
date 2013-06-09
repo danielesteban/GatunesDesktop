@@ -1,5 +1,6 @@
 ## v1.2.0 (Jun 9, 2013)
 
+  - Link to artist profile on band members
   - Create album partial template
 
 ## v1.1.1 (Jun 9, 2013)
