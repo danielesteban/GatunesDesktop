@@ -1,3 +1,7 @@
+## v1.1.3 (Jun ??, 2013)
+
+  - Better menu scrolling style
+
 ## v1.1.2 (Jun 9, 2013)
 
   - Render the rest of artist's albums when there aren't any songs on the album

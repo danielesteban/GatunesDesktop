@@ -18,7 +18,6 @@ aside {
 	background: #17181c;
 	border-right: 1px solid #eee;
 	text-shadow: #000 0 0.1em;
-	overflow-y: auto;
 	a.brand {
 		display: block;
 		padding: 5px 0 3px;
@@ -30,6 +29,7 @@ aside {
 		}
 	}
 	menu {
+		overflow-y: auto;
 		a {
 			display: block;
 			color: #c0c0c0;
@@ -64,6 +64,13 @@ aside {
 			&.dropping-reorder {
 				height: 9px;
 			}
+		}
+		&::-webkit-scrollbar {
+			width: 7px;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: rgba(255, 255, 255, 0.47);
+			.borderRadius(10px);
 		}
 	}
 }

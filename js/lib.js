@@ -267,7 +267,8 @@ LIB = {
 	onResize : function() {
 		var content_height = $(window).height() - 51;
 		$('section#playlist div.border').css('min-height', content_height - 100);
-		$('aside, section').css('height', content_height);
+		$('section').css('height', content_height);
+		$('aside menu').last().css('height', content_height - $('aside menu').first().height() - 50);
 	}
 };
 
