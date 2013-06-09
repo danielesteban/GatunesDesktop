@@ -1,5 +1,6 @@
-## v1.2.0 (Jun 9, 2013)
+## v1.2.0 (Jun ??, 2013)
 
+  - Render the rest of artist's albums when there aren't any songs on the album
   - Link to artist profile on band members
   - Create album partial template
 

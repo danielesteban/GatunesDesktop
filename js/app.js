@@ -890,6 +890,27 @@ TEMPLATE = {
 			});
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');        
 			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
+			!data.songs.length && LASTFM.getTopAlbums(data.artist.name, function(albums) {
+				var c = 0,
+					dest = $('div.empty div');
+
+				dest.empty();
+				albums.forEach(function(a, i) {
+					if(c >= 8 || !a.mbid || a.mbid === data.id) return;
+					var div = $(Handlebars.partials.album({
+							title : a.name,
+							link : '/album/' + a.mbid,
+							mini : true
+						}));
+
+					dest.append(div);
+					setTimeout(function() {
+						$('div.img iframe', div).attr('src', '/image.html#' + a.image[2]['#text']);
+					}, i * 150);
+					c++;
+				});
+				c > 0 && dest.parent().show().fadeIn('fast');
+			}, 16);
 			LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
 				var dest = $('section div.similarAlbums'),
 					c = 0;

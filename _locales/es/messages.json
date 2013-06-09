@@ -17,6 +17,9 @@
 	"emptyAlbum" : {
 		"message" : "Lo siento, este álbum no contiene ninguna canción"
 	},
+	"moreFrom" : {
+		"message" : "Más de"
+	},
 	"storeAlbum" : {
 		"message" : "Guardar Álbum"
 	},

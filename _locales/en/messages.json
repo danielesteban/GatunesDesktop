@@ -18,6 +18,9 @@
 	"emptyAlbum" : {
 		"message" : "Sorry, this album does not contain any songs"
 	},
+	"moreFrom" : {
+		"message" : "More from"
+	},
 	"storeAlbum" : {
 		"message" : "Save Album"
 	},

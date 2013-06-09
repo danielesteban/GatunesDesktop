@@ -17,6 +17,12 @@
 				<tr><td class="empty">{{L 'emptyAlbum'}}</td>
 			{{/empty}}
 		</table>
+		{{#empty songs}}
+			<div class="empty" style="display:none">
+				<h4>{{L 'moreFrom'}}: {{artist.name}}</h4>
+				<div></div>
+			</div>
+		{{/empty}}
 	</div>
 </div>
 <div class="half">
