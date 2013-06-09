@@ -739,7 +739,6 @@ TEMPLATE = {
 							0)))))))))));
 					});
 					songs[0] && songs[0].wCount >= titleWords.length && (s.bestMatch = songs[0]);
-					console.log(songs);
 					callback && callback(s.bestMatch);
 				};
 
