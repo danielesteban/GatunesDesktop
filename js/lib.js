@@ -21,15 +21,16 @@ LIB = {
 
 		return err ? null : values;
 	},
-	handleLink : function(e) {
+	handleLink : function(e, preventReload) {
 		var t = e.target;
 		t.tagName.toLowerCase() !== 'a' && (t = $(t).parents('a')[0]);
 		if(t.href) {
 			var fullHost = document.location.protocol + '//' + document.location.host,
-				p = t.href.indexOf(fullHost);
+				p = t.href.indexOf(fullHost),
+				url = t.href.substr(p === 0 ? (p + fullHost.length) : 0);
 
 			LIB.cancelHandler(e);
-			ROUTER.update(t.href.substr(p === 0 ? (p + fullHost.length) : 0));
+			(!preventReload || url !== ROUTER.url) && ROUTER.update(url);
 		}
 	},
 	handleLinks : function(selector) {
@@ -291,6 +292,7 @@ ROUTER = {
 		ROUTER.update(ps ? document.location.pathname : '/', ps);
 	},
 	update : function(url, fromPopEvent) {
+		ROUTER.url = url;
 		url = url.substr(1);
 		var p = url.indexOf('/'),
 			panel = p != -1 ? url.substr(0, p) : url,

@@ -1055,7 +1055,14 @@ TEMPLATE = {
 					}
 					lastQuery = query;
 					var ah = $('<li class="header" style="display:none">' + L.artists + '</li>'),
-						gh = $('<li class="header" style="display:none">' + L.genres + '</li>');
+						gh = $('<li class="header" style="display:none">' + L.genres + '</li>'),
+						handleLink = function(a) {
+							a.click(function(e) {
+								$('li', autofill).removeClass('selected');
+								a.parent().addClass('selected');
+								LIB.handleLink(e, true);
+							});
+						};
 
 					autofill.empty()
 						.append(ah)
@@ -1066,13 +1073,17 @@ TEMPLATE = {
 						var c = 0,
 							tophit;
 
-						artists.forEach(function(a) {
-							if(c > 3 || !a.mbid) return;
-							gh.before('<li' + (c === 0 ? ' class="selected"' : '') + '><a href="/artist/' + a.mbid + '">' + a.name + '</a></li>');
-							c === 0 && (tophit = a.mbid);
+						artists.forEach(function(artist) {
+							if(c > 3 || !artist.mbid) return;
+							var li = $('<li' + (c === 0 ? ' class="selected"' : '') + '></li>'),
+								a = $('<a href="/artist/' + artist.mbid + '">' + artist.name + '</a>');
+
+							handleLink(a);
+							li.append(a);
+							gh.before(li);
+							c === 0 && (tophit = artist.mbid);
 							c++;
 						});
-						LIB.handleLinks(autofill);
 						if(c === 0) return;
 						ah.show();
 						autofill.parent().addClass('autofill');
@@ -1082,11 +1093,15 @@ TEMPLATE = {
 						var c = 0;
 						tags.forEach(function(t) {
 							if(c > 3) return;
-							autofill.append('<li><a href="/explore/' + t.name.replace(/"/g, "'") + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a></li>');
+							var li = $('<li></li>'),
+								a = $('<a href="/explore/' + t.name.replace(/"/g, "'") + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>');
+
+							handleLink(a);
+							li.append(a);
+							autofill.append(li);
 							c++;
 						});
 						if(c === 0) return;
-						LIB.handleLinks(autofill);
 						gh.show();
 						autofill.parent().addClass('autofill');
 					});
@@ -1103,8 +1118,8 @@ TEMPLATE = {
 				switch(e.keyCode) {
 					case 13:
 						if(!autofill.parent().hasClass('autofill')) return submit();
-						 $('li.selected a', autofill).click();
-						 hide({});
+						$('li.selected a', autofill).click();
+						hide({});
 					break;
 					case 38:
 						var sel = $('li.selected', autofill);
@@ -1117,6 +1132,7 @@ TEMPLATE = {
 						}
 					break;
 					case 40:
+						if(!autofill.parent().hasClass('autofill')) return submit();
 						var sel = $('li.selected', autofill);
 						if(sel.next().length) {
 							sel.next().hasClass('header') && (sel = sel.next());
@@ -1247,10 +1263,12 @@ $(window).load(function() {
 		DATA.playlists.getAll(function(playlists) {
 			DATA.albums.getAll(function(albums) {
 				var menu = $('aside menu').last(),
-					selected = $('section .header h1').attr("key");
+					selected = $('section .header h1').attr("key"),
+					h = menu.css('height');
 
 				menu.replaceWith(Handlebars.partials.playlistsMenu({playlists : playlists, albums: albums}));
 				menu = $('aside menu').last();
+				menu.css('height', h);
 				albums.concat(playlists).forEach(function(p) {
 					var lnk = $('li[key="' + p.dataKey + '"] a', menu),
 						album = p.dataKey.substr(0, 6) === 'album:';
