@@ -150,10 +150,15 @@ DATA = {
 
 					DATA.getItem('song:' + id, function(song) {
 						if(song) return add();
-						DATA.setItem('song:' + id, {
+						song = {
 							title : LIB.escapeHTML(s.title),
 							time : parseInt(s.time, 10)
-						}, add);
+						};
+						s.artist && (song.artist = {
+							mbid : LIB.escapeHTML(s.artist.mbid),
+							name : LIB.escapeHTML(s.artist.name)
+						});
+						DATA.setItem('song:' + id, song, add);
 					});
 				});
 			});
@@ -701,6 +706,7 @@ TEMPLATE = {
 			if(s.bestMatch) return callback && callback(s.bestMatch);
 			var title = s.artist.name + ' ' + s.title,
 				words = title.split(' '),
+				titleWords = s.title.split(' '),
 				songs = [],
 				c = 0,
 				process = function() {
@@ -708,26 +714,32 @@ TEMPLATE = {
 					if(c < 2) return;
 					songs.forEach(function(ss) {
 						var sWords = ss.title.replace(/ - /g, ' ').replace(/ \/ /g, ' ').split(' '),
-							wCount = 0;
+							wCount = 0,
+							titleWCount = 0;
 
 						words.forEach(function(w) {
 							if(sWords.indexOf(w) === -1) return;
 							wCount++; 
+							if(titleWords.indexOf(w) === -1) return;
+							titleWCount++;
 						});
 
 						ss.timeDiff = Math.abs(ss.time - s.time);
 						ss.wCount = wCount;
 						ss.exactMatch = wCount === sWords.length;
+						ss.titleMatch = titleWCount === titleWords.length;
 					});
 					songs.sort(function(a, b) {
 						return a.wCount > b.wCount ? -1 : (a.wCount < b.wCount ? 1 : 
 							(a.exactMatch > b.exactMatch ? -1 : (a.exactMatch < b.exactMatch ? 1 : 
-								(b.timeDiff > a.timeDiff ? -1 : (b.timeDiff < a.timeDiff ? 1 : 
-									(a.hd > b.hd ? -1 : (a.hd < b.hd ? 1 :
-										(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
-							0)))))))));
+								(a.titleMatch > b.titleMatch ? -1 : (a.titleMatch < b.titleMatch ? 1 : 
+									(b.timeDiff > a.timeDiff ? -1 : (b.timeDiff < a.timeDiff ? 1 : 
+										(a.hd > b.hd ? -1 : (a.hd < b.hd ? 1 :
+											(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
+							0)))))))))));
 					});
-					songs[0] && songs[0].wCount >= s.title.split(' ').length && (s.bestMatch = songs[0]);
+					songs[0] && songs[0].wCount >= titleWords.length && (s.bestMatch = songs[0]);
+					console.log(songs);
 					callback && callback(s.bestMatch);
 				};
 
