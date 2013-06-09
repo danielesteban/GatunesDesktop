@@ -701,16 +701,13 @@ TEMPLATE = {
 			if(s.bestMatch) return callback && callback(s.bestMatch);
 			var title = s.artist.name + ' ' + s.title,
 				words = title.split(' '),
-				maxWCount = 0,
-				minTimeDiff = s.time,
 				songs = [],
 				c = 0,
 				process = function() {
 					c++;
 					if(c < 2) return;
 					songs.forEach(function(ss) {
-						var timeDiff = Math.abs(ss.time - s.time),
-							sWords = ss.title.split(' '),
+						var sWords = ss.title.replace(/ - /g, ' ').replace(/ \/ /g, ' ').split(' '),
 							wCount = 0;
 
 						words.forEach(function(w) {
@@ -718,23 +715,32 @@ TEMPLATE = {
 							wCount++; 
 						});
 
-						if(wCount >= (words.length / 2) && minTimeDiff > timeDiff + 10 && maxWCount <= wCount) {
-							minTimeDiff = timeDiff;
-							maxWCount = wCount;
-							s.bestMatch = ss;
-						}
+						ss.timeDiff = Math.abs(ss.time - s.time);
+						ss.wCount = wCount;
+						ss.exactMatch = wCount === sWords.length;
 					});
+					songs.sort(function(a, b) {
+						return a.wCount > b.wCount ? -1 : (a.wCount < b.wCount ? 1 : 
+							(a.exactMatch > b.exactMatch ? -1 : (a.exactMatch < b.exactMatch ? 1 : 
+								(b.timeDiff > a.timeDiff ? -1 : (b.timeDiff < a.timeDiff ? 1 : 
+									(a.hd > b.hd ? -1 : (a.hd < b.hd ? 1 :
+										(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
+							0)))))))));
+					});
+					songs[0] && songs[0].wCount >= s.title.split(' ').length && (s.bestMatch = songs[0]);
 					callback && callback(s.bestMatch);
 				};
 
-			YT.search('videos', title + ' -cover -live -edit -remix -reversed -backwards', 0, function(r) {
+			YT.search('videos', title + ' -cover -live -edit -remix -reversed -backwards -lesson -tribute', 0, function(r) {
 				if(r.entry) {
-					r.entry.forEach(function(e) {
+					r.entry.forEach(function(e, i) {
 						songs.push({
+							providerRanking : i,
 							provider : DATA.providers.youtube,
 							provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
 							title : e.title.$t,
-							time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10)
+							time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10),
+							hd : e.yt$hd ? true : false
 						});
 					});
 					process();
@@ -743,6 +749,7 @@ TEMPLATE = {
 			SC.search(title, function(r) {
 				r.forEach(function(t, i) {
 					songs.push({
+						providerRanking : i,
 						provider : DATA.providers.soundcloud,
 						provider_id : t.id,
 						title : t.user.username + ' - ' + t.title,
