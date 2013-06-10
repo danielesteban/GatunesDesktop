@@ -713,44 +713,80 @@ TEMPLATE = {
 		bestMatch : function(s, callback) {
 			if(s.bestMatch) return callback && callback(s.bestMatch);
 			var title = s.artist.name + ' ' + s.title,
-				words = title.split(' '),
-				titleWords = s.title.split(' '),
+				getWords = function(str) {
+					var ws = [];
+					str.split(' ').forEach(function(w) {
+						w = w.toLowerCase().trim();
+						ws.indexOf(w) === -1 && ws.push(w);
+					});
+					return ws;
+				},
+				words = getWords(title),
+				titleWords = getWords(s.title),
+				badWords = function() {
+					var bw = [
+							'cover',
+							'live',
+							'edit',
+							'remix',
+							'reversed',
+							'backwards',
+							'lesson',
+							'tribute'
+						], l = bw.length;
+
+					for(var x=0; x<l; x++) {
+						if(words.indexOf(bw[x]) !== -1) {
+							bw.splice(x, 1);
+							x--;
+							l--;
+						}
+					}
+					return bw;
+				}(),
 				songs = [],
 				c = 0,
 				process = function() {
 					c++;
 					if(c < 2) return;
 					songs.forEach(function(ss) {
-						var sWords = ss.title.replace(/ - /g, ' ').replace(/ \/ /g, ' ').split(' '),
+						var sWords = getWords(ss.title.replace(/ - /g, ' ').replace(/ \/ /g, ' ')),
 							wCount = 0,
-							titleWCount = 0;
+							titleWCount = 0,
+							bwCount = 0;
 
 						words.forEach(function(w) {
 							if(sWords.indexOf(w) === -1) return;
 							wCount++; 
-							if(titleWords.indexOf(w) === -1) return;
-							titleWCount++;
+							titleWords.indexOf(w) !== -1 && titleWCount++;
+							
+						});
+
+						badWords.forEach(function(w) {
+							sWords.indexOf(w) !== -1 && bwCount++;		
 						});
 
 						ss.timeDiff = Math.abs(ss.time - s.time);
 						ss.wCount = wCount;
+						ss.bwCount = bwCount;
 						ss.exactMatch = wCount === sWords.length;
 						ss.titleMatch = titleWCount === titleWords.length;
 					});
 					songs.sort(function(a, b) {
-						return a.exactMatch > b.exactMatch ? -1 : (a.exactMatch < b.exactMatch ? 1 : 
-							(a.titleMatch > b.titleMatch ? -1 : (a.titleMatch < b.titleMatch ? 1 : 
-								(a.wCount > b.wCount ? -1 : (a.wCount < b.wCount ? 1 : 
-									(b.timeDiff > a.timeDiff ? -1 : (b.timeDiff < a.timeDiff ? 1 : 
-										(a.hd > b.hd ? -1 : (a.hd < b.hd ? 1 :
-											(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
-							0)))))))))));
+						return b.bwCount > a.bwCount ? -1 : (b.bwCount < a.bwCount ? 1 : 
+							(a.exactMatch > b.exactMatch ? -1 : (a.exactMatch < b.exactMatch ? 1 : 
+								(a.titleMatch > b.titleMatch ? -1 : (a.titleMatch < b.titleMatch ? 1 : 
+									(a.wCount > b.wCount ? -1 : (a.wCount < b.wCount ? 1 : 
+										(b.timeDiff > a.timeDiff ? -1 : (b.timeDiff < a.timeDiff ? 1 : 
+											(a.hd > b.hd ? -1 : (a.hd < b.hd ? 1 :
+												(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
+							0)))))))))))));
 					});
 					songs[0] && songs[0].wCount >= titleWords.length && (s.bestMatch = songs[0]);
 					callback && callback(s.bestMatch);
 				};
 
-			YT.search('videos', title + ' -cover -live -edit -remix -reversed -backwards -lesson -tribute', 0, function(r) {
+			YT.search('videos', title, 0, function(r) {
 				if(r.entry) {
 					r.entry.forEach(function(e, i) {
 						songs.push({
