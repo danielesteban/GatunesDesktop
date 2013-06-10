@@ -1,3 +1,7 @@
+## v1.1.4 (Jun 10, 2013)
+
+  - The (i believe) final song matching algorithm
+
 ## v1.1.3 (Jun 10, 2013)
 
   - Search on aside. Just one search bar.
