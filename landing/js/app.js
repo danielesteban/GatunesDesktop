@@ -15,12 +15,15 @@ $(window).load(function() {
 					window.location.href = $('link[rel="chrome-webstore-item"]').attr('href');
 				};
 
+			return goToStore();
+			/*
+			Apparently this doesn't work.. so I'll comment it out 'til I fix it.
 			if(!window.chrome) return goToStore();
 			chrome.webstore.install('', function() {
 				$('a.install button').remove();
 				$('.install a').unbind('click', install);
 				$('.install button').unbind('click', install);
-			}, goToStore);
+			}, goToStore);*/
 		};
 	
 	['en', 'es'].indexOf(lang) === -1 && (lang = 'en');
