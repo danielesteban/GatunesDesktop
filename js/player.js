@@ -47,11 +47,7 @@ PLAYER = {
 			});
 		});
 
-		/* Remove the webview in the regular web app */
-		if(!window.chrome || !window.chrome.storage) {
-			$("#YTPlayer").remove();
-			$('body').append('<div id="YTPlayer" />');
-		}
+		$('body').append('<div id="YTPlayer" />');
 	},
 	load : function(queueId) {
 		var song = PLAYER.queue[queueId],
@@ -225,9 +221,8 @@ PLAYER = {
 		});
 	},
 	fullscreen : function() {
-		var w = $('html')[0];
-		if(FULLSCREEN.active()) FULLSCREEN.cancel(w);
-		else FULLSCREEN.request(w);
+		if(FULLSCREEN.active()) FULLSCREEN.cancel();
+		else FULLSCREEN.request();
 	},
 	onFullscreen : function() {
 		var a = FULLSCREEN.active();

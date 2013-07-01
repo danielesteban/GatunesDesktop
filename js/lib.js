@@ -262,6 +262,7 @@ LIB = {
 			on_text = (n === "INPUT" || n === "TEXTAREA" || $(t).attr('contenteditable')) && e.keyCode !== 27;
 
 		if(on_text || e.metaKey) return;
+		console.log(e.keyCode);
 		switch(e.keyCode) {
 			case 32: //space
 				LIB.cancelHandler(e); //avoid page scroll-down behaviour
@@ -273,6 +274,8 @@ LIB = {
 			case 39: //right
 				PLAYER.next();
 			break;
+			case 27: //esc
+				FULLSCREEN.active() && FULLSCREEN.cancel();
 		}
 	},
 	onResize : function() {

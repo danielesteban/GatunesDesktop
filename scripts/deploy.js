@@ -54,7 +54,7 @@ function writeIndex(css, js) {
 	var html = fs.readFileSync('bundle/index.html', 'utf8'),
 		index = html.substr(0, html.indexOf('<link'));
 
-	//index = index.replace(/<html>/, '<html manifest="/app.manifest">');
+	index = index.replace(/<html>/, '<html manifest="/app.manifest">');
 	index += '<link href="/' + css + '.css" rel="stylesheet" />';
 	index += '<script src="/' + js + '.js" charset="utf-8"></script>';
 	index += html.substr(html.indexOf('<title>'));
@@ -62,11 +62,11 @@ function writeIndex(css, js) {
 }
 
 function genManifest(css, js, callback) {
-	md5(['image.html'], '/', function(md5image) {
+	md5(['server.js'], '/', function(md5server) {
 		var imgs = fs.readdirSync('bundle/img'),
 		manifest = "CACHE:\n" +
 			"/\n" + 
-			"/image.html?" + md5image[0] + "\n" +
+			"/server.js?" + md5server[0] + "\n" +
 			"/" + css + ".css\n" +
 			"/" + js + ".js\n";
 
@@ -77,7 +77,7 @@ function genManifest(css, js, callback) {
 					manifest += "/img/" + img + "?" + md5s[i] + "\n"; 
 				});
 
-				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/image.html /image.html\n");
+				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.js /server.js\n");
 			}
 			
 			manifest += "\nNETWORK:\n" +
@@ -121,16 +121,14 @@ exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
 			exec('rm -rf bundle/scripts bundle/releases bundle/landing bundle/CHANGELOG.md bundle/LICENSE bundle/README.md bundle/bundle', function() {
-				fs.writeFileSync('bundle/image.html', str_replace_array(fs.readFileSync('bundle/image.html', 'utf8'), ["\n", "\r", "\t"], ['', '', '']));
 				console.log('compiling templates...');
 				genTemplates(function() {
 					console.log('compiling css...');
 					exec('lessc --yui-compress bundle/css/screen.less bundle/css/screen.css', function() {
 						exec('rm -rf bundle/templates bundle/css/*.less', function() {
 							uglify([
-								'launch.js',
+								'server.js',
 								'js/app.js',
-								'js/fullscreen.js',
 								'js/lastfm.js',
 								'js/lib.js',
 								'js/player.js',
@@ -146,13 +144,13 @@ exec('rm -rf bundle', function() {
 										exec('rm -rf bundle/js bundle/css', function() {
 											console.log('generating index & manifest...');
 											writeIndex(cssMD5, jsMD5);
-											//genManifest(cssMD5, jsMD5, function() {
-												exec('cd bundle/ && zip ../Gatunes.zip -r .', function() {
-													exec('rm -rf bundle', function() {
+											genManifest(cssMD5, jsMD5, function() {
+												//exec('cd bundle/ && zip ../Gatunes.zip -r .', function() {
+												//	exec('rm -rf bundle', function() {
 														console.log('Done!');       
-													});
-												});
-											//});
+												//	});
+												//});
+											});
 										});
 									});
 								});

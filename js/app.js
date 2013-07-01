@@ -1418,8 +1418,9 @@ $(window).load(function() {
 
 		$(window)
 			.resize(LIB.onResize)
-			.keydown(LIB.onKeyDown)
-			.bind(FULLSCREEN.eventName, PLAYER.onFullscreen);
+			.keydown(LIB.onKeyDown);
+
+		FULLSCREEN.onFullscreen = PLAYER.onFullscreen;
 
 		/* Init players */
 		PLAYER.init();

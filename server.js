@@ -22,11 +22,26 @@ httpServer.on('listening', function() {
 
 	APPWIN = window.open('http://localhost:' + httpPort, 'app', 'width=' + window.screen.width + ',height=' + window.screen.height);
 	var appWin = w.get(APPWIN);
-	appWin.show();
-	appWin.focus();
 	appWin.on('close', function() {
 		serverWin.close();
 	});
+	APPWIN.onload = function() {
+		appWin.show();
+		appWin.focus();
+		APPWIN.FULLSCREEN = {
+			active : function() {
+				return appWin.isFullscreen;
+			},
+			request : function() {
+				appWin.enterFullscreen();
+				APPWIN.FULLSCREEN.onFullscreen();
+			},
+			cancel : function() {
+				appWin.leaveFullscreen();
+				APPWIN.FULLSCREEN.onFullscreen();
+			}
+		};
+	};
 });
 
 httpServer.listen(httpPort, 'localhost');
