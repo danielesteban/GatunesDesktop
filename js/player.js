@@ -48,7 +48,7 @@ PLAYER = {
 		});
 
 		/* Remove the webview in the regular web app */
-		if(!window.chrome.storage) {
+		if(!window.chrome || !window.chrome.storage) {
 			$("#YTPlayer").remove();
 			$('body').append('<div id="YTPlayer" />');
 		}

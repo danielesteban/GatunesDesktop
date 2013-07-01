@@ -2,7 +2,7 @@
 /*
 
 To run this forever while developing:
-/usr/local/bin/supervisor --extensions 'less|handlebars' scripts/genStatics.js
+/usr/local/bin/supervisor --extensions 'less|handlebars' --ignore 'Gatunes.app' scripts/genStatics.js
 
 */
 var exec = require('child_process').exec;

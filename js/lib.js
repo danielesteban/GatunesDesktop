@@ -276,7 +276,7 @@ LIB = {
 		}
 	},
 	onResize : function() {
-		var content_height = $(window).height() - 51;
+		var content_height = $(window).height() - 50;
 		$('section#playlist div.border').css('min-height', content_height - 100);
 		$('section').css('height', content_height);
 		$('aside menu').last().css('height', content_height - $('aside input').first().height() - $('aside menu').first().height() - 75);

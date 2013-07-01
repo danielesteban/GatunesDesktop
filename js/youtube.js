@@ -30,7 +30,7 @@ YT = {
 		});
 	},
 	player : function(song) {
-		if(window.chrome.storage) return YT.chromeAppPlayer(song);
+		if(window.chrome && window.chrome.storage) return YT.chromeAppPlayer(song);
 		
 		var video_id = song.provider_id,
 			callback = function() {
@@ -55,8 +55,7 @@ YT = {
 							modestbranding: 1,
 							iv_load_policy: 3,
 							rel: 0,
-							hd: 1,
-							html5: 1
+							hd: 1
 						}
 					});
 

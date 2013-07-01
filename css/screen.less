@@ -8,10 +8,6 @@ body {
 	display: none;
 }
 
-aside, section {
-	border-top: 1px solid #f09;
-}
-
 aside {
 	float: left;
 	width: 200px;
@@ -265,9 +261,8 @@ footer {
 	background: #000;
 }
 
-#SCPlayer iframe {
-	width: 100%;
-	height: 99%;
+#SCPlayer img {
+	height: 100%;
 }
 
 /* Sections */
@@ -296,14 +291,9 @@ section {
 			overflow: hidden;
 			width: 126px;
 			margin: 0 auto 10px;
-			iframe, b {
-				float: left;
+			img {
 				width: 126px;
 				height: 126px;
-			}
-			b {
-				position: relative;
-				margin: -126px 0 0;
 			}
 		}
 		span {
@@ -318,12 +308,9 @@ section {
 			margin: 0 5px 5px 0;
 			div.img {
 				width: 64px;
-				iframe, b {
+				img {
 					width: 64px;
 					height: 64px;
-				}
-				b {
-					margin: -64px 0 0;
 				}
 			}
 			span {
@@ -513,14 +500,9 @@ section#album {
 		margin: 0 0 0 10px;
 	}
 	table .img, table .img {
-		iframe, b {
-			float: left;
+		img {
 			width: 64px;
 			height: 64px;
-		}
-		b {
-			position: relative;
-			margin: -64px 0 0;
 		}
 	}
 	menu {
@@ -531,7 +513,7 @@ section#album {
 			display: inline-block;
 		}
 	}
-	div.cover iframe {
+	div.cover img {
 		width: 300px;
 		height: 300px;
 	}
@@ -559,7 +541,7 @@ section#explore {
 }
 
 section#artist {
-	div.image iframe {
+	div.image img {
 		width: 300px;
 		height: 300px;
 	}

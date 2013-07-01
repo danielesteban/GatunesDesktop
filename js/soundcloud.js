@@ -110,13 +110,10 @@ SC = {
 			SC.artworks_req_callbacks.push(function() {
 				if(!SC.artworks[song.provider_id]) return;
 				var div = $('<div id="SCPlayer" />'),
-					i = $('<iframe />');
+					i = $('<img src="' + SC.artworks[song.provider_id] + '" />');
 
 				div.append(i);
 				$('body').append(div);
-				setTimeout(function() {
-					i.attr("src", '/image.html#' + SC.artworks[song.provider_id]);
-				});
 			});
 			SC.reqArtworks();
 		}

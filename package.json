@@ -1,0 +1,18 @@
+{
+	"name" : "Gatunes",
+	"version": "1.1.5",
+	"main" : "server.html",
+	"window" : {
+		"toolbar" : false,
+		"width" : 1280,
+		"height" : 800,
+		"resizeable" : true,
+		"show" : false
+	},
+	"webkit": {
+		"plugin": true
+	},
+	"dependencies" : {
+		"node-static" : "latest"
+	}
+}

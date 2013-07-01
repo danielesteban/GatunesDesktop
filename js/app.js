@@ -5,7 +5,7 @@ DATA = {
 		lastfm : 3
 	},
 	getItem : function(id, callback) {
-		if(!window.chrome.storage) callback(JSON.parse(window.localStorage.getItem(id)));
+		if(!window.chrome || !window.chrome.storage) callback(JSON.parse(window.localStorage.getItem(id)));
 		else window.chrome.storage.sync.get(id, function(items) {
 			callback(items[id]);
 		});
@@ -18,7 +18,7 @@ DATA = {
 				callback && callback();
 			};
 		
-		if(!window.chrome.storage) {
+		if(!window.chrome || !window.chrome.storage) {
 			window.localStorage.setItem(id, JSON.stringify(value));
 			onChange();
 		} else {
@@ -35,7 +35,7 @@ DATA = {
 				callback && callback();
 			};
 
-		if(!window.chrome.storage) {
+		if(!window.chrome || !window.chrome.storage) {
 			window.localStorage.removeItem(id);
 			onChange();
 		} else window.chrome.storage.sync.remove(id, onChange);
@@ -925,13 +925,13 @@ TEMPLATE = {
 				else DATA.albums.add(data, cb)
 			});
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');        
-			$('section div.cover').html('<iframe src="/image.html#' + data.image + '" />');
+			$('section div.cover').append('<img src="' + data.image + '" />');
 			!data.songs.length && LASTFM.getTopAlbums(data.artist.name, function(albums) {
 				var c = 0,
 					dest = $('div.empty div');
 
 				dest.empty();
-				albums.forEach(function(a, i) {
+				albums.forEach(function(a) {
 					if(c >= 8 || !a.mbid || a.mbid === data.id) return;
 					var div = $(Handlebars.partials.album({
 							title : a.name,
@@ -939,12 +939,11 @@ TEMPLATE = {
 							mini : true
 						}));
 
+					$('div.img', div).append('<img src="' + a.image[2]['#text'] + '" />');
 					dest.append(div);
-					setTimeout(function() {
-						$('div.img iframe', div).attr('src', '/image.html#' + a.image[2]['#text']);
-					}, i * 150);
 					c++;
 				});
+				LIB.handleLinks(dest);
 				c > 0 && dest.parent().show().fadeIn('fast');
 			}, 16);
 			LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
@@ -952,7 +951,7 @@ TEMPLATE = {
 					c = 0;
 
 				dest.empty();
-				albums.forEach(function(a, i) {
+				albums.forEach(function(a) {
 					if(c > 5 || !a.mbid || data.id === a.mbid) return;
 					var div = $(Handlebars.partials.album({
 							title : a.name,
@@ -960,10 +959,8 @@ TEMPLATE = {
 							mini : true
 						}));
 
+					$('div.img', div).append('<img src="' + a.image[1]['#text'] + '" />');
 					dest.append(div);
-					setTimeout(function() {
-						$('div.img iframe', div).attr('src', '/image.html#' + a.image[1]['#text']);
-					}, i * 150);
 					c++;
 				});
 				LIB.handleLinks(dest);
@@ -1040,17 +1037,15 @@ TEMPLATE = {
 				renderAlbums = function(albums) {
 					DATA.getItem('albums', function(userAlbums) {
 						userAlbums = userAlbums || [];
-						albums.forEach(function(a, i) {
+						albums.forEach(function(a) {
 							if(!a.mbid || userAlbums.indexOf(a.mbid) !== -1) return;
 							var div = $(Handlebars.partials.album({
 									title : a.artist.name + ' - ' + a.name,
 									link : '/album/' + a.mbid
 								}));
 
+							$('div.img', div).append('<img src="' + a.image[2]['#text'] + '" />');
 							dest.append(div);
-							setTimeout(function() {
-								$('div.img iframe', div).attr('src', '/image.html#' + a.image[2]['#text']);
-							}, i * 150);
 						});
 						LIB.handleLinks('section');
 						!$('a', dest).length && dest.append('<p class="empty">' + L.emptyHomeTag + '</p>');
@@ -1224,17 +1219,15 @@ TEMPLATE = {
 				page = 1,
 				getAlbums = function() {
 					LASTFM.getTopAlbums(data.name, function(albums) {
-						albums.forEach(function(a, i) {
+						albums.forEach(function(a) {
 							if(!a.mbid) return;
 							var div = $(Handlebars.partials.album({
 									title : a.artist.name + ' - ' + a.name,
 									link : '/album/' + a.mbid
 								}));
 
+							$('div.img', div).append('<img src="' + a.image[2]['#text'] + '" />');
 							dest.append(div);
-							setTimeout(function() {
-								$('div.img iframe', div).attr('src', '/image.html#' + a.image[2]['#text']);
-							}, i * 150);
 						});
 						LIB.handleLinks('section');
 						LIB.onSectionScroll(albums.length === 50, function() {
