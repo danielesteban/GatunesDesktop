@@ -3,6 +3,8 @@
 		{{a artist.name artist.link}} - {{title}} 
 		{{#unless stored}}
 			<button class="btn store"><i class="icon-plus"></i> {{L 'storeAlbum'}}</button>
+		{{else}}
+			<button class="btn offline"><i class="icon-download-alt"></i> <span></span></button>
 		{{/unless}}
 	</h1>
 	<hr>

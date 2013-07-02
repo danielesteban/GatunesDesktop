@@ -318,7 +318,7 @@ ROUTER = {
 						})
 						.keydown(LIB.inlineOnKeyDown);
 					});
-					LIB.handleSpeech('section');
+					//LIB.handleSpeech('section');
 					LIB.handleLinks('section');
 					LIB.onResize();
 					!fromPopEvent && window.history.pushState && window.history.state !== '/' + url && window.history.pushState('/' + url, '', '/' + url); 

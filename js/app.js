@@ -540,6 +540,7 @@ TEMPLATE = {
 					if(!song.search) {
 						if(song.provider !== DATA.providers.lastfm) return play && pf();
 						return TEMPLATE.song.bestMatch(song, function(match) {
+							!play && --playlist.songsToMatch === 0 && playlist.offline && TEMPLATE.playlist.download(playlist);
 							if(!match) return tr.addClass('error');
 							play && pf();
 						});
@@ -582,6 +583,8 @@ TEMPLATE = {
 			}
 			dest.append(tr);
 			!song.search && song.provider === DATA.providers.lastfm && setTimeout(function() {
+				!playlist.songsToMatch && (playlist.songsToMatch = 0);
+				playlist.songsToMatch++;
 				cf();
 			}, tr[0].rowIndex * 100);
 		},
@@ -604,6 +607,49 @@ TEMPLATE = {
 			var tr = $('tr:nth-child(' + (PLAYER.queueId + 1) + ')', t);
 			tr.addClass('playing');
 			$('a.play i', tr).attr('class', 'icon-headphones');
+		},
+		download : function(playlist) {
+			var songs = playlist.songs.slice(0),
+				i = 0,
+				download = function() {
+					if(!songs.length) return done();
+					var song = songs.shift(),
+						err,
+						cb = function(url) {
+							DOWNLOAD(url, s.provider + '_' + s.provider_id, LIB.addZero(i) + ' ' + song.title, playlist, function(e, file) {
+								if(err) return;
+								err = e;
+								console.log(file + ' downloaded.');
+								download();
+							});
+						};
+
+					var s = song;
+					s.provider === DATA.providers.lastfm && (s = s.bestMatch);
+
+					i++;
+
+					if(!s) return download();
+
+					switch(s.provider) {
+						case DATA.providers.youtube:
+							cb('http://youtube.com/watch?v=' + s.provider_id);
+						break;
+						case DATA.providers.soundcloud:
+							SC.get(s.provider_id, function(data) {
+								if(!data) return download();
+								cb(data.permalink_url);
+							});
+						break;
+						default:
+							return download();
+					}	
+				},
+				done = function() {
+					console.log('Download playlist done!');
+				};
+
+			download();
 		}
 	},
 	song : {
@@ -849,6 +895,7 @@ TEMPLATE = {
 									link : '/explore/' + t
 								};
 							});
+							//album.offline = true;
 							callback(album);
 						});
 					};
@@ -892,10 +939,12 @@ TEMPLATE = {
 			});
 		},
 		render : function(data) {
+			var songsToMatch = data.songs.length;
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
 					cf = function(play) {
 						TEMPLATE.song.bestMatch(s, function(match) {
+							!play && --songsToMatch === 0 && data.offline && TEMPLATE.playlist.download(data);
 							if(!match) return tr.addClass('error');
 							if(!play) return;
 							PLAYER.queue = data.songs;
@@ -922,6 +971,16 @@ TEMPLATE = {
 				if(data.stored) DATA.albums.remove(data.id, cb);
 				else DATA.albums.add(data, cb)
 			});
+			$('section button.offline').click(function() {
+				DATA.getItem('album:' + data.id, function(album) {
+					if(album.offline) delete album.offline;
+					else album.offline = true;
+					DATA.setItem('album:' + data.id, album, function() {
+						ROUTER.update('/album/' + data.id, true);
+					});
+				});
+			});
+			$('section button.offline span').text('Offline: ' + (data.offline ? 'ON' : 'OFF'));
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');        
 			$('section div.cover').append('<img src="' + data.image + '" />');
 			!data.songs.length && LASTFM.getTopAlbums(data.artist.name, function(albums) {
@@ -982,6 +1041,7 @@ TEMPLATE = {
 			});
 		},
 		render : function(data) {
+			var songsToMatch = data.songs.length;
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
 					pf = function() {
@@ -993,6 +1053,7 @@ TEMPLATE = {
 					cf = function(play) {
 						if(s.provider !== DATA.providers.lastfm) return play && pf();
 						TEMPLATE.song.bestMatch(s, function(match) {
+							!play && --songsToMatch === 0 && data.offline && TEMPLATE.playlist.download(data);
 							if(!match) return tr.addClass('error');
 							play && pf();
 						});
@@ -1392,7 +1453,7 @@ $(window).load(function() {
 	LIB.setupLang(function() {
 		/* Render the skin */
 		$('body').append(Handlebars.templates.skin({})).fadeIn();
-		LIB.handleSpeech('aside');
+		//LIB.handleSpeech('aside');
 		LIB.handleLinks('aside, footer');
 		TEMPLATE.explore.initSearch();
 
@@ -1426,6 +1487,12 @@ $(window).load(function() {
 		$(window)
 			.resize(LIB.onResize)
 			.keydown(LIB.onKeyDown);
+			/*.bind('online', function() {
+				console.log('online');
+			})
+			.bind('offline', function() {
+				console.log('offline');
+			});*/
 
 		FULLSCREEN.onFullscreen = PLAYER.onFullscreen;
 

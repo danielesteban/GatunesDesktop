@@ -1,4 +1,5 @@
-var staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
+var fs = require('fs'),
+	staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
 	httpServer = require('http').createServer(function (request, response) {
 	    request.addListener('end', function () {
 	    	staticServer.serve(request, response, function (e, res) {
@@ -6,7 +7,8 @@ var staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}
 			});
 	    }).resume();
 	}),
-	httpPort = 10000;
+	httpPort = 28029,
+	downloadPath = process.env.HOME + '/Downloads/Gatunes';
 
 httpServer.on('error', function(e) {
 	if(e.code !== "EADDRINUSE") return;
@@ -17,9 +19,6 @@ httpServer.on('error', function(e) {
 });
 
 httpServer.on('listening', function() {
-	var fs = require('fs'),
-		downloadPath = process.env.HOME + '/Downloads/Gatunes';
-
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	load();
 });
@@ -51,15 +50,31 @@ function load() {
 				APPWIN.FULLSCREEN.onFullscreen();
 			}
 		};
-		APPWIN.DOWNLOAD = function(url, callback, progress) {
-			var dl = require('youtube-dl').download(url, downloadPath);
-			progress && dl.on('progress', progress);
-			if(!callback) return;
-			dl.on('error', function(err) {
-				callback(err);
-			});
-			dl.on('end', function(data) {
-				callback(null, data);
+		APPWIN.DOWNLOAD = function(url, id, title, playlist, callback, progress) {
+			var path = downloadPath + '/';
+			if(playlist.artist) {
+				path += playlist.artist.name.replace(/\//g, '_') + '/';
+				!fs.existsSync(path) && fs.mkdirSync(path);
+			}
+			path += playlist.title.replace(/\//g, '_');
+			!fs.existsSync(path) && fs.mkdirSync(path);
+			fs.readdir(path, function(err, list) {
+				if(err) return callback(true);
+				var already = false;
+				list.forEach(function(item) {
+					if(already) return;
+					item.substr(item.length - 4 - id.length, id.length) === id && (already = item);
+				});
+				if(already) return callback(null, already);
+				var dl = require('youtube-dl').download(url, path, ["-o" + title + '_' + id + ".%(ext)s"]);
+				progress && dl.on('progress', progress);
+				if(!callback) return;
+				dl.on('error', function(err) {
+					callback(err);
+				});
+				dl.on('end', function(data) {
+					callback(null, data.filename);
+				});
 			});
 		};
 		APPWIN.RELOAD = function() {
