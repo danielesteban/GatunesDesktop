@@ -18,8 +18,11 @@ httpServer.on('error', function(e) {
 
 httpServer.on('listening', function() {
 	var w = require('nw.gui').Window,
-		serverWin = w.get();
+		serverWin = w.get(),
+		downloadPath = process.env.HOME + '/Downloads/Gatunes',
+		fs = require('fs');
 
+	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	APPWIN = window.open('http://localhost:' + httpPort, 'app', 'width=' + window.screen.width + ',height=' + window.screen.height);
 	var appWin = w.get(APPWIN);
 	appWin.on('close', function() {
@@ -40,6 +43,17 @@ httpServer.on('listening', function() {
 				appWin.leaveFullscreen();
 				APPWIN.FULLSCREEN.onFullscreen();
 			}
+		};
+		APPWIN.DOWNLOAD = function(url, callback, progress) {
+			var dl = require('youtube-dl').download(url, downloadPath);
+			progress && dl.on('progress', progress);
+			if(!callback) return;
+			dl.on('error', function(err) {
+				callback(err);
+			});
+			dl.on('end', function(data) {
+				callback(null, data);
+			});
 		};
 	};
 });

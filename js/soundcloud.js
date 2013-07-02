@@ -11,12 +11,12 @@ SC = {
 				q : query
 			};
 
-		$.get('https://api.soundcloud.com/tracks.json', params, function(data) {
+		$.get('//api.soundcloud.com/tracks.json', params, function(data) {
 			callback(data);
 		}, 'json');
 	},
 	get : function(id, callback) {
-		$.get('https://api.soundcloud.com/tracks/' + id +  '.json', {client_id : SC.client_id}, function(data) {
+		$.get('//api.soundcloud.com/tracks/' + id +  '.json', {client_id : SC.client_id}, function(data) {
 			callback(data);
 		}, 'json');
 	},
@@ -28,7 +28,7 @@ SC = {
 				},
 				cbs = SC.artworks_req_callbacks;
 			
-			$.get('https://api.soundcloud.com/tracks.json', params, function(data) {
+			$.get('//api.soundcloud.com/tracks.json', params, function(data) {
 				data.forEach(function(t) {
 					if(t.artwork_url || (t.user.avatar_url && t.user.avatar_url.indexOf('default_avatar_large.png') === -1)) {
 						SC.artworks[t.id] = (t.artwork_url || t.user.avatar_url).replace(/large.jpg/, 'crop.jpg');
@@ -55,7 +55,7 @@ SC = {
 		PLAYER.onStateChange(3);
 		var sound = soundManager.createSound({
 			id : 'sound' + song.provider + song.provider_id,
-			url : song.provider === DATA.providers.soundcloud ? 'https://api.soundcloud.com/tracks/' + song.provider_id + '/stream?client_id=' + SC.client_id : /*song.provider === DATA.providers.url ? song.provider_id : */song.url,
+			url : song.provider === DATA.providers.soundcloud ? '//api.soundcloud.com/tracks/' + song.provider_id + '/stream?client_id=' + SC.client_id : /*song.provider === DATA.providers.url ? song.provider_id : */song.url,
 			autoPlay: true,
 			multiShot: false,
 			/*useEQData: true,*/

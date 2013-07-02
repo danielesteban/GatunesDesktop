@@ -62,11 +62,12 @@ function writeIndex(css, js) {
 }
 
 function genManifest(css, js, callback) {
-	md5(['server.js'], '/', function(md5server) {
+	md5(['server.html', 'server.js'], '/', function(md5server) {
 		var imgs = fs.readdirSync('bundle/img'),
 		manifest = "CACHE:\n" +
 			"/\n" + 
-			"/server.js?" + md5server[0] + "\n" +
+			"/server.html?" + md5server[0] + "\n" +
+			"/server.js?" + md5server[1] + "\n" +
 			"/" + css + ".css\n" +
 			"/" + js + ".js\n";
 
@@ -77,7 +78,7 @@ function genManifest(css, js, callback) {
 					manifest += "/img/" + img + "?" + md5s[i] + "\n"; 
 				});
 
-				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.js /server.js\n");
+				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.html /server.html\n/server.js /server.js\n");
 			}
 			
 			manifest += "\nNETWORK:\n" +
@@ -140,6 +141,7 @@ exec('rm -rf bundle', function() {
 								compact('bundle/css/*.css', 'css', function(cssMD5) {
 									console.log('compacting js...');
 									compact('bundle/js/*.js', 'js', function(jsMD5) {
+										fs.writeFileSync('bundle/server.html', str_replace_array(fs.readFileSync('bundle/server.html', 'utf8'), ["\n", "\r", "\t"], ['', '', '']));
 										console.log('cleaning bundle...');
 										exec('rm -rf bundle/js bundle/css', function() {
 											console.log('generating index & manifest...');

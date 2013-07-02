@@ -9,11 +9,11 @@ YT = {
 
 		switch(feed) {
 			case 'videos':
-				url = 'https://gdata.youtube.com/feeds/api/videos';
+				url = '//gdata.youtube.com/feeds/api/videos';
 				params.vq = param;
 			break;
 			default:
-				url = 'https://gdata.youtube.com/feeds/api/standardfeeds/' + feed + (param ? '_' + param : '');
+				url = '//gdata.youtube.com/feeds/api/standardfeeds/' + feed + (param ? '_' + param : '');
 		}
 		$.get(url, params, function(data) {
 			callback(data.feed);
@@ -23,7 +23,7 @@ YT = {
 		var params = {
 				alt : 'json'
 			},
-			url = 'https://gdata.youtube.com/feeds/api/videos/' + id;
+			url = '//gdata.youtube.com/feeds/api/videos/' + id;
 
 		$.get(url, params, function(data) {
 			callback(data.entry);
@@ -89,7 +89,7 @@ YT = {
 
 		if(PLAYER.IframeAPILoaded) return callback();
 
-		$.getScript('https://www.youtube.com/iframe_api');
+		$.getScript('//www.youtube.com/iframe_api');
 		YT.IframeAPIReadyCallback = callback;
 	},
 	IframeAPIReady : function() {

@@ -1,6 +1,10 @@
 {
 	"name" : "Gatunes",
 	"version": "1.1.5",
+	"repository" : {
+		"type" : "git",
+     	"url" : "git://github.com/danielesteban/Gatunes.git"
+     },
 	"main" : "server.html",
 	"window" : {
 		"toolbar" : false,
@@ -13,6 +17,7 @@
 		"plugin": true
 	},
 	"dependencies" : {
-		"node-static" : "latest"
+		"node-static" : "latest",
+		"youtube-dl" : "latest"
 	}
 }

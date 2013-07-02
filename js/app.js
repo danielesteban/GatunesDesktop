@@ -583,7 +583,7 @@ TEMPLATE = {
 			dest.append(tr);
 			!song.search && song.provider === DATA.providers.lastfm && setTimeout(function() {
 				cf();
-			}, tr[0].rowIndex * 50);
+			}, tr[0].rowIndex * 100);
 		},
 		resetSelection : function() {
 			var sel = TEMPLATE.playlist.selectedSongs;
@@ -787,19 +787,17 @@ TEMPLATE = {
 				};
 
 			YT.search('videos', title, 0, function(r) {
-				if(r.entry) {
-					r.entry.forEach(function(e, i) {
-						songs.push({
-							providerRanking : i,
-							provider : DATA.providers.youtube,
-							provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
-							title : e.title.$t,
-							time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10),
-							hd : e.yt$hd ? true : false
-						});
+				r.entry && r.entry.forEach(function(e, i) {
+					songs.push({
+						providerRanking : i,
+						provider : DATA.providers.youtube,
+						provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
+						title : e.title.$t,
+						time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10),
+						hd : e.yt$hd ? true : false
 					});
-					process();
-				}
+				});
+				process();
 			});
 			SC.search(title, function(r) {
 				r.forEach(function(t, i) {
@@ -913,7 +911,7 @@ TEMPLATE = {
 				TEMPLATE.song.hookLove(tr, s);
 				setTimeout(function() {
 					cf();
-				}, i * 50);
+				}, i * 100);
 			});
 			TEMPLATE.playlist.setPlayingSong();
 			$('section button.store, section button.remove').click(function() {
@@ -1008,7 +1006,7 @@ TEMPLATE = {
 				});
 				s.provider === DATA.providers.lastfm && setTimeout(function() {
 					cf();
-				}, i * 50);
+				}, i * 100);
 			});
 			TEMPLATE.playlist.setPlayingSong();
 			$('aside menu li.loved').addClass('selected');
