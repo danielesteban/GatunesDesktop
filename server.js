@@ -66,7 +66,7 @@ function load() {
 					item.substr(item.length - 4 - id.length, id.length) === id && (already = item);
 				});
 				if(already) return callback(null, already);
-				var dl = require('youtube-dl').download(url, path, ["-o" + title + '_' + id + ".%(ext)s"]);
+				var dl = require('youtube-dl').download(url, path, ["-o" + title + '_' + id + ".%(ext)s", "--newline"]);
 				progress && dl.on('progress', progress);
 				if(!callback) return;
 				dl.on('error', function(err) {

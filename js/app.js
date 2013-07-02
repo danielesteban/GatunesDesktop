@@ -609,21 +609,31 @@ TEMPLATE = {
 			$('a.play i', tr).attr('class', 'icon-headphones');
 		},
 		download : function(playlist) {
-			var songs = playlist.songs.slice(0),
+			var table = $('section table').first(),
+				songs = playlist.songs.slice(0),
 				i = 0,
 				download = function() {
-					if(!songs.length) return done();
+					if(!songs.length) return; //done!
 					var song = songs.shift(),
+						tr = $('tr:nth-child(' + (i + 1) + ')', table),
+						progress,
 						err,
 						cb = function(url) {
+							var tmout = setTimeout(function() {
+								$('td.time', tr).children().first().before(progress = $('<div class="progress progress-striped active"><div class="bar"></div></div>'));
+							}, 100);
 							DOWNLOAD(url, s.provider + '_' + s.provider_id, LIB.addZero(i) + ' ' + song.title, playlist, function(e, file) {
 								if(err) return;
-								err = e;
-								console.log(file + ' downloaded.');
+								err = true;
+								progress && progress.remove();
+								clearTimeout(tmout);
 								download();
+							}, function(data) {
+								if(!progress) return;
+								progress.children().first().text(data.percent + '%' + (data.eta !== '--:--' ? ' (' + data.eta + ')' : ''));
 							});
 						};
-
+					
 					var s = song;
 					s.provider === DATA.providers.lastfm && (s = s.bestMatch);
 
@@ -644,10 +654,7 @@ TEMPLATE = {
 						default:
 							return download();
 					}	
-				},
-				done = function() {
-					console.log('Download playlist done!');
-				};
+				}
 
 			download();
 		}
