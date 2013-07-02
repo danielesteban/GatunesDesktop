@@ -251,8 +251,8 @@ LIB = {
 			n = t.nodeName,
 			on_text = (n === "INPUT" || n === "TEXTAREA" || $(t).attr('contenteditable')) && e.keyCode !== 27;
 
+		if(e.metaKey && e.keyCode === 82) return RELOAD();
 		if(on_text || e.metaKey) return;
-		console.log(e.keyCode);
 		switch(e.keyCode) {
 			case 32: //space
 				LIB.cancelHandler(e); //avoid page scroll-down behaviour

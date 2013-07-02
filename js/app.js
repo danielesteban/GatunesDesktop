@@ -1252,6 +1252,15 @@ TEMPLATE = {
 	}
 };
 
+/* Appcache */
+window.applicationCache.addEventListener('updateready', function(e) {
+	if(window.applicationCache.status !== window.applicationCache.UPDATEREADY) return;
+	try {
+		window.applicationCache.swapCache();
+	} catch(e) {}
+	RELOAD();
+}, false);
+
 $(window).load(function() {
 	/* Handlebars Helpers */
 	Handlebars.registerHelper('L', function(id) {

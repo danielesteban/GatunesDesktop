@@ -17,16 +17,23 @@ httpServer.on('error', function(e) {
 });
 
 httpServer.on('listening', function() {
-	var w = require('nw.gui').Window,
-		serverWin = w.get(),
-		downloadPath = process.env.HOME + '/Downloads/Gatunes',
-		fs = require('fs');
+	var fs = require('fs'),
+		downloadPath = process.env.HOME + '/Downloads/Gatunes';
 
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
+	load();
+});
+
+function load() {
 	APPWIN = window.open('http://localhost:' + httpPort, 'app', 'width=' + window.screen.width + ',height=' + window.screen.height);
-	var appWin = w.get(APPWIN);
+	var w = require('nw.gui').Window,
+		serverWin = w.get(),
+		appWin = w.get(APPWIN),
+		reloading = false;
+
 	appWin.on('close', function() {
-		serverWin.close();
+		!reloading && serverWin.close();
+		this.close(true);
 	});
 	APPWIN.onload = function() {
 		appWin.show();
@@ -55,7 +62,12 @@ httpServer.on('listening', function() {
 				callback(null, data);
 			});
 		};
+		APPWIN.RELOAD = function() {
+			reloading = true;
+			APPWIN.close();
+			load();
+		};
 	};
-});
+}
 
 httpServer.listen(httpPort, 'localhost');
