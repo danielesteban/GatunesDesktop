@@ -62,14 +62,15 @@ function writeIndex(css, js) {
 }
 
 function genManifest(css, js, callback) {
-	md5(['server.html', 'server.js'], '/', function(md5server) {
+	md5(['server.html', 'server.js', 'swf/soundmanager2_flash9.swf'], '/', function(md5statics) {
 		var imgs = fs.readdirSync('bundle/img'),
 		manifest = "CACHE:\n" +
 			"/\n" + 
-			"/server.html?" + md5server[0] + "\n" +
-			"/server.js?" + md5server[1] + "\n" +
 			"/" + css + ".css\n" +
-			"/" + js + ".js\n";
+			"/" + js + ".js\n" +
+			"/server.html?" + md5statics[0] + "\n" +
+			"/server.js?" + md5statics[1] + "\n" + 
+			"/swf/soundmanager2_flash9.swf?" + md5statics[2] + "\n";
 
 		md5(imgs.slice(), '/img/', function(md5s) { 
 			for(var x=0; x<2; x++) {
@@ -78,7 +79,7 @@ function genManifest(css, js, callback) {
 					manifest += "/img/" + img + "?" + md5s[i] + "\n"; 
 				});
 
-				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.html /server.html\n/server.js /server.js\n");
+				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.html /server.html?" + md5statics[0] + "\n/server.js /server.js?" + md5statics[1] + "\n/swf/soundmanager2_flash9.swf /swf/soundmanager2_flash9.swf?" + md5statics[2] + "\n");
 			}
 			
 			manifest += "\nNETWORK:\n" +
@@ -121,7 +122,7 @@ console.log("Creating bundle...");
 exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
-			exec('rm -rf bundle/scripts bundle/releases bundle/landing bundle/CHANGELOG.md bundle/LICENSE bundle/README.md bundle/bundle', function() {
+			exec('rm -rf bundle/scripts bundle/releases bundle/landing bundle/CHANGELOG.md bundle/LICENSE bundle/README.md bundle/Gatunes.app bundle/bundle', function() {
 				console.log('compiling templates...');
 				genTemplates(function() {
 					console.log('compiling css...');
@@ -130,6 +131,7 @@ exec('rm -rf bundle', function() {
 							uglify([
 								'server.js',
 								'js/app.js',
+								'js/lang.js',
 								'js/lastfm.js',
 								'js/lib.js',
 								'js/player.js',

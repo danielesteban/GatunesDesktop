@@ -172,18 +172,8 @@ LIB = {
 			if(available_langs.indexOf(cookie_lang) !== -1) lang = cookie_lang;    
 			else if(available_langs.indexOf(browser_lang[0].toLowerCase()) !== -1) lang = browser_lang[0].toLowerCase();
 			else if(browser_lang[1] && available_langs.indexOf(browser_lang[1].toLowerCase()) !== -1) lang = browser_lang[1].toLowerCase();
-			$.get('/_locales/' + lang +  '/messages.json', function(messages) {
-				L = {};
-				for(var i in messages) L[i] = messages[i].message;
-				switch(lang) {
-					case 'es':
-						L.months =  ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-					break;
-					default:
-						L.months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-				}
-				DATA.setItem('lang', lang, callback);
-			}, 'json');
+			L = LANG[lang];
+			DATA.setItem('lang', lang, callback);
 		});
 	},
 	getSpeech : function(input) {
