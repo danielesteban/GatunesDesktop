@@ -30,8 +30,6 @@ YT = {
 		});
 	},
 	player : function(song) {
-		if(window.chrome && window.chrome.storage) return YT.chromeAppPlayer(song);
-		
 		var video_id = song.provider_id,
 			callback = function() {
 				var onStateChange = function(e) {
@@ -95,77 +93,6 @@ YT = {
 	IframeAPIReady : function() {
 		PLAYER.IframeAPILoaded = 1;
 		YT.IframeAPIReadyCallback && YT.IframeAPIReadyCallback();
-	},
-	chromeAppPlayerCallback : 0,
-	chromeAppPlayerCallbacks : {},
-	chromeAppPlayer : function(song) {
-		var video_id = song.provider_id,
-			webview = document.querySelector('webview#YTPlayer'),
-			sendMessage = function(data) {
-				webview.contentWindow.postMessage(data, webview.src);
-			},
-			onMessage = function(e) {
-				if(e.data.callback) {
-					if(YT.chromeAppPlayerCallbacks[e.data.callback]) {
-						YT.chromeAppPlayerCallbacks[e.data.callback](e.data.data);
-						delete YT.chromeAppPlayerCallbacks[e.data.callback];
-					}
-					return;
-				}
-				switch(e.data.func) {
-					case 'state':
-						PLAYER.onStateChange(e.data.data);
-					break;
-					case 'error':
-						PLAYER.onError(e.data.data);
-					break;
-				}
-			}/*,
-			onLoadStop = function() {
-				webview.removeEventListener('loadstop', onLoadStop);
-				PLAYER.chromeAppPlayerLoaded = 1;
-				sendMessage({func: 'load', video: video_id});
-			}*/;
-
-		PLAYER.current = {
-			song : song,
-			play : function() {
-				sendMessage({func: 'play'});
-			},
-			pause : function() {
-				sendMessage({func: 'pause'});
-			},
-			getCurrentTime : function(callback) {
-				var cbid = ++YT.chromeAppPlayerCallback;
-				YT.chromeAppPlayerCallbacks[cbid] = callback;
-				sendMessage({func: 'currentTime', callback: cbid});
-			},
-			getDuration : function(callback) {
-				var cbid = ++YT.chromeAppPlayerCallback;
-				YT.chromeAppPlayerCallbacks[cbid] = callback;
-				sendMessage({func: 'duration', callback: cbid});
-			},
-			getLoadedFraction : function(callback) {
-				var cbid = ++YT.chromeAppPlayerCallback;
-				YT.chromeAppPlayerCallbacks[cbid] = callback;
-				sendMessage({func: 'loadedFraction', callback: cbid});
-			},
-			seekTo : function(fraction) {
-				sendMessage({func: 'seekTo', fraction: fraction});
-			},
-			destruct : function() {
-				window.removeEventListener('message', onMessage);
-				sendMessage({func: 'destruct'});
-			}
-		};
-
-		TEMPLATE.playlist.setPlayingSong();
-
-		window.addEventListener('message', onMessage);
-		sendMessage({func: 'load', video: video_id});
-
-		//if(PLAYER.chromeAppPlayerLoaded) return sendMessage({func: 'load', video: video_id});
-		//webview.addEventListener('loadstop', onLoadStop);
 	}
 };
 
