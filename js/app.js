@@ -608,19 +608,19 @@ TEMPLATE = {
 			tr.addClass('playing');
 			$('a.play i', tr).attr('class', 'icon-headphones');
 		},
+		downloadQueue : [],
 		download : function(playlist) {
-			var table = $('section table').first(),
-				songs = playlist.songs.slice(0),
+			var songs = playlist.songs.slice(0),
 				i = 0,
 				download = function() {
-					if(!songs.length) return; //done!
+					if(!songs.length) return done();
 					var song = songs.shift(),
-						tr = $('tr:nth-child(' + (i + 1) + ')', table),
 						progress,
 						err,
 						cb = function(url) {
 							var tmout = setTimeout(function() {
-								$('td.time', tr).children().first().before(progress = $('<div class="progress progress-striped active"><div class="bar"></div></div>'));
+								if($('section .header h1').attr("key") !== playlist.dataKey) return;
+								$('td.time', $('tr:nth-child(' + i + ')', $('section table').first())).children().first().before(progress = $('<div class="progress progress-striped active"><div class="bar"></div></div>'));
 							}, 100);
 							DOWNLOAD.start(url, s.provider + '_' + s.provider_id, LIB.addZero(i) + ' ' + song.title, playlist, function(e, file) {
 								if(err) return;
@@ -654,8 +654,14 @@ TEMPLATE = {
 						default:
 							return download();
 					}	
-				}
+				},
+				done = function() {
+					TEMPLATE.playlist.downloadQueue.shift();
+					TEMPLATE.playlist.downloadQueue.length && TEMPLATE.playlist.download(TEMPLATE.playlist.downloadQueue.shift());
+				};
 
+			TEMPLATE.playlist.downloadQueue.push(playlist);
+			if(TEMPLATE.playlist.downloadQueue.length > 1) return;
 			download();
 		}
 	},

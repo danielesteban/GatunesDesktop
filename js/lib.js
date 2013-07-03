@@ -277,7 +277,7 @@ LIB = {
 };
 
 ROUTER = {
-	init : function(playlists) {
+	init : function() {
 		var ps = window.history.pushState;
 		ps && $(window).bind('popstate', function(e) {
 			ROUTER.update(e.originalEvent.state !== null ? e.originalEvent.state : document.location.pathname, true);
