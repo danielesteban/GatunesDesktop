@@ -71,10 +71,9 @@ SC = {
 			onpause : function() {
 				PLAYER.onStateChange(PLAYER.states.paused);
 			},
-			/*,
-			onerror : function(e) {
-				PLAYER.onError(e.currentTarget.error.code);
-			}*/
+			onload : function(ok) {
+				!ok && PLAYER.onError();
+			}
 		});
 		PLAYER.current = {
 			song : song,
