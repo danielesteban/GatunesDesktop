@@ -609,7 +609,7 @@ TEMPLATE = {
 			$('a.play i', tr).attr('class', 'icon-headphones');
 		},
 		downloadQueue : [],
-		download : function(playlist) {
+		download : function(playlist, force) {
 			var songs = playlist.songs.slice(0),
 				i = 0,
 				download = function() {
@@ -657,11 +657,17 @@ TEMPLATE = {
 				},
 				done = function() {
 					TEMPLATE.playlist.downloadQueue.shift();
-					TEMPLATE.playlist.downloadQueue.length && TEMPLATE.playlist.download(TEMPLATE.playlist.downloadQueue.shift());
+					TEMPLATE.playlist.downloadQueue.length && TEMPLATE.playlist.download(TEMPLATE.playlist.downloadQueue.shift(), true);
 				};
 
+			var already = false;
+			TEMPLATE.playlist.downloadQueue.forEach(function(p) {
+				if(already) return;
+				p.dataKey === playlist.dataKey && (already = p);
+			});
+			if(already) return;
 			TEMPLATE.playlist.downloadQueue.push(playlist);
-			if(TEMPLATE.playlist.downloadQueue.length > 1) return;
+			if(!force && TEMPLATE.playlist.downloadQueue.length > 1) return;
 			download();
 		}
 	},

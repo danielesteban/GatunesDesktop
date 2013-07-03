@@ -1,5 +1,6 @@
 var fs = require('fs'),
-	downloadPath = process.env.HOME + '/Downloads/Gatunes',
+	join = require('path').join,
+	downloadPath = join(process.env.HOME, 'Downloads', 'Gatunes'),
 	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0}),
 	staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
 	httpServer = require('http').createServer(function (request, response) {
@@ -61,18 +62,19 @@ function load() {
 			}
 		};
 		APPWIN.DOWNLOAD = {
-			getPath : function(playlist) {
-				var path = downloadPath + '/';
+			getPath : function(playlist, create) {
+				var path = downloadPath;
 				if(playlist.artist) {
-					path += playlist.artist.name.replace(/\//g, '_').replace(/&/g, '_').replace(/\?/g, '') + '/';
-					!fs.existsSync(path) && fs.mkdirSync(path);
+					path = join(path, playlist.artist.name.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, ''));
+					create && !fs.existsSync(path) && fs.mkdirSync(path);
 				}
-				path += playlist.title.replace(/\//g, '_').replace(/&/g, '_').replace(/\?/g, '');
-				!fs.existsSync(path) && fs.mkdirSync(path);
+				path = join(path, playlist.title.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, ''));
+				create && !fs.existsSync(path) && fs.mkdirSync(path);
 				return path;
 			},
 			check : function(id, playlist, callback) {
 				var path = APPWIN.DOWNLOAD.getPath(playlist);
+				if(!fs.existsSync(path)) return callback();
 				fs.readdir(path, function(err, list) {
 					if(err) return callback();
 					var already = false;
@@ -80,14 +82,14 @@ function load() {
 						if(already) return;
 						item.substr(item.length - 4 - id.length, id.length) === id && (already = item);
 					});
-					callback(already, path.substr(downloadPath.length));
+					callback(already, path.substr(downloadPath.length).replace(/\\/g, '/'));
 				});
 			},
 			start : function(url, id, title, playlist, callback, progress) {
-				var path = APPWIN.DOWNLOAD.getPath(playlist);
+				var path = APPWIN.DOWNLOAD.getPath(playlist, true);
 				APPWIN.DOWNLOAD.check(id, playlist, function(already) {
 					if(already) return callback(null, already);
-					var dl = require('youtube-dl').download(url, path, ["-o" + title.replace(/\//g, '_').replace(/&/g, '_').replace(/\?/g, '') + '_' + id + ".%(ext)s", "--newline"]);
+					var dl = require('youtube-dl').download(url, path, ["-o" + title.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, '') + '_' + id + ".%(ext)s", "--newline"]);
 					progress && dl.on('progress', progress);
 					if(!callback) return;
 					dl.on('error', function(err) {
