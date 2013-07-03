@@ -55,7 +55,7 @@ SC = {
 		PLAYER.onStateChange(3);
 		var sound = soundManager.createSound({
 			id : 'sound' + song.provider + song.provider_id,
-			url : song.provider === DATA.providers.soundcloud ? '//api.soundcloud.com/tracks/' + song.provider_id + '/stream?client_id=' + SC.client_id : /*song.provider === DATA.providers.url ? song.provider_id : */song.url,
+			url : song.localMatch ? '//' + window.location.host + '/media' + song.localMatch : '//api.soundcloud.com/tracks/' + song.provider_id + '/stream?client_id=' + SC.client_id,
 			autoPlay: true,
 			multiShot: false,
 			/*useEQData: true,*/

@@ -622,7 +622,7 @@ TEMPLATE = {
 							var tmout = setTimeout(function() {
 								$('td.time', tr).children().first().before(progress = $('<div class="progress progress-striped active"><div class="bar"></div></div>'));
 							}, 100);
-							DOWNLOAD(url, s.provider + '_' + s.provider_id, LIB.addZero(i) + ' ' + song.title, playlist, function(e, file) {
+							DOWNLOAD.start(url, s.provider + '_' + s.provider_id, LIB.addZero(i) + ' ' + song.title, playlist, function(e, file) {
 								if(err) return;
 								err = true;
 								progress && progress.remove();
@@ -639,7 +639,7 @@ TEMPLATE = {
 
 					i++;
 
-					if(!s) return download();
+					if(!s || s.localMatch) return download();
 
 					switch(s.provider) {
 						case DATA.providers.youtube:
@@ -763,8 +763,15 @@ TEMPLATE = {
 				}
 			}
 		},
+		localMatch : function(s, p, callback) {
+			if(s.localMatch) return callback && callback(s.localMatch);
+			DOWNLOAD.check(s.provider + '_' + s.provider_id, p, function(localMatch, path) {
+				localMatch && (s.localMatch = path + '/' + localMatch);
+				callback && callback(s.localMatch);
+			});
+		},
 		bestMatch : function(s, callback) {
-			if(s.bestMatch) return callback && callback(s.bestMatch);
+			if(s.bestMatch/* && Math.round((new Date()).getTime() / 1000) - s.bestMatch.date < 604800*/) return callback && callback(s.bestMatch);
 			var title = s.artist.name + ' ' + s.title,
 				getWords = function(str) {
 					var ws = [];
@@ -835,7 +842,28 @@ TEMPLATE = {
 												(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
 							0)))))))))))));
 					});
-					songs[0] && songs[0].wCount >= titleWords.length && (s.bestMatch = songs[0]);
+					if(songs[0] && songs[0].wCount >= titleWords.length) {
+						s.bestMatch = songs[0];
+						s.bestMatch.date = Math.round((new Date()).getTime() / 1000);
+						DATA.getItem('song:' + s.provider + ':' + s.provider_id, function(song) {
+							if(!song) song = {
+								title : LIB.escapeHTML(s.title),
+								time : parseInt(s.time, 10),
+								artist : {
+									mbid : LIB.escapeHTML(s.artist.mbid),
+									name : LIB.escapeHTML(s.artist.name)
+								}
+							};
+							song.bestMatch = {
+								provider : parseInt(s.bestMatch.provider, 10),
+								provider_id : LIB.escapeHTML(s.bestMatch.provider_id),
+								title : LIB.escapeHTML(s.bestMatch.title),
+								time : parseInt(s.bestMatch.time, 10),
+								date : parseInt(s.bestMatch.date, 10)
+							};
+							DATA.setItem('song:' + s.provider + ':' + s.provider_id, song);
+						});
+					}
 					callback && callback(s.bestMatch);
 				};
 
@@ -902,7 +930,6 @@ TEMPLATE = {
 									link : '/explore/' + t
 								};
 							});
-							//album.offline = true;
 							callback(album);
 						});
 					};
@@ -951,13 +978,16 @@ TEMPLATE = {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
 					cf = function(play) {
 						TEMPLATE.song.bestMatch(s, function(match) {
-							!play && --songsToMatch === 0 && data.offline && TEMPLATE.playlist.download(data);
 							if(!match) return tr.addClass('error');
-							if(!play) return;
-							PLAYER.queue = data.songs;
-							PLAYER.queueDataKey = data.dataKey;
-							PLAYER.load(i);
-							$('li.title a', 'footer').attr('href', '/album/' + data.id);
+							TEMPLATE.song.localMatch(match, data, function(localMatch) {
+								!play && --songsToMatch === 0 && data.offline && navigator.onLine && TEMPLATE.playlist.download(data);
+								if(!localMatch && !navigator.onLine) return tr.addClass('error');
+								if(!play) return;
+								PLAYER.queue = data.songs;
+								PLAYER.queueDataKey = data.dataKey;
+								PLAYER.load(i);
+								$('li.title a', 'footer').attr('href', '/album/' + data.id);
+							});
 						});
 					};
 
@@ -967,7 +997,7 @@ TEMPLATE = {
 				TEMPLATE.song.hookLove(tr, s);
 				setTimeout(function() {
 					cf();
-				}, i * 100);
+				}, s.bestMatch ? 0 : i * 100);
 			});
 			TEMPLATE.playlist.setPlayingSong();
 			$('section button.store, section button.remove').click(function() {
@@ -1087,7 +1117,8 @@ TEMPLATE = {
 	explore : {
 		data : function(params, callback) {
 			callback({
-				tag : params[0]
+				tag : params[0],
+				offline : !navigator.onLine
 			});
 		},
 		render : function(data) {
@@ -1493,13 +1524,13 @@ $(window).load(function() {
 
 		$(window)
 			.resize(LIB.onResize)
-			.keydown(LIB.onKeyDown);
-			/*.bind('online', function() {
-				console.log('online');
+			.keydown(LIB.onKeyDown)
+			.bind('online', function() {
+				ROUTER.update(ROUTER.url);
 			})
 			.bind('offline', function() {
-				console.log('offline');
-			});*/
+				ROUTER.update(ROUTER.url);
+			});
 
 		FULLSCREEN.onFullscreen = PLAYER.onFullscreen;
 

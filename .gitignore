@@ -6,3 +6,4 @@ releases/
 bundle/
 scripts/nginx.pid
 node_modules/
+*.swf.cache

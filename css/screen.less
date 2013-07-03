@@ -6,6 +6,7 @@
 /* Main Layout */
 body {
 	display: none;
+	overflow: hidden;
 }
 
 aside {
@@ -252,8 +253,8 @@ footer {
 	}
 }
 
-#YTPlayer, #SCPlayer {
-	position: absolute;
+#YTPlayer, #SCPlayer, #daniPlaya {
+	position: fixed;
 	top: -200px;
 	left: -200px;
 	width: 200px;
@@ -613,7 +614,7 @@ body.fullscreen {
 	aside, section {
 		display: none!important;
 	}
-	#YTPlayer, #SCPlayer {
+	#YTPlayer, #SCPlayer, #daniPlaya {
 		top: 0;
 		left: 0;
 		width: 100%;

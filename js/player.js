@@ -54,16 +54,17 @@ PLAYER = {
 			id = song.provider + ':' + song.provider_id;
 
 		if(song.provider === DATA.providers.lastfm) {
-			 if(!song.bestMatch) return PLAYER.next();
-			 song.bestMatch.albumSong = song;
-			 song = song.bestMatch;
+			if(!song.bestMatch) return PLAYER.next();
+			song.bestMatch.albumSong = song;
+			song = song.bestMatch;
 		}
 		PLAYER.queueId = queueId;
 		PLAYER.onStateChange(-1);
 		PLAYER.current && PLAYER.current.destruct && PLAYER.current.destruct();
 		switch(song.provider) {
 			case DATA.providers.youtube:
-				YT.player(song);
+				if(song.localMatch) DANIPLAYA.player(song);
+				else YT.player(song);
 			break;
 			default:
 				SC.player(song);

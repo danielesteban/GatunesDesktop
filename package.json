@@ -7,7 +7,7 @@
      },
 	"main" : "server.html",
 	"window" : {
-		"toolbar" : false,
+		//"toolbar" : false,
 		"width" : 1280,
 		"height" : 800,
 		"resizeable" : true,

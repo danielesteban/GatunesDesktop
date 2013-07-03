@@ -1,14 +1,24 @@
 var fs = require('fs'),
+	downloadPath = process.env.HOME + '/Downloads/Gatunes',
+	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0}),
 	staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
 	httpServer = require('http').createServer(function (request, response) {
 	    request.addListener('end', function () {
-	    	staticServer.serve(request, response, function (e, res) {
+	    	if(request.url.substr(0, 7) === '/media/') mediaServer.serveFile(decodeURIComponent(request.url.substr(6)), 200, {}, request, response);
+	    	else if(request.url === '/crossdomain.xml') {
+				response.writeHead(200, {'Content-Type': 'application/xml'});
+				return response.end('<?xml version="1.0"?>'+
+					'<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">'+
+					'<cross-domain-policy>'+
+					'  <allow-access-from domain="*" secure="false"/>'+
+					'  <site-control permitted-cross-domain-policies="master-only"/>'+
+					'</cross-domain-policy>');
+	    	} else staticServer.serve(request, response, function (e, res) {
 				e && e.status === 404 && staticServer.serveFile('/index.html', 200, {}, request, response);
 			});
 	    }).resume();
 	}),
-	httpPort = 28029,
-	downloadPath = process.env.HOME + '/Downloads/Gatunes';
+	httpPort = 28028;
 
 httpServer.on('error', function(e) {
 	if(e.code !== "EADDRINUSE") return;
@@ -50,32 +60,44 @@ function load() {
 				APPWIN.FULLSCREEN.onFullscreen();
 			}
 		};
-		APPWIN.DOWNLOAD = function(url, id, title, playlist, callback, progress) {
-			var path = downloadPath + '/';
-			if(playlist.artist) {
-				path += playlist.artist.name.replace(/\//g, '_') + '/';
+		APPWIN.DOWNLOAD = {
+			getPath : function(playlist) {
+				var path = downloadPath + '/';
+				if(playlist.artist) {
+					path += playlist.artist.name.replace(/\//g, '_').replace(/&/g, '_').replace(/\?/g, '') + '/';
+					!fs.existsSync(path) && fs.mkdirSync(path);
+				}
+				path += playlist.title.replace(/\//g, '_').replace(/&/g, '_').replace(/\?/g, '');
 				!fs.existsSync(path) && fs.mkdirSync(path);
+				return path;
+			},
+			check : function(id, playlist, callback) {
+				var path = APPWIN.DOWNLOAD.getPath(playlist);
+				fs.readdir(path, function(err, list) {
+					if(err) return callback();
+					var already = false;
+					list.forEach(function(item) {
+						if(already) return;
+						item.substr(item.length - 4 - id.length, id.length) === id && (already = item);
+					});
+					callback(already, path.substr(downloadPath.length));
+				});
+			},
+			start : function(url, id, title, playlist, callback, progress) {
+				var path = APPWIN.DOWNLOAD.getPath(playlist);
+				APPWIN.DOWNLOAD.check(id, playlist, function(already) {
+					if(already) return callback(null, already);
+					var dl = require('youtube-dl').download(url, path, ["-o" + title.replace(/\//g, '_').replace(/&/g, '_').replace(/\?/g, '') + '_' + id + ".%(ext)s", "--newline"]);
+					progress && dl.on('progress', progress);
+					if(!callback) return;
+					dl.on('error', function(err) {
+						callback(err);
+					});
+					dl.on('end', function(data) {
+						callback(null, data.filename);
+					});
+				});
 			}
-			path += playlist.title.replace(/\//g, '_');
-			!fs.existsSync(path) && fs.mkdirSync(path);
-			fs.readdir(path, function(err, list) {
-				if(err) return callback(true);
-				var already = false;
-				list.forEach(function(item) {
-					if(already) return;
-					item.substr(item.length - 4 - id.length, id.length) === id && (already = item);
-				});
-				if(already) return callback(null, already);
-				var dl = require('youtube-dl').download(url, path, ["-o" + title.replace(/\//g, '_') + '_' + id + ".%(ext)s", "--newline"]);
-				progress && dl.on('progress', progress);
-				if(!callback) return;
-				dl.on('error', function(err) {
-					callback(err);
-				});
-				dl.on('end', function(data) {
-					callback(null, data.filename);
-				});
-			});
 		};
 		APPWIN.RELOAD = function() {
 			reloading = true;

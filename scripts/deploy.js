@@ -62,7 +62,7 @@ function writeIndex(css, js) {
 }
 
 function genManifest(css, js, callback) {
-	md5(['server.html', 'server.js', 'swf/soundmanager2_flash9.swf'], '/', function(md5statics) {
+	md5(['server.html', 'server.js', 'swf/soundmanager2_flash9.swf', 'swf/daniPlaya.swf'], '/', function(md5statics) {
 		var imgs = fs.readdirSync('bundle/img'),
 		manifest = "CACHE:\n" +
 			"/\n" + 
@@ -70,7 +70,8 @@ function genManifest(css, js, callback) {
 			"/" + js + ".js\n" +
 			"/server.html?" + md5statics[0] + "\n" +
 			"/server.js?" + md5statics[1] + "\n" + 
-			"/swf/soundmanager2_flash9.swf?" + md5statics[2] + "\n";
+			"/swf/soundmanager2_flash9.swf?" + md5statics[2] + "\n" +
+			"/swf/daniPlaya.swf?" + md5statics[3] + "\n";
 
 		md5(imgs.slice(), '/img/', function(md5s) { 
 			for(var x=0; x<2; x++) {
@@ -79,7 +80,7 @@ function genManifest(css, js, callback) {
 					manifest += "/img/" + img + "?" + md5s[i] + "\n"; 
 				});
 
-				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.html /server.html?" + md5statics[0] + "\n/server.js /server.js?" + md5statics[1] + "\n/swf/soundmanager2_flash9.swf /swf/soundmanager2_flash9.swf?" + md5statics[2] + "\n");
+				x === 0 && (manifest += "\nFALLBACK:\n/ /\n/server.html /server.html?" + md5statics[0] + "\n/server.js /server.js?" + md5statics[1] + "\n/swf/soundmanager2_flash9.swf /swf/soundmanager2_flash9.swf?" + md5statics[2] + "\n/swf/daniPlaya.swf /swf/daniPlaya.swf?" + md5statics[3] + "\n");
 			}
 			
 			manifest += "\nNETWORK:\n" +
@@ -122,7 +123,7 @@ console.log("Creating bundle...");
 exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
-			exec('rm -rf bundle/scripts bundle/releases bundle/landing bundle/CHANGELOG.md bundle/LICENSE bundle/README.md bundle/Gatunes.app bundle/bundle', function() {
+			exec('rm -rf bundle/scripts bundle/releases bundle/landing bundle/CHANGELOG.md bundle/LICENSE bundle/README.md bundle/swf/daniPlaya.as bundle/swf/daniPlaya.swf.cache bundle/Gatunes.app bundle/bundle', function() {
 				console.log('compiling templates...');
 				genTemplates(function() {
 					console.log('compiling css...');
@@ -137,7 +138,8 @@ exec('rm -rf bundle', function() {
 								'js/player.js',
 								'js/soundcloud.js',
 								'js/soundmanager.js',
-								'js/youtube.js'
+								'js/youtube.js',
+								'js/daniplaya.js'
 							], function() {
 								console.log('compacting css...');
 								compact('bundle/css/*.css', 'css', function(cssMD5) {

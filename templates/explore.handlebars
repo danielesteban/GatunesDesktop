@@ -1,6 +1,11 @@
-<div class="right">
-	<div class="tags"></div>
-</div>
-<div class="padding">
+{{#if offline}}
+	<p class="empty">&nbsp;<br>&nbsp;<br>&nbsp;</p>
+	<p class="empty">Sorry, you are offline.<br>You can still play your offline albums &amp; playlists, though.</p>
+{{else}}
+	<div class="right">
+		<div class="tags"></div>
+	</div>
+	<div class="padding">
 
-</div>
+	</div>
+{{/if}}
