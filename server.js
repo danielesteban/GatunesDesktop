@@ -4,8 +4,10 @@ var fs = require('fs'),
 	httpPort = 28029,
 	httpServer = require('http').createServer(function (request, response) {
 	    request.addListener('end', function () {
-	    	if(request.url.substr(0, 7) === '/media/') mediaServer.serveFile(decodeURIComponent(request.url.substr(6)), 200, {}, request, response);
-	    	else if(request.url === '/crossdomain.xml') {
+	    	if(request.url.substr(0, 7) === '/media/') {
+	    		request.url = request.url.substr(6);
+	    		mediaServer.serve(request, response);
+	    	} else if(request.url === '/crossdomain.xml') {
 				response.writeHead(200, {'Content-Type': 'application/xml'});
 				return response.end('<?xml version="1.0"?>'+
 					'<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">'+
@@ -104,6 +106,25 @@ function load() {
 					dl.on('end', function(data) {
 						callback(null, data.filename);
 					});
+				});
+			},
+			cover : function(playlist, callback) {
+				var path = APPWIN.DOWNLOAD.getPath(playlist, true);
+				require('http').get(playlist.image, function(res){
+					var data = ''
+						res.setEncoding('binary')
+
+					res.on('data', function(chunk){
+						data += chunk
+					})
+
+					res.on('end', function(){
+						var filename = 'cover' + playlist.image.substr(playlist.image.lastIndexOf('.'));
+						fs.writeFile(join(path, filename), data, 'binary', function(err) {
+							callback(err ? null : path.substr(downloadPath.length).replace(/\\/g, '/') + '/' + filename);
+						});
+					});
+
 				});
 			}
 		};

@@ -613,7 +613,7 @@ TEMPLATE = {
 			var songs = playlist.songs.slice(0),
 				i = 0,
 				download = function() {
-					if(!songs.length) return done();
+					if(!songs.length) return downloadCover();
 					var song = songs.shift(),
 						progress,
 						err,
@@ -654,6 +654,16 @@ TEMPLATE = {
 						default:
 							return download();
 					}	
+				},
+				downloadCover = function() {
+					if(!playlist.image || playlist.offlineImage) return done();
+					DOWNLOAD.cover(playlist, function(cover) {
+						if(!cover) return done();
+						DATA.getItem(playlist.dataKey, function(data) {
+							data.offlineImage = cover;
+							DATA.setItem(playlist.dataKey, data, done);
+						});
+					});
 				},
 				done = function() {
 					TEMPLATE.playlist.downloadQueue.shift();
@@ -1037,8 +1047,19 @@ TEMPLATE = {
 				});
 			});
 			$('section button.offline span').text('Offline: ' + (data.offline ? 'ON' : 'OFF'));
-			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');        
-			$('section div.cover').append('<img src="' + data.image + '" />');
+			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');
+			var cover = $('<img src="' + (data.offlineImage ? '/media' + data.offlineImage : data.image) + '" />'),
+				errorHandler = function() {
+					DATA.getItem(data.dataKey, function(a) {
+						delete a.offlineImage;
+						DATA.setItem(data.dataKey, a);
+					});
+					cover.attr('src', data.image);
+					cover.unbind('error', errorHandler);
+				};
+
+			data.offlineImage && cover.bind('error', errorHandler);
+			$('section div.cover').append(cover);
 			!data.songs.length && LASTFM.getTopAlbums(data.artist.name, function(albums) {
 				var c = 0,
 					dest = $('div.empty div');
