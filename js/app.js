@@ -428,6 +428,16 @@ TEMPLATE = {
 					ROUTER.update('/');
 				});
 			});
+			$('button.offline', actions).click(function() {
+				DATA.getItem(data.dataKey, function(playlist) {
+					if(playlist.offline) delete playlist.offline;
+					else playlist.offline = true;
+					DATA.setItem(data.dataKey, playlist, function() {
+						ROUTER.update('/playlist/' + data.dataKey.substr(9), true);
+					});
+				});
+			});
+			$('button.offline span', actions).text(L.availableOffline + ': ' + (data.offline ? 'ON' : 'OFF'));
 			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.create')).addClass('selected');
 			TEMPLATE.playlist.renderSongs(data);
 			$('section input').first().focus();
@@ -530,19 +540,29 @@ TEMPLATE = {
 		song : function(song, dest, playlist) {
 			var tr = $(Handlebars.partials.song(song)),
 				h1 = $('section .header h1'),
-				pf = function() {
-					PLAYER.queue = playlist.songs;
-					PLAYER.queueDataKey = playlist.dataKey;
-					PLAYER.load(tr[0].rowIndex);
-					$('li.title a', 'footer').attr('href', '/playlist/' + playlist.id);
+				download = function() {
+					--playlist.songsToMatch === 0 && playlist.offline && navigator.onLine && TEMPLATE.playlist.download(playlist);
+				},
+				lmf = function(match, play) {
+					TEMPLATE.song.localMatch(match, playlist, function(localMatch) {
+						!play && download();
+						if(!localMatch && !navigator.onLine) return tr.addClass('error');
+						if(!play) return;
+						PLAYER.queue = playlist.songs;
+						PLAYER.queueDataKey = playlist.dataKey;
+						PLAYER.load(tr[0].rowIndex);
+						$('li.title a', 'footer').attr('href', '/playlist/' + playlist.id);
+					});
 				},
 				cf = function(play) {
 					if(!song.search) {
-						if(song.provider !== DATA.providers.lastfm) return play && pf();
+						if(song.provider !== DATA.providers.lastfm) return lmf(song, play);
 						return TEMPLATE.song.bestMatch(song, function(match) {
-							!play && --playlist.songsToMatch === 0 && playlist.offline && TEMPLATE.playlist.download(playlist);
-							if(!match) return tr.addClass('error');
-							play && pf();
+							if(!match) {
+								!play && download();
+								return tr.addClass('error');
+							}
+							lmf(match, play);
 						});
 					}
 
@@ -582,11 +602,11 @@ TEMPLATE = {
 				TEMPLATE.song.hookDrop(tr, song);
 			}
 			dest.append(tr);
-			!song.search && song.provider === DATA.providers.lastfm && setTimeout(function() {
+			!song.search && setTimeout(function() {
 				!playlist.songsToMatch && (playlist.songsToMatch = 0);
 				playlist.songsToMatch++;
 				cf();
-			}, tr[0].rowIndex * 100);
+			}, song.provider !== DATA.providers.lastfm || song.bestMatch ? 0 : tr[0].rowIndex * 100);
 		},
 		resetSelection : function() {
 			var sel = TEMPLATE.playlist.selectedSongs;
@@ -794,6 +814,7 @@ TEMPLATE = {
 		},
 		bestMatch : function(s, callback) {
 			if(s.bestMatch/* && Math.round((new Date()).getTime() / 1000) - s.bestMatch.date < 604800*/) return callback && callback(s.bestMatch);
+			if(!navigator.onLine) return callback && callback();
 			var title = s.artist.name + ' ' + s.title,
 				getWords = function(str) {
 					var ws = [];
@@ -1112,27 +1133,45 @@ TEMPLATE = {
 					s.num = LIB.addZero(i + 1);
 					s.loved = true;
 				});
-				callback({
-					songs : songs
+				DATA.getItem('lovedOffline', function(offline) {
+					var data = {
+							songs : songs,
+							dataKey : 'loved',
+							title : L.loved //For the downloader...
+						};
+
+					offline && (data.offline = true);
+					callback(data);
 				});
 			});
 		},
 		render : function(data) {
-			var songsToMatch = data.songs.length;
+			var songsToMatch = data.songs.length,
+				download = function() {
+					--songsToMatch === 0 && data.offline && navigator.onLine && TEMPLATE.playlist.download(data);
+				};
+
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
-					pf = function() {
-						PLAYER.queue = data.songs;
-						PLAYER.queueDataKey = data.dataKey;
-						PLAYER.load(i);
-						$('li.title a', 'footer').attr('href', '/loved');
+					lmf = function(match, play) {
+						TEMPLATE.song.localMatch(match, data, function(localMatch) {
+							!play && download();
+							if(!localMatch && !navigator.onLine) return tr.addClass('error');
+							if(!play) return;
+							PLAYER.queue = data.songs;
+							PLAYER.queueDataKey = data.dataKey;
+							PLAYER.load(i);
+							$('li.title a', 'footer').attr('href', '/loved');
+						});
 					},
 					cf = function(play) {
-						if(s.provider !== DATA.providers.lastfm) return play && pf();
+						if(s.provider !== DATA.providers.lastfm) return lmf(s, play);
 						TEMPLATE.song.bestMatch(s, function(match) {
-							!play && --songsToMatch === 0 && data.offline && TEMPLATE.playlist.download(data);
-							if(!match) return tr.addClass('error');
-							play && pf();
+							if(!match) {
+								!play && download();
+								return tr.addClass('error');
+							}
+							lmf(match, play);
 						});
 					};
 
@@ -1142,11 +1181,20 @@ TEMPLATE = {
 				$('a.remove', tr).click(function() {
 					DATA.loved.remove(s.provider + ':' + s.provider_id);
 				});
-				s.provider === DATA.providers.lastfm && setTimeout(function() {
+				setTimeout(function() {
 					cf();
-				}, i * 100);
+				}, s.provider !== DATA.providers.lastfm || s.bestMatch ? 0 : i * 100);
 			});
 			TEMPLATE.playlist.setPlayingSong();
+			$('section button.offline').click(function() {
+				var cb = function() {
+						ROUTER.update('/loved', true);
+					};
+
+				if(data.offline) DATA.removeItem('lovedOffline', cb);
+				else DATA.setItem('lovedOffline', true, cb);
+			});
+			$('section button.offline span').text(L.availableOffline + ': ' + (data.offline ? 'ON' : 'OFF'));
 			$('aside menu li.loved').addClass('selected');
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
 			ROUTER.onUnload = function() {
@@ -1566,10 +1614,10 @@ $(window).load(function() {
 			.resize(LIB.onResize)
 			.keydown(LIB.onKeyDown)
 			.bind('online', function() {
-				ROUTER.update(ROUTER.url);
+				ROUTER.update(ROUTER.url, true);
 			})
 			.bind('offline', function() {
-				ROUTER.update(ROUTER.url);
+				ROUTER.update(ROUTER.url, true);
 			});
 
 		FULLSCREEN.onFullscreen = PLAYER.onFullscreen;

@@ -1,8 +1,11 @@
 <div class="header">
 	{{#if dataKey}}
 	<menu class="actions">
-		<li><a class="remove"><i class="icon-remove"></i></a></li>
-		<li style="display:none">
+		<li>
+			<button class="btn offline"><i class="icon-download-alt"></i> <span></span></button>
+		</li>
+		<li class="pad"><a class="remove"><i class="icon-remove"></i></a></li>
+		<li class="pad" style="display:none">
 			<span class="red">{{L 'removePlaylist'}}</span>: {{L 'areYouSure'}} 
 			<a class="ok"><i class="icon-ok"></i></a> &nbsp; <a class="cancel"><i class="icon-remove"></i></a>
 		</li>
