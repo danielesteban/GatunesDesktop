@@ -22,6 +22,7 @@ LANG = {
 		emptyHomeTag : 'There aren\'t any available albums with that genre',
 		exploreOffline : 'Sorry, you are offline.',
 		exploreOfflineB : 'You can still play your offline albums & playlists, though.',
+		availableOffline : 'Available offline',
 		date : '{{month}} {{date}}',
 		months : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	},
@@ -48,6 +49,7 @@ LANG = {
 		emptyHomeTag : 'No hay ningun álbum disponible con ese género',
 		exploreOffline : 'Lo siento, estás offline.',
 		exploreOfflineB : 'Puedes seguir escuchando tus álbums y playlists offline de todos modos.',
+		availableOffline : 'Disponible offline',
 		date : '{{date}} {{month}}',
 		months : ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 	}

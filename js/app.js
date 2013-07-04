@@ -1046,7 +1046,7 @@ TEMPLATE = {
 					});
 				});
 			});
-			$('section button.offline span').text('Offline: ' + (data.offline ? 'ON' : 'OFF'));
+			$('section button.offline span').text(L.availableOffline + ': ' + (data.offline ? 'ON' : 'OFF'));
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');
 			var cover = $('<img src="' + (data.offlineImage ? '/media' + data.offlineImage : data.image) + '" />'),
 				errorHandler = function() {
