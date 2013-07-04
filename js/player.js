@@ -5,7 +5,7 @@ PLAYER = {
 			url : '/swf/',
 			flashVersion : 9,
 			debugMode : 0,
-			preferFlash : false,
+			useEQData : true,
 			onready : function(){
 				SoundManager.ready = 1;
 				SoundManager.callbacks && SoundManager.callbacks.forEach(function(cb){cb()});
