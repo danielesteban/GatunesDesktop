@@ -68,7 +68,52 @@ function load() {
 		};
 		APPWIN.DOWNLOAD = {
 			cleanPath : function(path) {
-				return path.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, '').replace(/'/g, '').replace(/’/g, '');
+				var	find = [
+						"á","à","ä","â","ã","å","ą",
+						"é","è","ë","ê",
+						"í","ì","ï","î",
+						"ó","ò","ö","ô","ø",
+						"ú","ù","ü","û",
+						"ñ","ç",
+						"ß","œ","æ",
+						"/","\\","&",
+						"?","`","´","'","’"
+					],
+					replaces = [
+						"a","a","a","a","a","a","a",
+						"e","e","e","e",
+						"i","i","i","i",
+						"o","o","o","o","o",
+						"u","u","u","u",
+						"n","c",
+						"ss","oe","ae",
+						"_","_","_",
+						"","","","",""
+					],
+					replace = function() {
+						find.forEach(function(find, index) {
+							var replace = replaces[index],
+								i = path.indexOf(find),
+								len;
+
+							if(i !== -1) {
+								len = find.length;
+								do {
+									path = path.substr(0, i) + replace + path.substr(i + len);
+									i = path.indexOf(find);
+								} while(i !== -1);
+							}
+						});
+					};
+
+				replace();
+				find.forEach(function(a, i) {
+					find[i] = find[i].toUpperCase();
+					replaces[i] = replaces[i].toUpperCase();
+				});
+				replace();
+				
+				return path;
 			},
 			getPath : function(playlist, create) {
 				var path = downloadPath;
@@ -111,20 +156,17 @@ function load() {
 			cover : function(playlist, callback) {
 				var path = APPWIN.DOWNLOAD.getPath(playlist, true);
 				require('http').get(playlist.image, function(res){
-					var data = ''
-						res.setEncoding('binary')
-
+					var data = '';
+					res.setEncoding('binary');
 					res.on('data', function(chunk){
-						data += chunk
-					})
-
+						data += chunk;
+					});
 					res.on('end', function(){
 						var filename = 'cover' + playlist.image.substr(playlist.image.lastIndexOf('.'));
 						fs.writeFile(join(path, filename), data, 'binary', function(err) {
 							callback(err ? null : path.substr(downloadPath.length).replace(/\\/g, '/') + '/' + filename);
 						});
 					});
-
 				});
 			}
 		};
