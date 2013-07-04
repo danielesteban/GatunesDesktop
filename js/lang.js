@@ -17,9 +17,11 @@ LANG = {
 		artists : 'Artists',
 		genres : 'Genres',
 		loved : 'Songs you love',
-		emptyLoved : 'You didn\'t loved any song',
+		emptyLoved : 'You haven\'t loved any songs',
 		emptyHomeArtist : 'There aren\'t any available albums from that artist',
 		emptyHomeTag : 'There aren\'t any available albums with that genre',
+		exploreOffline : 'Sorry, you are offline.',
+		exploreOfflineB : 'You can still play your offline albums & playlists, though.',
 		date : '{{month}} {{date}}',
 		months : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	},
@@ -44,6 +46,8 @@ LANG = {
 		emptyLoved : 'No has amado ninguna canción',
 		emptyHomeArtist : 'No hay ningun álbum disponible de ese artista',
 		emptyHomeTag : 'No hay ningun álbum disponible con ese género',
+		exploreOffline : 'Lo siento, estás offline.',
+		exploreOfflineB : 'Puedes seguir escuchando tus álbums y playlists offline de todos modos.',
 		date : '{{date}} {{month}}',
 		months : ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 	}
