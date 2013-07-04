@@ -1,8 +1,7 @@
 var fs = require('fs'),
 	join = require('path').join,
 	downloadPath = join(process.env.HOME, 'Downloads'),
-	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0}),
-	staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
+	httpPort = 28029,
 	httpServer = require('http').createServer(function (request, response) {
 	    request.addListener('end', function () {
 	    	if(request.url.substr(0, 7) === '/media/') mediaServer.serveFile(decodeURIComponent(request.url.substr(6)), 200, {}, request, response);
@@ -19,7 +18,8 @@ var fs = require('fs'),
 			});
 	    }).resume();
 	}),
-	httpPort = 28029;
+	staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
+	mediaServer;
 
 httpServer.on('error', function(e) {
 	if(e.code !== "EADDRINUSE") return;
@@ -33,6 +33,7 @@ httpServer.on('listening', function() {
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	downloadPath = join(downloadPath, 'Gatunes');
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
+	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0});
 	load();
 });
 
