@@ -985,14 +985,21 @@ TEMPLATE = {
 			});
 		},
 		render : function(data) {
-			var songsToMatch = data.songs.length;
+			var songsToMatch = data.songs.length,
+				download = function() {
+					--songsToMatch === 0 && data.offline && navigator.onLine && TEMPLATE.playlist.download(data);
+				};
+
 			data.songs.forEach(function(s, i) {
 				var tr = $('section table tr:nth-child(' + (i + 1) + ')'),
 					cf = function(play) {
 						TEMPLATE.song.bestMatch(s, function(match) {
-							if(!match) return tr.addClass('error');
+							if(!match) {
+								!play && download();
+								return tr.addClass('error');
+							}
 							TEMPLATE.song.localMatch(match, data, function(localMatch) {
-								!play && --songsToMatch === 0 && data.offline && navigator.onLine && TEMPLATE.playlist.download(data);
+								!play && download();
 								if(!localMatch && !navigator.onLine) return tr.addClass('error');
 								if(!play) return;
 								PLAYER.queue = data.songs;
