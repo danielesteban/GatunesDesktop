@@ -1220,7 +1220,7 @@ TEMPLATE = {
 						var c = 0,
 							tophit;
 
-						artists.forEach(function(artist) {
+						artists && artists.forEach(function(artist) {
 							if(c > 3 || !artist.mbid) return;
 							var li = $('<li' + (c === 0 ? ' class="selected"' : '') + '></li>'),
 								a = $('<a href="/artist/' + artist.mbid + '">' + artist.name + '</a>');
@@ -1238,7 +1238,7 @@ TEMPLATE = {
 					});
 					LASTFM.searchTags(query, function(tags) {
 						var c = 0;
-						tags.forEach(function(t) {
+						tags && tags.forEach(function(t) {
 							if(c > 3) return;
 							var li = $('<li></li>'),
 								a = $('<a href="/explore/' + t.name.replace(/"/g, "'") + '">' + t.name.substr(0, 1).toUpperCase() + t.name.substr(1) + '</a>');

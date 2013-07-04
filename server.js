@@ -65,13 +65,16 @@ function load() {
 			}
 		};
 		APPWIN.DOWNLOAD = {
+			cleanPath : function(path) {
+				return path.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, '').replace(/'/g, '').replace(/’/g, '');
+			},
 			getPath : function(playlist, create) {
 				var path = downloadPath;
 				if(playlist.artist) {
-					path = join(path, playlist.artist.name.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, ''));
+					path = join(path, APPWIN.DOWNLOAD.cleanPath(playlist.artist.name));
 					create && !fs.existsSync(path) && fs.mkdirSync(path);
 				}
-				path = join(path, playlist.title.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, ''));
+				path = join(path, APPWIN.DOWNLOAD.cleanPath(playlist.title));
 				create && !fs.existsSync(path) && fs.mkdirSync(path);
 				return path;
 			},
@@ -92,7 +95,7 @@ function load() {
 				var path = APPWIN.DOWNLOAD.getPath(playlist, true);
 				APPWIN.DOWNLOAD.check(id, playlist, function(already) {
 					if(already) return callback(null, already);
-					var dl = require('youtube-dl').download(url, path, ["-o" + title.replace(/\//g, '_').replace(/\\/g, '_').replace(/&/g, '_').replace(/\?/g, '') + '_' + id + ".%(ext)s", "--newline"]);
+					var dl = require('youtube-dl').download(url, path, ["-o" + APPWIN.DOWNLOAD.cleanPath(title) + '_' + id + ".%(ext)s", "--newline"]);
 					progress && dl.on('progress', progress);
 					if(!callback) return;
 					dl.on('error', function(err) {
