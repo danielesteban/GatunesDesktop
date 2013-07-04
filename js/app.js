@@ -1060,7 +1060,7 @@ TEMPLATE = {
 
 			data.offlineImage && cover.bind('error', errorHandler);
 			$('section div.cover').append(cover);
-			!data.songs.length && LASTFM.getTopAlbums(data.artist.name, function(albums) {
+			navigator.onLine && !data.songs.length && LASTFM.getTopAlbums(data.artist.name, function(albums) {
 				var c = 0,
 					dest = $('div.empty div');
 
@@ -1080,7 +1080,7 @@ TEMPLATE = {
 				LIB.handleLinks(dest);
 				c > 0 && dest.parent().show().fadeIn('fast');
 			}, 16);
-			LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
+			navigator.onLine && LASTFM.similarArtistsAlbums(data.artist.mbid, function(albums) {
 				var dest = $('section div.similarAlbums'),
 					c = 0;
 
