@@ -1,6 +1,6 @@
 var fs = require('fs'),
 	join = require('path').join,
-	downloadPath = join(process.env.HOME, 'Downloads'),
+	downloadPath = process.env.HOME || process.env.USERPROFILE,
 	httpPort = 28029,
 	httpServer = require('http').createServer(function (request, response) {
 	    request.addListener('end', function () {
@@ -32,7 +32,7 @@ httpServer.on('error', function(e) {
 });
 
 httpServer.on('listening', function() {
-	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
+	fs.existsSync(join(downloadPath, 'Music')) && (downloadPath = join(downloadPath, 'Music'));
 	downloadPath = join(downloadPath, 'Gatunes');
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0});
