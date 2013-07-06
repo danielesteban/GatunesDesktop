@@ -175,7 +175,57 @@ function load() {
 			APPWIN.close();
 			load();
 		};
+		update();
 	};
+}
+
+function update() {
+	if(!navigator.onLine || !fs.existsSync(join(process.cwd(), 'app.manifest'))) return;
+	var http = require('http'),
+		updateURL = 'http://gatunes.com/',
+		lastUpdate = localStorage.getItem('lastUpdate') || 0,
+		now = Math.round((new Date()).getTime() / 1000);
+
+	if(now - lastUpdate < 86400) return;
+	localStorage.setItem('lastUpdate', now);
+	var current = fs.readFileSync(join(process.cwd(), 'package.json'));
+	try {
+		current = JSON.parse(current).version;
+	} catch(e) { return; }
+	http.get(updateURL + 'package.json', function(res) {
+		var latest = '';
+		res.setEncoding('utf-8');
+		res.on('data', function(chunk) {
+			latest += chunk;
+		});
+		res.on('end', function() {
+			try {
+				latest = JSON.parse(latest).version;
+			} catch(e) { return; }
+			if(latest === current) return; //No updates
+			var filename = 'Gatunes.v' + latest + '-' + process.platform + (process.platform === 'linux' ? '-' + process.arch : '') + '.nw';
+			http.get(updateURL + filename, function(res) {
+				if(res.statusCode !== 200) return;
+				var update = '';
+				res.setEncoding('binary');
+				res.on('data', function(chunk) {
+					update += chunk;
+				});
+				res.on('end', function(){
+					var path = process.platform === 'darwin' ? join(process.cwd(), '..') : require('path').dirname(process.execPath);
+					filename = join(path, 'gatunes.nw');
+					fs.writeFile(filename, update, 'binary', function(err) {
+						if(err || process.platform !== 'darwin') return;
+						var AdmZip = require('adm-zip'),
+							zip = new AdmZip(filename);
+						
+						zip.extractAllTo(process.cwd(), true);
+						fs.unlink(filename);
+					});
+				});
+			});
+		});
+	});
 }
 
 httpServer.listen(httpPort, 'localhost');

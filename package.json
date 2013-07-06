@@ -18,6 +18,7 @@
 	},
 	"dependencies" : {
 		"node-static" : "latest",
-		"youtube-dl" : "latest"
+		"youtube-dl" : "latest",
+		"adm-zip" : "latest"
 	}
 }
