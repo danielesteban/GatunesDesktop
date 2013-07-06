@@ -1577,6 +1577,12 @@ $(window).load(function() {
 
 	/* Lang detection/setup */
 	LIB.setupLang(function() {
+		/* Flash plugin check */
+		if(!swfobject.hasFlashPlayerVersion("11.0.0")) {
+			$('body').append(Handlebars.templates.noFlash({})).fadeIn();
+			return;
+		}
+
 		/* Render the skin */
 		$('body').append(Handlebars.templates.skin({})).fadeIn();
 		//LIB.handleSpeech('aside');

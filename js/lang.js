@@ -23,6 +23,8 @@ LANG = {
 		exploreOffline : 'Sorry, you are offline.',
 		exploreOfflineB : 'You can still play your offline albums & playlists, though.',
 		availableOffline : 'Available offline',
+		noFlash : 'Your flash player version is outdated',
+		noFlashB : 'Update now',
 		date : '{{month}} {{date}}',
 		months : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 	},
@@ -50,6 +52,8 @@ LANG = {
 		exploreOffline : 'Lo siento, estás offline.',
 		exploreOfflineB : 'Puedes seguir escuchando tus álbums y playlists offline de todos modos.',
 		availableOffline : 'Disponible offline',
+		noFlash : 'Tu versión de flash player está desactualizada',
+		noFlashB : 'Actualizar ahora',
 		date : '{{date}} {{month}}',
 		months : ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 	}
