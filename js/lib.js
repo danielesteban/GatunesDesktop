@@ -282,14 +282,14 @@ LIB = {
 
 ROUTER = {
 	init : function() {
-		var ps = window.history.pushState;
-		ps && $(window).bind('popstate', function(e) {
-			ROUTER.update(e.originalEvent.state !== null ? e.originalEvent.state : document.location.pathname, true);
+		DATA.getItem('lastUrl', function(lastUrl) {
+			lastUrl && DATA.removeItem('lastUrl');
+			ROUTER.update(navigator.onLine && lastUrl ? lastUrl : (window.history.pushState ? document.location.pathname : '/'));
 		});
-		ROUTER.update(ps ? document.location.pathname : '/', ps);
 	},
 	update : function(url, fromPopEvent) {
 		ROUTER.url = url;
+		DATA.setItem('lastUrl', url);
 		url = url.substr(1);
 		var p = url.indexOf('/'),
 			panel = p != -1 ? url.substr(0, p) : url,

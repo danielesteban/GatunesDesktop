@@ -47,14 +47,14 @@ httpServer.on('listening', function() {
 			menu = new m();
 
 		menu.append(new mi({
-			label : 'Export data to file',
+			label : 'Export data to a file',
 			click : function() {
 				window.APPWIN && APPWIN.DATA.export();
 			}
 		}));
 
 		menu.append(new mi({
-			label : 'Import data from file',
+			label : 'Import data from a file',
 			click : function() {
 				window.APPWIN && APPWIN.DATA.import();
 			}
@@ -212,7 +212,7 @@ function load() {
 function update() {
 	if(!navigator.onLine || !fs.existsSync(join(process.cwd(), 'app.manifest'))) return;
 	var http = require('http'),
-		updateURL = 'http://gatunes.com/',
+		updateURL = 'http://gatunes.com/releases/',
 		lastUpdate = localStorage.getItem('lastUpdate') || 0,
 		now = Math.round((new Date()).getTime() / 1000);
 
