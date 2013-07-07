@@ -480,6 +480,10 @@ DATA = {
 										provider_id : provider_id,
 										title : LIB.escapeHTML(s.title),
 										time : parseInt(s.time, 10)
+									},
+									cb = function() {
+										backup.songs.push(song);
+										songs(data, callback, ++i);
 									};
 
 								s.artist && (song.artist = {
@@ -487,10 +491,11 @@ DATA = {
 									name : LIB.escapeHTML(s.artist.name)
 								});
 
-								/* TODO: BestMatch parse/add */
-
-								backup.songs.push(song);
-								songs(data, callback, ++i);
+								if(!s.bestMatch) return cb();
+								songs([s.bestMatch], function(match) {
+									match[0] && (song.bestMatch = match[0]);
+									cb();
+								});
 							});
 						},
 						playlists = function() {
