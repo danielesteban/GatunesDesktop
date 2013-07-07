@@ -81,7 +81,13 @@ DATA = {
 						s.provider = parseInt(id.split(':')[0], 10);
 						s.provider_id = id.split(':')[1];
 						playlist.songs[index] = s;
-						cb();
+						if(!s.bestMatch) return cb();
+						DATA.getItem('song:' + s.bestMatch, function(bm) {
+							bm.provider = parseInt(s.bestMatch.split(':')[0], 10);
+							bm.provider_id = s.bestMatch.split(':')[1];
+							s.bestMatch = bm;
+							cb();
+						});
 					});
 				});
 			});
@@ -241,7 +247,13 @@ DATA = {
 						s.provider = parseInt(id.split(':')[0], 10);
 						s.provider_id = id.split(':')[1];
 						album.songs[index] = s;
-						cb();
+						if(!s.bestMatch) return cb();
+						DATA.getItem('song:' + s.bestMatch, function(bm) {
+							bm.provider = parseInt(s.bestMatch.split(':')[0], 10);
+							bm.provider_id = s.bestMatch.split(':')[1];
+							s.bestMatch = bm;
+							cb();
+						});
 					});
 				});
 			});
@@ -325,7 +337,13 @@ DATA = {
 						s.provider = parseInt(id.split(':')[0], 10);
 						s.provider_id = id.split(':')[1];
 						loved[index] = s;
-						cb();
+						if(!s.bestMatch) return cb();
+						DATA.getItem('song:' + s.bestMatch, function(bm) {
+							bm.provider = parseInt(s.bestMatch.split(':')[0], 10);
+							bm.provider_id = s.bestMatch.split(':')[1];
+							s.bestMatch = bm;
+							cb();
+						});
 					});
 				});
 			});
@@ -956,7 +974,7 @@ TEMPLATE = {
 			});
 		},
 		bestMatch : function(s, callback) {
-			if(s.bestMatch/* && Math.round((new Date()).getTime() / 1000) - s.bestMatch.date < 604800*/) return callback && callback(s.bestMatch);
+			if(s.bestMatch) return callback && callback(s.bestMatch);
 			if(!navigator.onLine) return callback && callback();
 			var title = s.artist.name + ' ' + s.title,
 				getWords = function(str) {
@@ -1030,24 +1048,23 @@ TEMPLATE = {
 					});
 					if(songs[0] && songs[0].wCount >= titleWords.length) {
 						s.bestMatch = songs[0];
-						s.bestMatch.date = Math.round((new Date()).getTime() / 1000);
-						DATA.getItem('song:' + s.provider + ':' + s.provider_id, function(song) {
-							if(!song) song = {
-								title : LIB.escapeHTML(s.title),
-								time : parseInt(s.time, 10),
-								artist : {
-									mbid : LIB.escapeHTML(s.artist.mbid),
-									name : LIB.escapeHTML(s.artist.name)
-								}
-							};
-							song.bestMatch = {
-								provider : parseInt(s.bestMatch.provider, 10),
-								provider_id : LIB.escapeHTML(s.bestMatch.provider_id),
+						DATA.getItem('song:' + s.bestMatch.provider + ':' + s.bestMatch.provider_id, function(match) {
+							if(!match) DATA.setItem('song:' + s.bestMatch.provider + ':' + s.bestMatch.provider_id, {
 								title : LIB.escapeHTML(s.bestMatch.title),
-								time : parseInt(s.bestMatch.time, 10),
-								date : parseInt(s.bestMatch.date, 10)
-							};
-							DATA.setItem('song:' + s.provider + ':' + s.provider_id, song);
+								time : parseInt(s.bestMatch.time, 10)
+							});
+							DATA.getItem('song:' + s.provider + ':' + s.provider_id, function(song) {
+								if(!song) song = {
+									title : LIB.escapeHTML(s.title),
+									time : parseInt(s.time, 10),
+									artist : {
+										mbid : LIB.escapeHTML(s.artist.mbid),
+										name : LIB.escapeHTML(s.artist.name)
+									}
+								};
+								song.bestMatch = s.bestMatch.provider + ':' + s.bestMatch.provider_id;
+								DATA.setItem('song:' + s.provider + ':' + s.provider_id, song);
+							});
 						});
 					}
 					callback && callback(s.bestMatch);
