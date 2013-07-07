@@ -444,6 +444,7 @@ DATA = {
 						DATA.setItem('albums', albums);
 					}
 					backup.loved && DATA.setItem('loved', backup.loved);
+					backup.lovedOffline && DATA.setItem('lovedOffline', true);
 					RELOAD();
 				};
 				r.readAsText(e.target.files[0]);
@@ -499,6 +500,7 @@ DATA = {
 									title : LIB.escapeHTML(data.title)
 								};
 
+							data.offline && (playlist.offline = true);
 							songs(data.songs, function(songs) {
 								playlist.songs = songs;
 								!backup.playlists && (backup.playlists = []);
@@ -519,7 +521,8 @@ DATA = {
 									image : LIB.escapeHTML(data.image),
 									tags : []
 								};
-								
+							
+							data.offline && (album.offline = true);	
 							data.tags.forEach(function(t) {
 								album.tags.push(LIB.escapeHTML(t));
 							});
@@ -533,7 +536,10 @@ DATA = {
 						loved = function() {
 							songs(lovedData, function(loved) {
 								backup.loved = loved;
-								done();
+								DATA.getItem('lovedOffline', function(offline) {
+									offline && (backup.lovedOffline = true);
+									done();
+								});
 							});
 						},
 						done = function() {
