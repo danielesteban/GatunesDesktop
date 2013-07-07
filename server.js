@@ -37,6 +37,36 @@ httpServer.on('listening', function() {
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0});
 	load();
+	(function() {
+		/* Backup Menu */
+		var m = require('nw.gui').Menu,
+			mi = require('nw.gui').MenuItem,
+			menubar = new m({
+				type : 'menubar'
+			}),
+			menu = new m();
+
+		menu.append(new mi({
+			label : 'Export data to file',
+			click : function() {
+				window.APPWIN && APPWIN.DATA.export();
+			}
+		}));
+
+		menu.append(new mi({
+			label : 'Import data from file',
+			click : function() {
+				window.APPWIN && APPWIN.DATA.import();
+			}
+		}));
+
+		menubar.append(new mi({
+			label : 'Backup',
+			submenu : menu
+		}));
+
+		require('nw.gui').Window.get().menu = menubar;
+	}());
 });
 
 function load() {
