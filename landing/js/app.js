@@ -10,25 +10,44 @@ window.applicationCache && window.applicationCache.addEventListener('updateready
 /* Start the app */
 $(window).load(function() {
 	var lang = navigator.language ? navigator.language.substr(navigator.language.length - 2).toLowerCase() : navigator.browserLanguage,
-		install = function() {
-			var goToStore = function() {
-					window.location.href = $('link[rel="chrome-webstore-item"]').attr('href');
-				};
-
-			return goToStore();
-			/*
-			Apparently this doesn't work.. so I'll comment it out 'til I fix it.
-			if(!window.chrome) return goToStore();
-			chrome.webstore.install('', function() {
-				$('a.install button').remove();
-				$('.install a').unbind('click', install);
-				$('.install button').unbind('click', install);
-			}, goToStore);*/
+		version = '1.1.5',
+		sizes = {
+			darwin : 25,
+			win32 : 20,
+			'linux-ia32' : 27,
+			'linux-x64' : 30
+		},
+		platformNames = {
+			darwin : 'Mac OS X',
+			win32 : 'Windows',
+			'linux-ia32' : 'GNU/Linux (32bit)',
+			'linux-x64' : 'GNU/Linux (64bit)'
+		},
+		platform = navigator.appVersion.indexOf("Win") != -1 ? 'win32' : navigator.appVersion.indexOf("Mac") != -1 ? 'darwin' : 'linux-x64',
+		link = function(platform) {
+			return '/releases/Gatunes.v' + version + '-' + platform + '.' + (platform === 'darwin' ? 'zip' : platform === 'win32' ? 'exe' : 'tar.bz2');
 		};
 	
 	['en', 'es'].indexOf(lang) === -1 && (lang = 'en');
 	$('[class*="lang-"]').hide();
 	$('[class*="lang-' + lang + '"]').show();
+
+	$('.download a').attr('href', link(platform));
+	$('.download button').click(function() {
+		window.location.href = link(platform);
+	});
+	$('.download button .version').text('v' + version);
+	$('.download button .platform').text(platformNames[platform]);
+	$('.download button .size').text(sizes[platform] + 'MB');
+
+	var p = $('.download .alternative'),
+		c = 0;
+
+	for(var i in platformNames) {
+		if(i === platform) continue;
+		c++ > 0 && p.append('&nbsp; • &nbsp;');
+		p.append($('<a href="' + link(i) + '">' + platformNames[i] + '</a>'));
+	}
 
 	var canvas = $('canvas')[0],
 		ctx = canvas.getContext('2d'),
@@ -67,7 +86,4 @@ $(window).load(function() {
 	});
 	$('body').fadeIn();
 	draw();draw();
-	if(window.chrome && window.chrome.app && window.chrome.app.isInstalled) return $('a.install button').remove();
-	$('.install a').bind('click', install);
-	$('.install button').bind('click', install);
 });
