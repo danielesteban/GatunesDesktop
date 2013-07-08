@@ -243,7 +243,7 @@ function update() {
 				});
 				res.on('end', function(){
 					var path = process.platform === 'darwin' ? join(process.cwd(), '..') : require('path').dirname(process.execPath);
-					filename = join(path, 'gatunes.nw');
+					filename = join(path, 'package.nw');
 					fs.writeFile(filename, update, 'binary', function(err) {
 						if(err || process.platform !== 'darwin') return;
 						var AdmZip = require('adm-zip'),
