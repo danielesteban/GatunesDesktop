@@ -609,7 +609,7 @@ TEMPLATE = {
 					});
 				});
 			});
-			$('button.offline span', actions).text(L.availableOffline + ': ' + (data.offline ? 'ON' : 'OFF'));
+			$('button.offline span', actions).html(L.availableOffline + ': ' + (data.offline ? '<strong>ON</strong>' : 'OFF'));
 			$('aside menu li' + (data.dataKey ? '[key="' + data.dataKey + '"]' : '.create')).addClass('selected');
 			TEMPLATE.playlist.renderSongs(data);
 			$('section input').first().focus();
@@ -1238,7 +1238,7 @@ TEMPLATE = {
 					});
 				});
 			});
-			$('section button.offline span').text(L.availableOffline + ': ' + (data.offline ? 'ON' : 'OFF'));
+			$('section button.offline span').html(L.availableOffline + ': ' + (data.offline ? '<strong>ON</strong>' : 'OFF'));
 			$('aside menu li[key="' + data.dataKey + '"]').addClass('selected');
 			var cover = $('<img src="' + (data.offlineImage ? '/media' + data.offlineImage : data.image) + '" />'),
 				errorHandler = function() {
@@ -1365,7 +1365,7 @@ TEMPLATE = {
 				if(data.offline) DATA.removeItem('lovedOffline', cb);
 				else DATA.setItem('lovedOffline', true, cb);
 			});
-			$('section button.offline span').text(L.availableOffline + ': ' + (data.offline ? 'ON' : 'OFF'));
+			$('section button.offline span').html(L.availableOffline + ': ' + (data.offline ? '<strong>ON</strong>' : 'OFF'));
 			$('aside menu li.loved').addClass('selected');
 			$(window).bind('mousedown', TEMPLATE.playlist.resetSelection);
 			ROUTER.onUnload = function() {
@@ -1607,6 +1607,33 @@ TEMPLATE = {
 				}, m.name);
 			});
 		}
+	},
+	settings : function() {
+		var i = $('section input[name="downloadPath"]'),
+			f = i.next();
+
+		i.val(DOWNLOAD.getDownloadPath()).click(function() {
+			f.click();
+		});
+		f.attr('nwworkingdir', i.val()).change(function(e) {
+			if(!e.target.files[0]) return;
+			i.val(e.target.files[0].path);
+			e.target.nwworkingdir = i.val();
+			DOWNLOAD.setDownloadPath(i.val());
+		});
+		$('section input[name="extractAudio"]')
+			.attr('checked', DOWNLOAD.getExtractAudio)
+			.change(function(e) {
+				DOWNLOAD.setExtractAudio(e.target.checked);
+			});
+
+		$('section button.import').click(DATA.import);
+		$('section button.export').click(DATA.export);
+		$('section select[name="lang"]')
+			.val(L.lang)
+			.change(function(e) {
+				DATA.setItem('lang', $(e.target).val(), RELOAD);
+			});
 	}
 };
 

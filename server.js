@@ -1,6 +1,7 @@
 var fs = require('fs'),
 	join = require('path').join,
-	downloadPath = process.env.HOME || process.env.USERPROFILE,
+	downloadPath = localStorage.getItem('downloadPath'),
+	extractAudio = localStorage.getItem('extractAudio'),
 	httpPort = 28029,
 	httpServer = require('http').createServer(function (request, response) {
 	    request.addListener('end', function () {
@@ -32,41 +33,14 @@ httpServer.on('error', function(e) {
 });
 
 httpServer.on('listening', function() {
-	fs.existsSync(join(downloadPath, 'Music')) && (downloadPath = join(downloadPath, 'Music'));
-	downloadPath = join(downloadPath, 'Gatunes');
+	if(!downloadPath) {
+		downloadPath = process.env.HOME || process.env.USERPROFILE;
+		fs.existsSync(join(downloadPath, 'Music')) && (downloadPath = join(downloadPath, 'Music'));
+		downloadPath = join(downloadPath, 'Gatunes');
+	}
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0});
 	load();
-	(function() {
-		/* Backup Menu */
-		var m = require('nw.gui').Menu,
-			mi = require('nw.gui').MenuItem,
-			menubar = new m({
-				type : 'menubar'
-			}),
-			menu = new m();
-
-		menu.append(new mi({
-			label : 'Export data to a file',
-			click : function() {
-				window.APPWIN && APPWIN.DATA.export();
-			}
-		}));
-
-		menu.append(new mi({
-			label : 'Import data from a file',
-			click : function() {
-				window.APPWIN && APPWIN.DATA.import();
-			}
-		}));
-
-		menubar.append(new mi({
-			label : 'Backup',
-			submenu : menu
-		}));
-
-		require('nw.gui').Window.get().menu = menubar;
-	}());
 });
 
 function load() {
@@ -172,7 +146,9 @@ function load() {
 				var path = APPWIN.DOWNLOAD.getPath(playlist, true);
 				APPWIN.DOWNLOAD.check(id, playlist, function(already) {
 					if(already) return callback(null, already);
-					var dl = require('youtube-dl').download(url, path, ["-o" + APPWIN.DOWNLOAD.cleanPath(title) + '_' + id + ".%(ext)s", "--newline"]);
+					var params = ["-o" + APPWIN.DOWNLOAD.cleanPath(title) + '_' + id + ".%(ext)s", "--newline"];
+					extractAudio && (params = params.concat(["-x", "--audio-format", "mp3"]));
+					var dl = require('youtube-dl').download(url, path, params);
 					progress && dl.on('progress', progress);
 					if(!callback) return;
 					dl.on('error', function(err) {
@@ -198,6 +174,23 @@ function load() {
 						});
 					});
 				});
+			},
+			getDownloadPath : function() {
+				return downloadPath;
+			},
+			setDownloadPath : function(path) {
+				if(!fs.existsSync(path)) return;
+				downloadPath = path;
+				mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0});
+				localStorage.setItem('downloadPath', downloadPath);
+			},
+			getExtractAudio : function() {
+				return extractAudio;
+			},
+			setExtractAudio : function(active) {
+				extractAudio = active;
+				if(active) localStorage.setItem('extractAudio', true);
+				else localStorage.removeItem('extractAudio');
 			}
 		};
 		APPWIN.RELOAD = function() {

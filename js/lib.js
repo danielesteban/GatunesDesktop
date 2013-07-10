@@ -177,6 +177,7 @@ LIB = {
 			else if(available_langs.indexOf(browser_lang[0].toLowerCase()) !== -1) lang = browser_lang[0].toLowerCase();
 			else if(browser_lang[1] && available_langs.indexOf(browser_lang[1].toLowerCase()) !== -1) lang = browser_lang[1].toLowerCase();
 			L = LANG[lang];
+			L.lang = lang;
 			DATA.setItem('lang', lang, callback);
 		});
 	},
@@ -299,7 +300,8 @@ ROUTER = {
 				'artist',
 				'explore',
 				'loved',
-				'playlist'
+				'playlist',
+				'settings'
 			];
 
 		params.forEach(function(p, i) { params[i] = decodeURIComponent(p); });

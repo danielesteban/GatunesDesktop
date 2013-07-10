@@ -1,0 +1,22 @@
+<div class="header">
+	<h1>{{L 'settings'}}</h1>
+	<hr>
+</div>
+<div class="padding">
+	<h4>{{L 'downloadPath'}}</h4>
+	<input class="input-block-level" type="text" name="downloadPath" />
+	<input style="display:none" type="file" nwdirectory />
+	<label class="checkbox">
+		<input type="checkbox" name="extractAudio" /> {{L 'extractAudio'}}
+	</label>
+	<hr>
+	<h4>{{L 'backup'}}</h4>
+	<button class="btn export"><i class="icon-upload"></i> {{L 'export'}}</button> 
+	<button class="btn import"><i class="icon-download"></i> {{L 'import'}}</button>
+	<hr>
+	<h4>{{L 'language'}}</h4>
+	<select name="lang">
+		<option value="es">Castellano</option>
+		<option value="en">English</option>
+	</select>
+</div>

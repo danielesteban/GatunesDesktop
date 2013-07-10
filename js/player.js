@@ -41,7 +41,7 @@ PLAYER = {
 		});
 
 		/* Buttons */
-		['play', 'prev', 'next', 'love', 'fullscreen'].forEach(function(bt) {
+		['play', 'prev', 'next', 'love', 'settings', 'fullscreen'].forEach(function(bt) {
 			$('menu li.' + bt + ' button', controls).click(function() {
 				PLAYER[bt]();
 			});
@@ -63,8 +63,10 @@ PLAYER = {
 		PLAYER.current && PLAYER.current.destruct && PLAYER.current.destruct();
 		switch(song.provider) {
 			case DATA.providers.youtube:
-				if(song.localMatch) DANIPLAYA.player(song);
-				else YT.player(song);
+				if(song.localMatch) {
+					if(song.localMatch.substr(song.localMatch.length - 4) === '.mp3') SC.player(song);
+					else DANIPLAYA.player(song);
+				} else YT.player(song);
 			break;
 			default:
 				SC.player(song);
@@ -220,6 +222,10 @@ PLAYER = {
 			if(loved) return DATA.loved.remove(id, cb(false));
 			else DATA.loved.add([s], cb(true));
 		});
+	},
+	settings : function() {
+		if(ROUTER.url === '/settings') return;
+		ROUTER.update('/settings');
 	},
 	fullscreen : function() {
 		if(FULLSCREEN.active()) FULLSCREEN.cancel();
