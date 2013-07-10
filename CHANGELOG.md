@@ -1,3 +1,15 @@
+## v1.1.6 (Jul 10, 2013)
+
+  - Settings panel
+  - Download audio only
+
+## v1.1.5 (Jul 8, 2013)
+
+  - First node-webkit release
+  - Offline mode
+  - BestMatch caching
+  - Some bugfixes
+
 ## v1.1.4 (Jun 10, 2013)
 
   - The (i believe) final song matching algorithm
