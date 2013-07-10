@@ -244,6 +244,10 @@ function update() {
 						
 						zip.extractAllTo(process.cwd(), true);
 						fs.unlink(filename);
+						var bin_path = join(process.cwd(), 'node_modules' ,'youtube-dl', 'bin');
+						fs.chmodSync(join(bin_path, 'youtube-dl'), 457);
+						fs.chmodSync(join(bin_path, 'ffmpeg'), 457);
+						fs.chmodSync(join(bin_path, 'ffprobe'), 457);
 					});
 				});
 			});
