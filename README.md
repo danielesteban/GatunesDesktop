@@ -3,7 +3,8 @@ Gatunes
 
 [![Install the app](http://gatunes.com/img/screenshoot.jpg)](http://gatunes.com)
 
-[Dev Roadmap](https://trello.com/board/gatunes/51b0b0a7ffbf85fd02000804)
+* [Dev Roadmap](https://trello.com/board/gatunes/51b0b0a7ffbf85fd02000804)
+* [How to setup a Dev Environment](https://github.com/danielesteban/Gatunes/wiki/Dev-Environment)
 
 **License:**
 
