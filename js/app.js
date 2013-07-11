@@ -759,19 +759,22 @@ TEMPLATE = {
 			$(tr).dblclick(cf);
 			$('a.play', tr).click(cf);
 			TEMPLATE.song.hookDrag(tr, song);
-			!song.search && TEMPLATE.song.hookLove(tr, song);
-			if(!song.search && !song.album) {
-				$('a.remove', tr).click(function() {
-					var dataKey = h1.attr("key");
-					if(dataKey === 'undefined') return;
-					var id = dataKey.split(':')[1];
-					DATA.playlists.removeSong(id, tr[0].rowIndex, song.provider, song.provider_id, function() {
-						DATA.playlists.get(id, function(playlist) {
-							TEMPLATE.playlist.renderSongs(playlist);
+			if(!song.search) {
+				TEMPLATE.song.hookLove(tr, song);
+				TEMPLATE.song.hookReplace(tr, song);
+				if(!song.album) {
+					$('a.remove', tr).click(function() {
+						var dataKey = h1.attr("key");
+						if(dataKey === 'undefined') return;
+						var id = dataKey.split(':')[1];
+						DATA.playlists.removeSong(id, tr[0].rowIndex, song.provider, song.provider_id, function() {
+							DATA.playlists.get(id, function(playlist) {
+								TEMPLATE.playlist.renderSongs(playlist);
+							});
 						});
 					});
-				});
-				TEMPLATE.song.hookDrop(tr, song);
+					TEMPLATE.song.hookDrop(tr, song);
+				}
 			}
 			dest.append(tr);
 			!song.search && setTimeout(function() {
@@ -984,8 +987,8 @@ TEMPLATE = {
 				callback && callback(s.localMatch);
 			});
 		},
-		bestMatch : function(s, callback) {
-			if(s.bestMatch) return callback && callback(s.bestMatch);
+		bestMatch : function(s, callback, replace) {
+			if(!replace && s.bestMatch) return callback && callback(s.bestMatch);
 			if(!navigator.onLine) return callback && callback();
 			var title = s.artist.name + ' ' + s.title,
 				getWords = function(str) {
@@ -1057,36 +1060,41 @@ TEMPLATE = {
 												(b.providerRanking > a.providerRanking ? -1 : (b.providerRanking < a.providerRanking ? 1 :
 							0)))))))))))));
 					});
-					if(songs[0] && songs[0].wCount >= titleWords.length) {
-						s.bestMatch = songs[0];
-						DATA.getItem('song:' + s.bestMatch.provider + ':' + s.bestMatch.provider_id, function(match) {
-							if(!match) DATA.setItem('song:' + s.bestMatch.provider + ':' + s.bestMatch.provider_id, {
-								title : LIB.escapeHTML(s.bestMatch.title),
-								time : parseInt(s.bestMatch.time, 10)
+					if(replace) callback(songs);
+					else {
+						if(songs[0] && songs[0].wCount >= titleWords.length) {
+							s.bestMatch = songs[0];
+							DATA.getItem('song:' + s.bestMatch.provider + ':' + s.bestMatch.provider_id, function(match) {
+								if(!match) DATA.setItem('song:' + s.bestMatch.provider + ':' + s.bestMatch.provider_id, {
+									title : LIB.escapeHTML(s.bestMatch.title),
+									time : parseInt(s.bestMatch.time, 10)
+								});
+								DATA.getItem('song:' + s.provider + ':' + s.provider_id, function(song) {
+									if(!song) song = {
+										title : LIB.escapeHTML(s.title),
+										time : parseInt(s.time, 10),
+										artist : {
+											mbid : LIB.escapeHTML(s.artist.mbid),
+											name : LIB.escapeHTML(s.artist.name)
+										}
+									};
+									song.bestMatch = s.bestMatch.provider + ':' + s.bestMatch.provider_id;
+									DATA.setItem('song:' + s.provider + ':' + s.provider_id, song);
+								});
 							});
-							DATA.getItem('song:' + s.provider + ':' + s.provider_id, function(song) {
-								if(!song) song = {
-									title : LIB.escapeHTML(s.title),
-									time : parseInt(s.time, 10),
-									artist : {
-										mbid : LIB.escapeHTML(s.artist.mbid),
-										name : LIB.escapeHTML(s.artist.name)
-									}
-								};
-								song.bestMatch = s.bestMatch.provider + ':' + s.bestMatch.provider_id;
-								DATA.setItem('song:' + s.provider + ':' + s.provider_id, song);
-							});
-						});
+						}
+						callback && callback(s.bestMatch);
 					}
-					callback && callback(s.bestMatch);
 				};
 
 			YT.search('videos', title, 0, function(r) {
 				r.entry && r.entry.forEach(function(e, i) {
+					var provider_id = e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1);
+					if(replace && replace.provider === DATA.providers.youtube && replace.provider_id === provider_id) return;
 					songs.push({
 						providerRanking : i,
 						provider : DATA.providers.youtube,
-						provider_id : e.id.$t.substr(e.id.$t.lastIndexOf('/') + 1),
+						provider_id : provider_id,
 						title : e.title.$t,
 						time : parseInt(e.media$group.yt$duration ? e.media$group.yt$duration.seconds : 0, 10),
 						hd : e.yt$hd ? true : false
@@ -1096,6 +1104,7 @@ TEMPLATE = {
 			});
 			SC.search(title, function(r) {
 				r.forEach(function(t, i) {
+					if(replace && replace.provider === DATA.providers.soundcloud && replace.provider_id === t.id) return;
 					songs.push({
 						providerRanking : i,
 						provider : DATA.providers.soundcloud,
@@ -1121,6 +1130,96 @@ TEMPLATE = {
 					if(loved) return DATA.loved.remove(id, cb(false));
 					else DATA.loved.add([song], cb(true));
 				});
+			});
+		},
+		hookReplace : function(tr, song) {
+			$('a.replace', tr).click(function() {
+				if(!song.bestMatch) return;
+				var close = function() {
+						$('div.modal-backdrop').remove();
+						$('div.modal').remove();
+					},
+					backdrop = $('<div class="modal-backdrop hidden" />'),
+					modal = $(Handlebars.partials.replace({})),
+					table = $('table tbody', modal);
+
+				backdrop.click(close);
+				close();
+				$('h2', modal).text(L.replace + ' ' + song.title);
+				$('body').append(backdrop);
+				$('body').append(modal);
+				TEMPLATE.song.bestMatch(song, function(matches) {
+					table.empty();
+					if(!matches.length) {
+						table.append($('<tr><td class="empty">No matches found!</td></tr>'));
+						return tr.addClass('error');
+					}
+					matches.forEach(function(s, i) {
+						s.num = LIB.addZero(i + 1);
+						s.search = true;
+						var tr = $(Handlebars.partials.song(s)),
+							td = $('<td class="image" />'),
+							div = $('<div />'),
+							img = $('<img />');
+
+						switch(s.provider) {
+				    		case DATA.providers.youtube:
+				    			img.attr('src', 'http://i.ytimg.com/vi/' + s.provider_id + '/default.jpg');
+				    		break;
+				    		case DATA.providers.soundcloud:
+				    			if(SC.artworks[s.provider_id]) img.attr('src', SC.artworks[s.provider_id].replace(/crop.jpg/, 'large.jpg'));
+								else if(!SC.artworks_err[s.provider_id]) {
+									if(SC.artworks_req.indexOf(s.provider_id) === -1) SC.artworks_req.push(s.provider_id);
+									img.addClass('scart' + s.provider_id);
+								}
+				    	}
+				    	img.load(function() {
+				    		var s = 50;
+				    		if(img.width() > img.height()) {
+				    			var w = img.width() * s / img.height();
+				    			img.css('height', s);
+				    			img.css('width', w);
+				    			img.css('left', (w - s) / -2);
+				    		} else {
+				    			var h = img.height() * s / img.width();
+				    			img.css('width', s);
+				    			img.css('height', h);
+				    			img.css('top', (h - s) / -2);
+				    		}
+				    	});
+				    	div.append(img);
+				    	td.append(div);
+						$(tr).children().first().after(td);
+						$(tr).click(function() {
+							song.bestMatch = s;
+							DATA.getItem('song:' + s.provider + ':' + s.provider_id, function(match) {
+								if(!match) DATA.setItem('song:' + s.provider + ':' + s.provider_id, {
+									title : LIB.escapeHTML(s.title),
+									time : parseInt(s.time, 10)
+								});
+								DATA.getItem('song:' + song.provider + ':' + song.provider_id, function(cache) {
+									if(!cache) cache = {
+										title : LIB.escapeHTML(song.title),
+										time : parseInt(song.time, 10),
+										artist : {
+											mbid : LIB.escapeHTML(song.artist.mbid),
+											name : LIB.escapeHTML(song.artist.name)
+										}
+									};
+									cache.bestMatch = s.provider + ':' + s.provider_id;
+									DATA.setItem('song:' + song.provider + ':' + song.provider_id, cache);
+									close();
+								});
+							});
+						});
+						table.append(tr);
+					});
+					SC.reqArtworks();
+				}, song.bestMatch);
+				setTimeout(function() {
+					backdrop.removeClass('hidden');
+					modal.removeClass('hidden');
+				}, 0);
 			});
 		}
 	},
@@ -1230,6 +1329,7 @@ TEMPLATE = {
 				$('a.play', tr).click(cf);
 				TEMPLATE.song.hookDrag(tr, s);
 				TEMPLATE.song.hookLove(tr, s);
+				TEMPLATE.song.hookReplace(tr, s);
 				setTimeout(function() {
 					cf();
 				}, s.bestMatch ? 0 : i * 100);
@@ -1363,6 +1463,7 @@ TEMPLATE = {
 				tr.dblclick(cf);
 				$('a.play', tr).click(cf);
 				TEMPLATE.song.hookDrag(tr, s);
+				TEMPLATE.song.hookReplace(tr, s);
 				$('a.remove', tr).click(function() {
 					DATA.loved.remove(s.provider + ':' + s.provider_id);
 				});
@@ -1668,6 +1769,11 @@ $(window).load(function() {
 
 	Handlebars.registerHelper('or', function(val1, val2, options) {
 		if(val1 || val2) return options.fn(this);
+		else return options.inverse(this);
+	});
+
+	Handlebars.registerHelper('equals', function(val1, val2, options) {
+		if(val1 === val2) return options.fn(this);
 		else return options.inverse(this);
 	});
 

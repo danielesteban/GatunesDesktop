@@ -147,12 +147,41 @@ aside {
 	}
 }
 
-section {
+section, div.modal.replace {
 	overflow-y: scroll;
 	div.header {
 		padding: 0 20px;
 		h1 a {
 			color: #0088cc;
+		}
+	}
+}
+
+div.modal.replace {
+	overflow: hidden;
+	div.header h2 {
+		margin-bottom: 0;
+		.ellipsis();
+	}
+	hr {
+		margin: 10px 0;
+	}
+	div.padding {
+		max-height: 360px;
+		padding: 0 20px 20px;
+		margin: 0 0 20px;
+		overflow-y: scroll;	
+	}
+	table td {
+		cursor: pointer;
+		&.image div {
+			display: block;
+			width: 50px;
+			height: 50px;
+			overflow: hidden;
+			img {
+				position: relative;
+			}
 		}
 	}
 }
@@ -273,7 +302,7 @@ footer {
 }
 
 /* Sections */
-section {
+section, div.modal.replace {
 	div.half {
 		float: left;
 		width: 50%;
@@ -349,7 +378,7 @@ section {
 	}
 }
 
-section#playlist, section#album, section#loved {
+section#playlist, section#album, section#loved, div.modal.replace {
 	div.header button {
 		margin: 0 0 0 10px;
 		font-weight: normal;
@@ -440,12 +469,16 @@ section#playlist, section#album, section#loved {
 				text-align: right;
 				a {
 					display: none;
-					&.love {
+					&.love, &.replace {
 						position: relative;
 						margin: -14px 0 0;
 						top: 13px;
+						width: 14px;
 						height: 14px;
 						left: -28px;
+					}
+					&.replace {
+						left: -49px;
 					}
 				}
 			}
@@ -506,7 +539,7 @@ section#playlist, section#album, section#loved {
 				}
 				a {
 					display: inline;
-					&.love {
+					&.love, &.replace {
 						display: block;
 					}
 				}

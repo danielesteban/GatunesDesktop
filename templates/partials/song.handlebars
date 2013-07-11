@@ -13,6 +13,9 @@
 		{{/if}}
 	</td>
 	<td class="time">
+		{{#equals provider 3}}
+			<a class="replace"><i class="icon-wrench"></i></a>
+		{{/equals}}
 		{{#unless loved}}
 			{{#unless search}}
 				<a class="love"><i class="icon-{{#if love}}ok{{else}}heart{{/if}}"></i></a>

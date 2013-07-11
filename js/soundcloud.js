@@ -32,7 +32,7 @@ SC = {
 				data.forEach(function(t) {
 					if(t.artwork_url || (t.user.avatar_url && t.user.avatar_url.indexOf('default_avatar_large.png') === -1)) {
 						SC.artworks[t.id] = (t.artwork_url || t.user.avatar_url).replace(/large.jpg/, 'crop.jpg');
-						$('img.scart' + t.id, 'section').attr('src', SC.artworks[t.id].replace(/crop.jpg/, 'large.jpg'));
+						$('img.scart' + t.id, 'section, div.modal.replace').attr('src', SC.artworks[t.id].replace(/crop.jpg/, 'large.jpg'));
 					} else SC.artworks_err[t.id] = true;
 				});
 				
