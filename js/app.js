@@ -1163,25 +1163,39 @@ TEMPLATE = {
 								image : LIB.escapeHTML(a.image[3]['#text']),
 								songs : [],
 								tags : []
+							},
+							tracks = a.tracks.track.length ? a.tracks.track : [a.tracks.track],
+							getTracks = function() {
+								if(!tracks.length) return cb(album);
+								var t = tracks.shift();
+								if(!t.mbid) return getTracks();
+								DATA.getItem('song:' + DATA.providers.lastfm + ':' + t.mbid, function(s) {
+									!s && (s = {
+										title : LIB.escapeHTML(t.name),
+										time : parseInt(t.duration, 10),
+										artist : {
+											mbid : LIB.escapeHTML(t.artist.mbid),
+											name : LIB.escapeHTML(t.artist.name)
+										}
+									});
+									s.provider = DATA.providers.lastfm;
+									s.provider_id = t.mbid;	
+									album.songs.push(s);
+									if(!s.bestMatch) return getTracks();
+									DATA.getItem('song:' + s.bestMatch, function(bm) {
+										bm.provider = parseInt(s.bestMatch.split(':')[0], 10);
+										bm.provider_id = s.bestMatch.split(':')[1];
+										s.bestMatch = bm;
+										getTracks();
+									});
+								});
 							};
 
-						(a.tracks.track.length ? a.tracks.track : [a.tracks.track]).forEach(function(t) {
-							if(!t.mbid) return;
-							album.songs.push({
-								provider : DATA.providers.lastfm,
-								provider_id : t.mbid,
-								title : LIB.escapeHTML(t.name),
-								time : parseInt(t.duration, 10),
-								artist : {
-									mbid : LIB.escapeHTML(t.artist.mbid),
-									name : LIB.escapeHTML(t.artist.name)
-								}
-							});
-						});
 						a.toptags.tag && (a.toptags.tag.length ? a.toptags.tag : [a.toptags.tag]).forEach(function(t) {
 							album.tags.push(LIB.escapeHTML(t.name));
 						});
-						cb(album);
+						
+						getTracks();
 					}, a.artist);
 				});
 			});
