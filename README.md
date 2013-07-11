@@ -1,9 +1,7 @@
 Gatunes
 =======
 
-[![Install the app](http://gatunes.com/img/screenshoot.jpg)](https://chrome.google.com/webstore/detail/gatunes/jcbcnbikbcidmnkbfomplfjbclpfogbn)
-
-[Install the app](https://chrome.google.com/webstore/detail/gatunes/jcbcnbikbcidmnkbfomplfjbclpfogbn)
+[![Install the app](http://gatunes.com/img/screenshoot.jpg)](http://gatunes.com)
 
 [Dev Roadmap](https://trello.com/board/gatunes/51b0b0a7ffbf85fd02000804)
 
