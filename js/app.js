@@ -539,8 +539,8 @@ DATA = {
 							});
 						},
 						loved = function() {
-							songs(lovedData, function(loved) {
-								backup.loved = loved;
+							songs(lovedData || [], function(loved) {
+								loved.length && (backup.loved = loved);
 								DATA.getItem('lovedOffline', function(offline) {
 									offline && (backup.lovedOffline = true);
 									done();

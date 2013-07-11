@@ -40,6 +40,15 @@ httpServer.on('listening', function() {
 	}
 	!fs.existsSync(downloadPath) && fs.mkdirSync(downloadPath);
 	mediaServer = new (require('node-static').Server)(downloadPath, {cache: 0});
+	var bin_path = join(process.cwd(), 'node_modules', 'youtube-dl', 'bin');
+	if(process.platform !== 'win32') {
+		['youtube-dl', 'ffmpeg', 'ffprobe'].forEach(function(bin) {
+			bin = join(bin_path, bin);
+			if(!fs.existsSync(bin) || fs.statSync(bin).mode === 33225) return;
+			fs.chmodSync(bin, 457);
+		});
+	}
+	require('child_process').spawn(join(bin_path, 'youtube-dl' + (process.platform === 'win32' ? '.exe' : '')), ["-U"]);
 	load();
 });
 
@@ -244,10 +253,10 @@ function update() {
 						
 						zip.extractAllTo(process.cwd(), true);
 						fs.unlink(filename);
-						var bin_path = join(process.cwd(), 'node_modules' ,'youtube-dl', 'bin');
-						fs.chmodSync(join(bin_path, 'youtube-dl'), 457);
-						fs.chmodSync(join(bin_path, 'ffmpeg'), 457);
-						fs.chmodSync(join(bin_path, 'ffprobe'), 457);
+						var bin_path = join(process.cwd(), 'node_modules', 'youtube-dl', 'bin');
+						['youtube-dl', 'ffmpeg', 'ffprobe'].forEach(function(bin) {
+							fs.chmodSync(join(bin_path, bin), 457);
+						});
 					});
 				});
 			});
