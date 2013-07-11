@@ -384,6 +384,101 @@ DATA = {
 				callback(true);
 			});
 		}
+	},
+	export : function(callback) {
+		DATA.playlists.getAll(function(playlistData) {
+			DATA.albums.getAll(function(albumData) {
+				DATA.getItem('loved', function(lovedData) {
+					var backup = {},
+						songs = function(data, callback, i) {
+							i = i || 0;
+							if(!data.length || i >= data.length) return callback(data);
+							!backup.songs && (backup.songs = []);
+							var id = data[i],
+								provider = parseInt(id.split(':')[0], 10),
+								provider_id = id.split(':')[1],
+								already = false;
+
+							backup.songs.forEach(function(s) {
+								if(already) return;
+								if(s.provider === provider && s.provider_id === provider_id) return already = true;
+							});
+							if(already) return songs(data, callback, ++i);
+							DATA.getItem('song:' + id, function(s) {
+								if(!s) {
+									data.splice(i, 1);
+									return songs(data, callback, i);
+								}
+								var song = {
+										provider : provider,
+										provider_id : provider_id,
+										title : LIB.escapeHTML(s.title),
+										time : parseInt(s.time, 10)
+									};
+
+								s.artist && (song.artist = {
+									mbid : LIB.escapeHTML(s.artist.mbid),
+									name : LIB.escapeHTML(s.artist.name)
+								});
+
+								backup.songs.push(song);
+								songs(data, callback, ++i);
+							});
+						},
+						playlists = function() {
+							if(!playlistData.length) return albums();
+							var data = playlistData.shift(),
+								playlist = {
+									title : LIB.escapeHTML(data.title)
+								};
+
+							songs(data.songs, function(songs) {
+								playlist.songs = songs;
+								!backup.playlists && (backup.playlists = []);
+								backup.playlists.push(playlist);
+								playlists();
+							});
+						},
+						albums = function() {
+							if(!albumData.length) return loved();
+							var data = albumData.shift(),
+								album = {
+									id : data.id,
+									artist : {
+										mbid : LIB.escapeHTML(data.artist.mbid),
+										name : LIB.escapeHTML(data.artist.name)
+									},
+									title : LIB.escapeHTML(data.title),
+									image : LIB.escapeHTML(data.image),
+									tags : []
+								};
+							
+							data.tags.forEach(function(t) {
+								album.tags.push(LIB.escapeHTML(t));
+							});
+							songs(data.songs, function(songs) {
+								album.songs = songs;
+								!backup.albums && (backup.albums = []);
+								backup.albums.push(album);
+								albums();
+							});
+						},
+						loved = function() {
+							songs(lovedData || [], function(loved) {
+								loved.length && (backup.loved = loved);
+								done();
+							});
+						},
+						done = function() {
+							var date = new Date();
+							saveAs(new Blob([JSON.stringify(backup)], {type: "text/plain;charset=utf-8"}), 'GatunesBackup-' + date.getFullYear() + LIB.addZero(date.getMonth() + 1) + LIB.addZero(date.getDate()) + '.json');
+							callback && callback();
+						};
+
+					playlists();
+				});
+			});
+		});
 	}
 };
 
@@ -1258,6 +1353,13 @@ TEMPLATE = {
 				}, m.name);
 			});
 		}
+	},
+	deprecated : function() {
+		$('section p.export button').click(function() {
+			DATA.export(function() {
+				$('section p.export').html('<small>Se ha guardado el archivo en tu carpeta de descargas de Chrome</small>');
+			})
+		});
 	}
 };
 
