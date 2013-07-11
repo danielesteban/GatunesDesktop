@@ -10,12 +10,12 @@ window.applicationCache && window.applicationCache.addEventListener('updateready
 /* Start the app */
 $(window).load(function() {
 	var lang = navigator.language ? navigator.language.substr(navigator.language.length - 2).toLowerCase() : navigator.browserLanguage,
-		version = '1.1.6',
+		version = '1.1.7',
 		sizes = {
-			darwin : 38,
-			win32 : 38,
-			'linux-ia32' : 39,
-			'linux-x64' : 42
+			darwin : 41,
+			win32 : 40,
+			'linux-ia32' : 42,
+			'linux-x64' : 45
 		},
 		platformNames = {
 			darwin : 'Mac OS X',
