@@ -1,5 +1,5 @@
 #define MyAppName "Gatunes"
-#define MyAppVersion "1.1.6"
+#define MyAppVersion "1.1.7"
 #define MyAppPublisher "Gatunes S.L."
 #define MyAppURL "http://gatunes.com/"
 #define MyAppExeName "nw.exe"

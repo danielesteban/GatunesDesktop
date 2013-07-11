@@ -1,3 +1,9 @@
+## v1.1.7 (Jul 11, 2013)
+
+  - Replace BestMatch popup
+  - Auto update youtube-dl on startup
+  - Some more data caching & bugfixes
+
 ## v1.1.6 (Jul 10, 2013)
 
   - Settings panel
