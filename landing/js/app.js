@@ -24,18 +24,32 @@ $(window).load(function() {
 			'linux-x64' : 'GNU/Linux (64bit)'
 		},
 		platform = navigator.appVersion.indexOf("Win") != -1 ? 'win32' : navigator.appVersion.indexOf("Mac") != -1 ? 'darwin' : 'linux-x64',
-		link = function(platform) {
-			return '/releases/Gatunes.v' + version + '-' + platform + '.' + (platform === 'darwin' ? 'zip' : platform === 'win32' ? 'exe' : 'tar.bz2');
+		link = function(a, platform) {
+			var url = '/releases/Gatunes.v' + version + '-' + platform + '.' + (platform === 'darwin' ? 'zip' : platform === 'win32' ? 'exe' : 'tar.bz2');
+			a.attr('href', url)
+				.click(function(e) {
+					e.stopPropagation();
+					e.preventDefault();
+					$.ajax({
+						url : 'https://api.mongolab.com/api/1/databases/landing/collections/downloads?apiKey=M8bGkRgnxrTJ-Y5pBW7c1GsKF901Fb6g',
+						data : JSON.stringify({
+							platform : platform,
+							date : Math.round((new Date()).getTime() / 1000)
+						}),
+						type : 'POST',
+						contentType : 'application/json'
+					}).always(function() {
+						window.location.href = url;
+					});
+				});
 		};
 	
 	['en', 'es'].indexOf(lang) === -1 && (lang = 'en');
 	$('[class*="lang-"]').hide();
 	$('[class*="lang-' + lang + '"]').show();
 
-	$('.download a').attr('href', link(platform));
-	$('.download button').click(function() {
-		window.location.href = link(platform);
-	});
+	link($('.download a'), platform);
+	link($('.download button'), platform);
 	$('.download button .version').text('v' + version);
 	$('.download button .platform').text(platformNames[platform]);
 	$('.download button .size').text(sizes[platform] + 'MB');
@@ -46,7 +60,9 @@ $(window).load(function() {
 	for(var i in platformNames) {
 		if(i === platform) continue;
 		c++ > 0 && p.append('&nbsp; • &nbsp;');
-		p.append($('<a href="' + link(i) + '">' + platformNames[i] + '</a>'));
+		var a = $('<a>' + platformNames[i] + '</a>');
+		link(a, i);
+		p.append(a);
 	}
 
 	var canvas = $('canvas')[0],

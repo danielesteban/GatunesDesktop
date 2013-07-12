@@ -103,7 +103,7 @@ console.log("Creating bundle...");
 exec('rm -rf bundle', function() {
 	exec('mkdir bundle', function() {
 		exec('cp -R * bundle/', function() {
-			exec('rm -rf bundle/scripts bundle/css/* bundle/bundle bundle/js/_jquery.js bundle/img/brand.png && cp ../js/_jquery.js bundle/js && cp ../img/brand.png bundle/img', function() {
+			exec('rm -rf bundle/scripts bundle/css/* bundle/bundle bundle/img/brand.png && cp ../img/brand.png bundle/img', function() {
 				console.log('compiling css...');
 				exec('lessc --yui-compress css/screen.less bundle/css/screen.css', function() {		
 					uglify([
