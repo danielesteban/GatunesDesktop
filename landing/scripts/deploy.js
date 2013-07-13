@@ -47,12 +47,25 @@ function writeIndex(css, js) {
 	fs.writeFileSync('bundle/index.html', str_replace_array(index, ["\n", "\r", "\t"], ['', '', '']));
 }
 
-function genManifest(css, js, callback) {
+function writeStats(js) {
+	var html = fs.readFileSync('bundle/stats.html', 'utf8'),
+		stats = html.substr(0, html.indexOf('<script'));
+
+	stats += '<script src="/' + js + '.js" charset="utf-8"></script>';
+	stats += html.substr(html.indexOf('<title>'));
+	stats = str_replace_array(stats, ["\n", "\r", "\t"], ['', '', '']);
+	fs.writeFileSync('bundle/stats.html', stats);
+	return require('crypto').createHash('md5').update(stats).digest('hex');
+}
+
+function genManifest(css, js, stats, statsJs, callback) {
 	var imgs = fs.readdirSync('bundle/img'),
 	manifest = "CACHE:\n" +
 		"/\n" + 
 		"/" + css + ".css\n" +
-		"/" + js + ".js\n";
+		"/" + js + ".js\n" +
+		"/" + statsJs + ".js\n" +
+		"/stats.html?" + stats + "\n";
 
 	md5(imgs.slice(), '/img/', function(md5s) { 
 		for(var x=0; x<2; x++) {
@@ -61,7 +74,7 @@ function genManifest(css, js, callback) {
 				manifest += "/img/" + img + "?" + md5s[i] + "\n"; 
 			});
 
-			x === 0 && (manifest += "\nFALLBACK:\n/ /\n");
+			x === 0 && (manifest += "\nFALLBACK:\n/ /\n/stats.html /stats.html?" + stats + "\n");
 		}
 		
 		manifest += "\nNETWORK:\n" +
@@ -107,18 +120,21 @@ exec('rm -rf bundle', function() {
 				console.log('compiling css...');
 				exec('lessc --yui-compress css/screen.less bundle/css/screen.css', function() {		
 					uglify([
-						'js/app.js'
+						'js/app.js',
+						'js/stats.js'
 					], function() {
 						console.log('compacting css...');
 						compact('bundle/css/*.css', 'css', function(cssMD5) {
 							console.log('compacting js...');
-							compact('bundle/js/*.js', 'js', function(jsMD5) {
-								console.log('cleaning bundle...');
-								exec('rm -rf bundle/js bundle/css', function() {
-									console.log('generating index & manifest...');
-									writeIndex(cssMD5, jsMD5);
-									genManifest(cssMD5, jsMD5, function() {
-										console.log('Done!');
+							compact('bundle/js/_jquery.js bundle/js/app.js', 'js', function(jsMD5) {
+								compact('bundle/js/_jquery.js bundle/js/stats.js', 'js', function(statsJsMD5) {
+									console.log('cleaning bundle...');
+									exec('rm -rf bundle/js bundle/css', function() {
+										console.log('generating index, stats & manifest...');
+										writeIndex(cssMD5, jsMD5);
+										genManifest(cssMD5, jsMD5, writeStats(statsJsMD5), statsJsMD5, function() {
+											console.log('Done!');
+										});
 									});
 								});
 							});
