@@ -25,11 +25,15 @@ $(window).load(function() {
 		},
 		platform = navigator.appVersion.indexOf("Win") != -1 ? 'win32' : navigator.appVersion.indexOf("Mac") != -1 ? 'darwin' : 'linux-x64',
 		link = function(a, platform) {
-			var url = '/releases/Gatunes.v' + version + '-' + platform + '.' + (platform === 'darwin' ? 'zip' : platform === 'win32' ? 'exe' : 'tar.bz2');
+			var url = '/releases/Gatunes.v' + version + '-' + platform + '.' + (platform === 'darwin' ? 'zip' : platform === 'win32' ? 'exe' : 'tar.bz2'),
+				ongoing;
+			
 			a.attr('href', url)
 				.click(function(e) {
 					e.stopPropagation();
 					e.preventDefault();
+					if(ongoing) return;
+					ongoing = true;
 					$.ajax({
 						url : 'https://api.mongolab.com/api/1/databases/landing/collections/downloads?apiKey=M8bGkRgnxrTJ-Y5pBW7c1GsKF901Fb6g',
 						data : JSON.stringify({
@@ -39,6 +43,7 @@ $(window).load(function() {
 						type : 'POST',
 						contentType : 'application/json'
 					}).always(function() {
+						ongoing = false;
 						window.location.href = url;
 					});
 				});
