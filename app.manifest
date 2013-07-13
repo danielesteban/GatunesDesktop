@@ -1,13 +1,13 @@
 CACHE MANIFEST
 
-# 4298545edce868a6d509ba3d2d4c3ed3
+# 70244658dd62af9f3f5663850e7500b1
 
 CACHE:
 /
 /d7754382a84a73b0480e832314be07bc.css
 /29ee65fc86f23201c7ec4e861c5e2ae8.js
 /a03b4b50f1bee3baf714778aff5b272d.js
-/stats.html?0192684dcdf4ce41e51dd087031a6f26
+/stats.html?648b51455207de73d08e4acd27b1c130
 /img/brand.jpg?4e745f5d877172b09e65a353f322e9b8
 /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
 /img/favicon.png?c7155d105780d900c85259ba72fb4193
@@ -16,7 +16,7 @@ CACHE:
 
 FALLBACK:
 / /
-/stats.html /stats.html?0192684dcdf4ce41e51dd087031a6f26
+/stats.html /stats.html?648b51455207de73d08e4acd27b1c130
 /img/brand.jpg /img/brand.jpg?4e745f5d877172b09e65a353f322e9b8
 /img/brand.png /img/brand.png?c0e81edca6451e9441603a8a9c85eb85
 /img/favicon.png /img/favicon.png?c7155d105780d900c85259ba72fb4193
