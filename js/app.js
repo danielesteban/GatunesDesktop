@@ -143,11 +143,12 @@ DATA = {
 			DATA.getItem('playlist:' + id, function(playlist) {
 				index = index === 0 || index > 0 ? index : playlist.songs.length;
 				var count = songs.length;
-				
+
 				songs.forEach(function(s) {
 					var id = parseInt(s.provider, 10) + ':' + LIB.escapeHTML(s.provider_id),
 						add = function() {
 							playlist.songs.splice(index, 0, id);
+							PLAYER.queueId >= index && PLAYER.queueId++;
 							index++;
 							count--;
 							if(count > 0) return;
@@ -174,6 +175,7 @@ DATA = {
 				var sid = playlist.songs[index];
 				if(!sid || parseInt(sid.split(':')[0], 10) !== provider || sid.split(':')[1] !== provider_id) return callback(playlist.songs);
 				playlist.songs.splice(index, 1);
+				index <= PLAYER.queueId && PLAYER.queueId--;
 				DATA.setItem('playlist:' + id, playlist, callback);
 			});
 		},
@@ -188,6 +190,8 @@ DATA = {
 					if(playlist.songs[s.index] !== id) return;
 					ids.push(id);
 					indexes.push(s.index);
+					PLAYER.queueId >= index && PLAYER.queueId++;
+					PLAYER.queueId < index && PLAYER.queueId--;
 				});
 				playlist.songs.forEach(function(id, i) {
 					i === index && ids.forEach(function(id) {
