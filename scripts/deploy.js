@@ -153,7 +153,7 @@ exec('rm -rf bundle', function() {
 											genManifest(cssMD5, jsMD5, function() {
 												//exec('cd bundle/ && zip ../Gatunes.zip -r .', function() {
 												//	exec('rm -rf bundle', function() {
-														console.log('Done!');       
+														console.log('Done!');		
 												//	});
 												//});
 											});

@@ -16,7 +16,7 @@ SC = {
 		}, 'json');
 	},
 	get : function(id, callback) {
-		$.get('//api.soundcloud.com/tracks/' + id +  '.json', {client_id : SC.client_id}, function(data) {
+		$.get('//api.soundcloud.com/tracks/' + id + '.json', {client_id : SC.client_id}, function(data) {
 			callback(data);
 		}, 'json');
 	},

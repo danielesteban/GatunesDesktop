@@ -173,7 +173,7 @@ LIB = {
 				available_langs = ['en', 'es'],
 				lang = 'en'; //the default
 
-			if(available_langs.indexOf(cookie_lang) !== -1) lang = cookie_lang;    
+			if(available_langs.indexOf(cookie_lang) !== -1) lang = cookie_lang;	   
 			else if(available_langs.indexOf(browser_lang[0].toLowerCase()) !== -1) lang = browser_lang[0].toLowerCase();
 			else if(browser_lang[1] && available_langs.indexOf(browser_lang[1].toLowerCase()) !== -1) lang = browser_lang[1].toLowerCase();
 			L = LANG[lang];

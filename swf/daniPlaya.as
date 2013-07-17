@@ -26,9 +26,9 @@ package {
 			};
 			customClient.onPlayStatus = function(info:Object):void {
 				switch(info.code) {
-	                case 'NetStream.Play.Complete':
-	                	ExternalInterface.call('PLAYER.onStateChange', 0);
-	            }
+					case 'NetStream.Play.Complete':
+						ExternalInterface.call('PLAYER.onStateChange', 0);
+				}
 			};
 			var ns:NetStream = new NetStream(nc);
 			ns.client = customClient;
