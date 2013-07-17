@@ -136,18 +136,20 @@ DATA = {
 			});
 		},
 		addSongs : function(id, songs, callback, index) {
-			var cb = function(playlist) {
-					DATA.setItem('playlist:' + id, playlist, callback);
+			var playlist_id = 'playlist:' + id,
+				cb = function(playlist) {
+					DATA.setItem(playlist_id, playlist, callback);
 				};
 
-			DATA.getItem('playlist:' + id, function(playlist) {
+			DATA.getItem(playlist_id, function(playlist) {
 				index = index === 0 || index > 0 ? index : playlist.songs.length;
 				var count = songs.length;
-				
+
 				songs.forEach(function(s) {
 					var id = parseInt(s.provider, 10) + ':' + LIB.escapeHTML(s.provider_id),
 						add = function() {
 							playlist.songs.splice(index, 0, id);
+							PLAYER.queueDataKey === playlist_id && PLAYER.queueId >= index && PLAYER.queueId++;
 							index++;
 							count--;
 							if(count > 0) return;
@@ -170,36 +172,47 @@ DATA = {
 			});
 		},
 		removeSong : function(id, index, provider, provider_id, callback) {
-			DATA.getItem('playlist:' + id, function(playlist) {
+			var playlist_id = 'playlist:' + id;
+			DATA.getItem(playlist_id, function(playlist) {
 				var sid = playlist.songs[index];
 				if(!sid || parseInt(sid.split(':')[0], 10) !== provider || sid.split(':')[1] !== provider_id) return callback(playlist.songs);
 				playlist.songs.splice(index, 1);
-				DATA.setItem('playlist:' + id, playlist, callback);
+				PLAYER.queueDataKey === playlist_id && index <= PLAYER.queueId && PLAYER.queueId--;
+				DATA.setItem(playlist_id, playlist, callback);
 			});
 		},
 		reorderSongs : function(id, songs, callback, index) {
-			DATA.getItem('playlist:' + id, function(playlist) {
+			var playlist_id = 'playlist:' + id;
+			DATA.getItem(playlist_id, function(playlist) {
 				var ids = [],
 					indexes = [],
-					reordered = [];
+					reordered = [],
+					queue_id = false;
 
-				songs.forEach(function(s) {
+				songs.forEach(function(s, i) {
 					var id = s.provider + ':' + s.provider_id;
 					if(playlist.songs[s.index] !== id) return;
 					ids.push(id);
 					indexes.push(s.index);
+					if(s.index === PLAYER.queueId) queue_id = i;
 				});
+
 				playlist.songs.forEach(function(id, i) {
-					i === index && ids.forEach(function(id) {
+					i === index && ids.forEach(function(id, i) {
+						if(queue_id === i) queue_id = -reordered.length;
 						reordered.push(id);
 					});
+					if(queue_id === false && i === PLAYER.queueId) PLAYER.queueId = reordered.length;
 					indexes.indexOf(i) === -1 && reordered.push(id);
 				});
+				if(queue_id !== false) {
+					PLAYER.queueId = -queue_id
+				}
 				index === null && ids.forEach(function(id) {
 					reordered.push(id);
 				});
 				playlist.songs = reordered;
-				DATA.setItem('playlist:' + id, playlist, callback);
+				DATA.setItem(playlist_id, playlist, callback);
 			});
 		}
 	},
