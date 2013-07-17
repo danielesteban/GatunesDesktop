@@ -131,7 +131,7 @@ PLAYER = {
 					//HISTORY.add(PLAYER.current.song);
 					PLAYER.current.destruct && PLAYER.current.destruct();
 					delete PLAYER.current;
-				}   
+				}	
 				PLAYER.next();
 		}
 	},
@@ -197,7 +197,7 @@ PLAYER = {
 			s.children().first().css('width', s.width() * p);
 		}
 		
-		p = data.progress;      
+		p = data.progress;		
 		if(((p || p === 0) && !PLAYER.sliding) || data.fromSlider) {
 			if(p > 1) p = 1;
 			if(p < 0) p = 0;

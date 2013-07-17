@@ -4,11 +4,11 @@ var fs = require('fs'),
 	extractAudio = localStorage.getItem('extractAudio'),
 	httpPort = 28029,
 	httpServer = require('http').createServer(function (request, response) {
-	    request.addListener('end', function () {
-	    	if(request.url.substr(0, 7) === '/media/') {
-	    		request.url = request.url.substr(6);
-	    		mediaServer.serve(request, response);
-	    	} else if(request.url === '/crossdomain.xml') {
+		request.addListener('end', function () {
+			if(request.url.substr(0, 7) === '/media/') {
+				request.url = request.url.substr(6);
+				mediaServer.serve(request, response);
+			} else if(request.url === '/crossdomain.xml') {
 				response.writeHead(200, {'Content-Type': 'application/xml'});
 				return response.end('<?xml version="1.0"?>'+
 					'<!DOCTYPE cross-domain-policy SYSTEM "http://www.macromedia.com/xml/dtds/cross-domain-policy.dtd">'+
@@ -16,10 +16,10 @@ var fs = require('fs'),
 					'  <allow-access-from domain="*" secure="false"/>'+
 					'  <site-control permitted-cross-domain-policies="master-only"/>'+
 					'</cross-domain-policy>');
-	    	} else staticServer.serve(request, response, function (e, res) {
+			} else staticServer.serve(request, response, function (e, res) {
 				e && e.status === 404 && staticServer.serveFile('/index.html', 200, {}, request, response);
 			});
-	    }).resume();
+		}).resume();
 	}),
 	staticServer = new (require('node-static').Server)(process.cwd(), {cache: 0}),
 	mediaServer;
